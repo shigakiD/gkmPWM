@@ -1,7 +1,7 @@
-function plot_motif_lasso(varargin)
+function plot_motif_lasso2(varargin)
 
 inp=varargin{1};
-fid = fopen([varargin{1} '_gkmPWMlasso.out'], 'r');
+fid = fopen([varargin{1} '_gkmPWMlasso2.out'], 'r');
 X = textscan(fid, '%f\t%f\t%s\t%f\t%f\t%f\t%f\n','HeaderLines', 4, 'delimiter', '\t');
 fclose(fid);
 mf = fopen('motif_logos/short_name', 'r');
@@ -13,12 +13,6 @@ for i = 1:nmot
     f = find(X{1}==i);
     IND(i) = f(1);
 end
-X{1} = X{1}(IND);
-X{2} = X{2}(IND);
-X{3} = X{3}(IND);
-X{4} = X{4}(IND);
-X{5} = X{5}(IND);
-X{6} = X{6}(IND);
 figure('units','inches','position',[8 0 8 7*nmot/30])
 hold on
 scale=85;
@@ -32,39 +26,32 @@ text(-6.2*scale,(nmot+.5)*scale,'W')
 text(-12.8*scale,(nmot+.5)*scale,'N')
 text(-11.6*scale,(nmot+.5)*scale,'ID')
 text(-9.8*scale,(nmot+.5)*scale,'Motif')
-[S1, I1] = sort(X{5}, 'descend');
-X{2} = X{2}(I1);
-X{3} = X{3}(I1);
-X{4} = X{4}(I1);
-X{5} = X{5}(I1);
-X{6} = X{6}(I1);
-IND = zeros(nmot,1);
 zmax = max(abs(X{5}));
 emax = max(abs(X{6}));
 wmax = max(abs(X{4}));
 for i=1:nmot 
-    if X{4}(i) > 0
-        rectangle('position',85*[1 nmot-i 1 1],'facecolor',[1-X{4}(i)/wmax 1-X{4}(i)/wmax 1])
+    if X{4}(IND(i)) > 0
+        rectangle('position',85*[1 nmot-i 1 1],'facecolor',[1-X{4}(IND(i))/wmax 1-X{4}(IND(i))/wmax 1])
     else
-        rectangle('position',85*[1 nmot-i 1 1],'facecolor',[1 1+X{4}(i)/wmax 1+X{4}(i)/wmax])
+        rectangle('position',85*[1 nmot-i 1 1],'facecolor',[1 1+X{4}(IND(i))/wmax 1+X{4}(IND(i))/wmax])
     end
-    if X{5}(i) > 0
-        rectangle('position',85*[2 nmot-i 1 1],'facecolor',[1-X{5}(i)/zmax 1-X{5}(i)/zmax 1])
+    if X{5}(IND(i)) > 0
+        rectangle('position',85*[2 nmot-i 1 1],'facecolor',[1-X{5}(IND(i))/zmax 1-X{5}(IND(i))/zmax 1])
     else
-        rectangle('position',85*[2 nmot-i 1 1],'facecolor',[1 1+X{5}(i)/zmax 1+X{5}(i)/zmax])
+        rectangle('position',85*[2 nmot-i 1 1],'facecolor',[1 1+X{5}(IND(i))/zmax 1+X{5}(IND(i))/zmax])
     end
-    rectangle('position',85*[3 nmot-i 1 1],'facecolor',[1-X{6}(i)/emax 1-X{6}(i)/emax 1])
-    smot=sprintf('motif_logos/m%d.png',X{2}((i)));
+    rectangle('position',85*[3 nmot-i 1 1],'facecolor',[1-X{6}(IND(i))/emax 1-X{6}(IND(i))/emax 1])
+    smot=sprintf('motif_logos/m%d.png',X{2}((IND(i))));
     img=imread(smot);
     p=[2 nmot-i 1 1];
-    mlab=names{1}{X{2}((i))};
+    mlab=names{1}{X{2}((IND(i)))};
     e=min(8,length(mlab));
     text(-9.8*scale,(p(2)+.5)*scale,mlab(1:e))
     text(-12.8*scale,(p(2)+.5)*scale,sprintf('%d',i))
-    text(-11.6*scale,(p(2)+.5)*scale,sprintf('%d',X{2}(i)))
-    text(-4.0*scale,(p(2)+.5)*scale,sprintf('%0.2f',X{5}(i)))
-    text(-1.8*scale,(p(2)+.5)*scale,sprintf('%0.2f',X{6}(i)))
-    text(-6.2*scale,(p(2)+.5)*scale,sprintf('%0.2f',X{4}(i)))
+    text(-11.6*scale,(p(2)+.5)*scale,sprintf('%d',X{2}(IND(i))))
+    text(-4.0*scale,(p(2)+.5)*scale,sprintf('%0.2f',X{5}(IND(i))))
+    text(-1.8*scale,(p(2)+.5)*scale,sprintf('%0.2f',X{6}(IND(i))))
+    text(-6.2*scale,(p(2)+.5)*scale,sprintf('%0.2f',X{4}(IND(i))))
     p1=[p(1) p(2)+5]*20;
     p2=p1+[400 100];
     image('XData',(p(1)+2.3)*scale,'YData',(p(2)-0.25)*scale,'CData',flipud(img)) 
@@ -74,5 +61,5 @@ hold off
 fig=gcf;   
 fig.PaperUnits='inches';
 fig.PaperSize=[8 7*nmot/30]*1.2;
-pfile=[varargin{1} '_gkmPWMlasso.pdf'];
+pfile=[varargin{1} '_gkmPWMlasso2.pdf'];
 print(pfile,'-dpdf','-fillpage')
