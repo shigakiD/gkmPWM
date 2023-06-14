@@ -1,0 +1,790 @@
+function gkmPWM(varargin)
+% usage  gkmPWM(fileheader, wfile, mnum, num)
+% fileheader: everything before *svseq.fa
+% wfile: a list of kmer weights
+% mmun: the number of motifs to identify
+% num: number of iterations (I recommend at least 10*mnum)
+if nargin < 4
+    error('Need at least 4 inputs')
+end
+
+fileheader = varargin{1};
+wfile = varargin{2};
+mnum = varargin{3};
+num = varargin{4};
+rcorr = 0.9;
+pnr = 0.5;
+reg = 0;
+l_svm = 10;
+k_svm = 6;
+BG_GC = 0;
+
+if nargin > 4
+    f = find(strcmp('MaxCorr', varargin));
+    if ~isempty(f);
+        rcorr = varargin{f+1};
+    end
+    f = find(strcmp('PNratio', varargin));
+    if ~isempty(f);
+        pnr = varargin{f+1};
+    end
+    f = find(strcmp('RegFrac', varargin));
+    if ~isempty(f);
+        reg = varargin{f+1};
+    end
+    f = find(strcmp('l', varargin));
+    if ~isempty(f);
+        l_svm = varargin{f+1};
+    end
+    f = find(strcmp('k', varargin));
+    if ~isempty(f);
+        k_svm = varargin{f+1};
+    end
+    %f = find(strcmp('Mode', varargin));
+    %if strcmp('Compare',varargin{f+1});
+    %    BG_GC = 1;
+    %end
+end
+
+[comb,~,~,~,~,rcnum] = genIndex(l_svm,k_svm);%generate gapped positions, adjusted for reverse complements
+
+if length(comb)*4^k_svm > 10^6
+    error([num2str(length(comb)*4^k_svm) ' exceeds the maximum number of gapped kmers allowed (10^6)'])
+end
+
+disp(['Running gkmPWM on ' fileheader ' for ' num2str(mnum) ' motifs and ' num2str(num) ' iterations'])
+disp('Counting gapped k-mers')
+
+[A, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fileheader,l_svm,k_svm,1); %count gapped k-mers, get GC content, and dinucleotide distribution
+if BG_GC == 1
+    mat = (mat+mat2)/2;
+    GCpos1 = (GCpos1+GCneg1)/2;
+    GCneg1 = GCpos1;
+end
+negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm);%generate expected gapped kmer distribution of background
+GC=[0.5-GCneg1/2 GCneg1/2 GCneg1/2 0.5-GCneg1/2];%GC content vector
+
+disp('Finding PWM seeds')
+%get PWM seeds using the kmer weight vectors
+[kmers, seed,p,c] = seed_kmers(wfile, mnum,'descend', {});
+[kmers2, seed2,pp, c2] = seed_kmers(wfile, max([floor(mnum*pnr) 2]),'ascend',seed);
+kmers = [kmers;kmers2];
+p = [p;pp];
+tot = c2;
+disp('Seeding PWMs at the following kmers')
+for i = 1:tot
+    disp(kmers{i})
+end
+
+for i = 1:length(p)
+    p{i} = extendPWM(p{i},l_svm+1,GC);
+end
+
+disp('Running de novo motif discovery')
+m = mean(A);
+s = std(A);
+cfile = (1/2)*(1+erf((A-m)/s)).*A;
+cfile = A-negvec/sum(negvec)*sum(A);
+cfile = cfile/max(abs(cfile));% normalize to speed up computation
+clear A
+[pp scorevec C r R E Rd] = gkmPWM_lagrange(cfile,mat,p,negvec,num,rcorr,reg,l_svm,k_svm);
+
+createMEME([fileheader '_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum)], pp, GCneg1, C, r, R, rcorr, E, Rd);
+createMEMEneg([fileheader '_all_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum)], pp, GCneg1, C, r, R, rcorr);
+dlmwrite([fileheader '_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum) '_error.out'],scorevec');
+
+function createMEME(fileh,PWM, GC, C, r, R, rcorr, E, Rd)
+
+num = numel(C);
+GC = round(GC*100)/100;
+GCvec = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];
+[p] = getmotif('combined_db_v4.meme',1:1968);
+fid = fopen([fileh '_denovo.meme'], 'w');
+fid2 = fopen([fileh '_gkmPWM.out'], 'w');
+lenvec = zeros(1968,1);
+for i = 1:1968
+    [lenvec(i),~] = size(p{i});
+end
+mf = fopen('motif_logos/short_name', 'r');
+names = textscan(mf,'%*d\t%s\t%*s\n');
+fclose(mf);
+names = names{1};
+fprintf(fid, 'MEME\n\n');
+fprintf(fid, 'ALPHABET= ACGT\n\n');
+fprintf(fid, 'Correlation with SVM weight vector: %0.3f\n\n', r);
+fprintf(fid, 'Max PWM Correlation: %0.3f\n\n', rcorr);
+fprintf(fid, 'Background letter frequencies (from negative set)\n');
+fprintf(fid, 'A %0.2f C %0.2f G %0.2f T %0.2f\n\n', GCvec(1), GCvec(2), GCvec(3), GCvec(4));
+fprintf(fid2, 'Correlation with SVM weight vector:\t%0.3f\n', r);
+fprintf(fid2, 'Max PWM Correlation:\t%0.3f\n', rcorr);
+fprintf(fid2, 'MOTIF\tID\tSimilarity\tRedundancy\tWeight\tZ\tError\n');
+a = 1;
+b = 1;
+for i = 1:num
+    if C(i) > 0
+        [len,~] = size(PWM{i});
+        [M, MM] = matchMotif([PWM{i}; p], [len;lenvec]);% matches motifs to the best motif in our database
+        if M > 0.9
+            fprintf(fid, 'MOTIF %d %s\n', a, names{MM});
+            fprintf(fid2,'%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n',names{MM},MM,M,Rd(i),C(i),R(i),E(i));
+        else
+            fprintf(fid, 'MOTIF %d %s\n', a, names{MM});
+            fprintf(fid2,'%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n',names{MM},MM,M,Rd(i),C(i),R(i),E(i));
+        end
+        fprintf(fid, 'weight= %0.3f l= 4 w= %d z-score= %0.2f motifsim= %0.3f\n', C(i), len, R(i), M);
+        for j = 1:len
+            fprintf(fid, '%0.3f %0.3f %0.3f %0.3f\n',PWM{i}(j,1),PWM{i}(j,2),PWM{i}(j,3),PWM{i}(j,4));
+        end
+        fprintf(fid, '\n');
+        a = a+1;
+    end
+end
+for i = 1:num
+    if C(i) <  0
+        [len,~] = size(PWM{i});
+        [M, MM] = matchMotif([PWM{i}; p], [len;lenvec]);% matches motifs to the best motif in our database
+        if M > 0.9
+            fprintf(fid2,'%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n',names{MM},MM,M,Rd(i),C(i),R(i),E(i));
+        else
+            fprintf(fid2,'%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n',names{MM},MM,M,Rd(i),C(i),R(i),E(i));
+        end
+        %fprintf(fid2,'%s\t-\t-\t-\t%0.3f\t%0.2f\t%0.3f\n',['Neg' num2str(b)], C(i),R(i),E(i));
+        %b = b+1;
+    end
+end
+fclose(fid);
+fclose(fid2);
+
+
+function createMEMEneg(fileh,PWM, GC, C, r, R, rcorr)
+
+filename = [fileh '_denovo.meme'];
+num = numel(C);
+GC = round(GC*100)/100;
+GCvec = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];
+fid = fopen(filename, 'w');
+
+fprintf(fid, 'MEME\n\n');
+fprintf(fid, 'ALPHABET= ACGT\n\n');
+fprintf(fid, 'Correlation with SVM weight vector: %0.3f\n\n', r);
+fprintf(fid, 'Max Correlation: %0.3f\n\n', rcorr);
+fprintf(fid, 'Background letter frequencies (from negative set)\n');
+fprintf(fid, 'A %0.2f C %0.2f G %0.2f T %0.2f\n\n', GCvec(1), GCvec(2), GCvec(3), GCvec(4));
+a = 1;
+for i = 1:num
+    [len,~] = size(PWM{i});
+    fprintf(fid, 'MOTIF %d\n', a);
+    fprintf(fid, 'weight= %0.3f l= 4 w= %d z-score= %0.2f\n', C(i), len, R(i));
+    for j = 1:len
+        fprintf(fid, '%0.3f %0.3f %0.3f %0.3f\n',PWM{i}(j,1),PWM{i}(j,2),PWM{i}(j,3),PWM{i}(j,4));
+    end
+    fprintf(fid, '\n');
+    a = a+1;
+end
+fclose(fid);
+
+function [p, mat,pwms, c] = seed_kmers(fn, num, pn, ik);
+fid = fopen(fn, 'r');
+a = textscan(fid, '%s\t%f\n');
+fclose(fid);
+[w, ind] = sort(a{2}, pn);
+s = a{1}(ind(1:min([100000 length(a{1})])));
+l = length(s{1});
+k = round(l/2)+1;
+ikl = length(ik);
+p = cell(num,1);
+c = ikl+1;
+p{1} = s{1};
+mat = cell(ikl+num,1);
+mat(1:ikl) = ik;
+mat{c} = letterconvert(s{1});
+pwms = cell(num,1);
+for i = 1:num
+    pwms{i} = zeros(l,4);
+end
+for i = 1:l
+    pwms{1}(i,mat{c}(i)+1) = pwms{1}(i,mat{c}(i)+1)+w(i);
+end
+B = zeros(9,1);
+BB = zeros(9,1);
+B(1:5) = (0:4)';
+B(6:9) = 0;
+BB(1:5) = 0;
+BB(6:9) = (1:4)';
+CC = [l l-1 l-2 l-3 l-4 l-1 l-2 l-3 l-4];
+%this process picks kmers to seed the PWMs.  kmers that match one of the seeds by round(l/2)+1 or more are added that particular seed.  Otherwise, it becomes another seed.
+for i = 2:100000
+    ss = letterconvert(s{i});
+    rs = 3-fliplr(ss);
+    M = zeros(c,1);
+    D = zeros(c,1);
+    DD = zeros(c,1);
+    for j = 1:c
+        [m,d] = max([sum(mat{j}==ss) sum(mat{j}(2:end)==ss(1:l-1)) sum(mat{j}(3:end)==ss(1:l-2)) sum(mat{j}(4:end)==ss(1:l-3)) sum(mat{j}(5:end)==ss(1:l-4)) sum(mat{j}(1:l-1)==ss(2:end)) sum(mat{j}(1:l-2)==ss(3:end)) sum(mat{j}(1:l-3)==ss(4:end)) sum(mat{j}(1:l-4)==ss(5:end))]);
+        [mm,dd] = max([sum(mat{j}==rs) sum(mat{j}(2:end)==rs(1:l-1)) sum(mat{j}(3:end)==rs(1:l-2)) sum(mat{j}(4:end)==rs(1:l-3)) sum(mat{j}(5:end)==rs(1:l-4)) sum(mat{j}(1:l-1)==rs(2:end)) sum(mat{j}(1:l-2)==rs(3:end)) sum(mat{j}(1:l-3)==rs(4:end)) sum(mat{j}(1:l-4)==rs(5:end))]);
+        [M(j),ddd] = max([m mm]);
+        if ddd == 1
+            D(j) = d;
+            DD(j) = 1;
+        else
+            D(j) = dd;
+            DD(j) = 2;
+        end
+    end
+    if max(M) < k
+        c = c+1;
+        p{c-ikl} = s{i};
+        mat{c} = ss;
+        ss = ss+1;
+        for j = 1:l
+            pwms{c-ikl}(j,ss(j)) = pwms{c-ikl}(j,ss(j))+w(i);
+        end
+    else
+        [~,d] = max(M);
+        if DD(d) == 1 && d > ikl
+            ss = ss+1;
+            d = d-ikl;
+            for j = 1:CC(D(d))
+                pwms{d}(j+B(D(d)),ss(j+BB(D(d)))) = pwms{d}(j+B(D(d)),ss(j+BB(D(d))))+w(i);
+            end
+        elseif DD(d) == 2 && d > ikl
+            rs = rs+1;
+            d = d-ikl;
+            for j = 1:CC(D(d))
+                pwms{d}(j+B(D(d)),rs(j+BB(D(d)))) = pwms{d}(j+B(D(d)),rs(j+BB(D(d))))+w(i);
+            end
+        end
+    end
+    if c == num+ikl
+        break
+    end
+end
+mat = mat(1:c);
+p = p(1:c-ikl);
+pwms = pwms(1:c-ikl);
+for i = 1:c-ikl
+    for j = 1:l
+        pwms{i}(j,:) = pwms{i}(j,:)/sum(pwms{i}(j,:));
+    end
+end
+
+
+function en = letterconvert(s)
+
+l = length(s);
+en = zeros(1,l);
+for i = 1:l
+    if strcmp(s(i),'A') || strcmp(s(i), 'a')
+        en(i) = 0;
+    elseif strcmp(s(i),'C') || strcmp(s(i),'c')
+        en(i) = 1;
+    elseif strcmp(s(i),'G') || strcmp(s(i),'g')
+        en(i) = 2;
+    else
+        en(i) = 3;
+    end
+end
+
+function [M, ind] = matchMotif(mot,lenvec)
+n = length(lenvec)-1;
+simmat = ones(n-1,1);
+for i = 1:n+1
+    mot{i} = mot{i}-1/4;
+    mot{i} = mot{i}/sqrt(sum(sum(mot{i}.^2)));
+end
+M = 0;
+ind = 1;
+for j = 2:n+1
+    mat = mot{1}*mot{j}';
+    rmat = rot90(mot{1},2)*mot{j}';
+    MM = max([sum(spdiags(mat)) sum(spdiags(rmat))]);
+    if MM > M
+        M = MM;
+        ind = j-1;
+    end
+end
+
+function [PWM, scorevec, C, r, R, E, Rd] = gkmPWM_lagrange(kweig,negmat,PWM,negvec,n,rcorr,reg,l_svm,k_svm)
+%Note: This code is rather messy.  I block commmented to the best of my ability, so hopefully this makes enough sense.  If something seems non-trivial, then I probably found a mathematical trick to speed up computation time (in particular dynamic programming).
+
+GC = PWM{1}(1,:);
+[~,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm);%generate index information
+lcomb = length(diffc);
+diffC = zeros(lcomb,l_svm);
+for i = 1:l_svm
+    ct = rc+i-1;
+    f = find(sum(ct==l_svm,2));
+    ct = ct(f,:);
+    CT = zeros(length(ct),k_svm-1);
+    for j = 1:length(ct)
+        a = 1;
+        for jj = 1:k_svm
+            if ct(j,jj) ~= l_svm
+                CT(j,a) = ct(j,jj);
+                a = a+1;
+            end
+        end
+    end
+    for j = 2:length(f)
+        a = 1;
+        while CT(j,a)==CT(j-1,a)
+            a = a+1;
+        end
+        if a < 2
+            a = 2;
+        end
+        diffC(f(j),i)=a;
+    end
+    diffC(f(1),i)=2;
+end
+m = length(PWM);
+scorevec = zeros(1,n);
+lenvec = zeros(m,1);
+loc = cell(m, 1);
+for i = 1:m
+    lenvec(i) = length(PWM{i})-l_svm*2+2;
+    loc{i} = zeros(length(PWM{i}), 1);
+    loc{i}(l_svm:lenvec(i)+l_svm-1) = 1;
+end
+
+kmat = zeros(lcomb*4^k_svm, m);
+KMAT = zeros(lcomb*4^k_svm, m);
+
+disp('Mapping PWMs to gkm space')
+
+for i = 1:m
+    kmat(:,i) = PWM2kmers(PWM{i},negmat,rc,diffc,indc,loc{i},xc,l_svm,k_svm,rcnum)-negvec*(lenvec(i)+l_svm-1);%map PWMs to gapped kmers
+end
+
+%the following loop creates indices for the PWM column optimize to utilize dynamic programming.
+poscell = cell(k_svm,1);
+for i = 1:k_svm
+    temp = zeros(4^(k_svm-1),1)';
+    vec = 1:4^(i):4^(k_svm);
+    for ii = 1:4^(i-1)
+        t = length(vec);
+        temp(1+(ii-1)*t:t+(ii-1)*t) = vec+ii-1;
+    end
+    poscell{i} = sort(temp)';
+end
+disp('Running Recursion')
+acount = 0;
+i = 0;
+scount = 0;
+tic
+while i < n
+    i = i+1;
+    if mod(i,10) == 0
+        toc
+        tic
+        fprintf('%d iterations done...\n',i);
+    end
+    scount = scount + 1;
+    %Every 20 iterations, I extend or truncate the PWMs based on information content
+    if  i >= 20 && max(-1*diff(scorevec(i-9:i-1))./scorevec(i-8:i-1)) < 0.001 && scount > 10 && acount < 5 && i ~= n
+        acount = acount + 1;
+        fprintf('adjusting PWMs after %d iterations (%d)\n',i,acount);
+        scount = 0;
+        for ii = 1:m
+            if i/n <= 0.8 && C(ord(ii)) > 0
+                [PWM{ord(ii)}, lenvec(ord(ii))] = adjust_PWM(PWM{ord(ii)}(l_svm:(length(PWM{ord(ii)})-l_svm+1),:),GC);
+                PWM{ord(ii)} = extendPWM(PWM{ord(ii)}, l_svm-1, GC);
+                loc{ord(ii)} = zeros(lenvec(ord(ii))+2*l_svm-2, 1);
+                loc{ord(ii)}(l_svm:lenvec(ord(ii))+l_svm-1) = 1;
+            end
+        end
+    end
+    C = (kmat'*kmat)^(-1)*(kmat'*kweig);
+    res = kweig-kmat*C;
+    corrvec = zeros(m,1);
+    for ii = 1:m
+        [~,ind] = sort(kmat(:,ii), 'descend');
+        corrvec(ii) = sum(res(ind(1:lcomb)).^2);
+        if mod(i,20) == 0
+            kmat(:,ii) = PWM2kmers(PWM{ii},negmat,rc,diffc,indc,loc{ii},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(ii));
+        end
+    end
+    %The order of PWM optimization is determined by the correlation of its top 110 kmers with the gapped kmer weight vector
+    [~,ord] = sort(corrvec, 'descend');
+    for ii = 1:m
+        %The order of the column optimization is determined by the max probability in each column
+        v = max(PWM{ord(ii)}(l_svm:lenvec(ord(ii))+l_svm-1,:)');
+        [~,c] = sort(v, 'ascend');
+        %C = (kmat'*kmat)^(-1)*(kmat'*kweig);
+        %res = kweig-kmat*C;
+        for iii = 1:length(c)
+            PWMtemp = PWM{ord(ii)}(c(iii):c(iii)+l_svm*2-2,:);
+            [kweigdiff,PWM{ord(ii)}(c(iii)+l_svm-1,:)] = getEMprob_v3(PWMtemp,res/C(ord(ii)),negmat,poscell,rc,diffC,indc,loc{ord(ii)}(c(iii):c(iii)+2*l_svm-2),xc,reg,l_svm,k_svm,rcnum);
+            kmat(:,ord(ii)) = kmat(:,ord(ii)) + kweigdiff;
+            res = res-kweigdiff*C(ord(ii));
+        end
+    end
+    %Reseed PWMs if two or more of them are too highly correlated
+    if i/n <= 0.80
+        info = avg_info(PWM,l_svm);
+        [~,ord] = sort(info,'descend');
+        kmat = kmat(:,ord);
+        lenvec = lenvec(ord);
+        loc = loc(ord);
+        PWM = PWM(ord);
+        C = C(ord);
+        for j = 1:m
+            KMAT(:,j) = kmat(:,j)/(kmat(:,j)'*kmat(:,j));
+        end
+        MAT = KMAT'*KMAT;
+        for j = 1:m-1
+            vec = MAT(j+1:end,j);
+            [a b] = max(vec);
+            if a > rcorr && C(j) > 0
+                scount = 0;
+                disp('reseeding')
+                f = j+find(vec > rcorr);
+                for jj = 1:length(f)
+                    for jjj = 1:min([lenvec(f(jj)) 12])
+                        PWM{f(jj)}(jj+9,:) =  PWM{f(jj)}(jjj+l_svm-1,randperm(4));
+                    end
+                    if lenvec(f(jj)) >= 12
+                        PWM{f(jj)} = PWM{f(jj)}(l_svm:l_svm+11,:);
+                        PWM{f(jj)} = extendPWM(PWM{f(jj)}, l_svm-1, GC);
+                        lenvec(f(jj)) = 12;
+                        loc{f(jj)} = zeros(lenvec(f(jj))+l_svm*2-2, 1);
+                        loc{f(jj)}(l_svm:lenvec(f(jj))+l_svm-1) = 1;
+                    end
+                    kmat(:,f(jj)) = PWM2kmers(PWM{f(jj)},negmat,rc,diffc,indc,loc{f(jj)},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(f(jj)));
+                end
+            end
+        end
+    end
+    %Breaks the loop if it looks like it converged
+    C = (kmat'*kmat)^(-1)*(kmat'*kweig);
+    scorevec(i) = sqrt(res'*res);
+    if scount > 20 && i > 100 && max(abs(diff(scorevec(i-9:i))./scorevec(i-8:i))) < 0.0001 
+        scorevec = scorevec(1:i);
+        break
+    end
+    if scount > 20 && i > 100 && sum(diff(scorevec(i-9:i))>0) > 7
+        scorevec = scorevec(1:i);
+        break
+    end
+end
+toc
+disp(['gkmPWM completed after ' num2str(i) ' iterations'])
+
+for i = 1:length(PWM)
+    PWM{i} = PWM{i}(l_svm:(length(PWM{i})-l_svm+1),:);
+end
+%the following just calculates a few interesting quantities
+r = corr(kweig, kmat*C);
+M = mean(kweig);
+S = std(kweig);
+R = zeros(m,1);
+E = zeros(m,1);
+CM = corrcoef(kmat)-eye(m);
+for i = 1:m
+    [~,a] = sort(kmat(:,i),'descend');
+    R(i) = (mean(kweig(a(1:lcomb)))-M)/S;
+    Kmat = kmat;
+    Kmat(:,i) = [];
+    c = (Kmat'*Kmat)^(-1)*(Kmat'*kweig);
+    res = kweig-Kmat*c;
+    E(i) = (sqrt(res'*res)-scorevec(end))/scorevec(end);
+    if C(i) < 0
+        CM(i,:) = 0;
+        CM(:,i) = 0;
+    end
+end
+[R,a] = sort(R, 'descend');
+PWM = PWM(a);
+C = C(a);
+E = E(a);
+Rd = max(CM);
+Rd = Rd(a);
+
+function [kweig,P] = getEMprob_v3(PWM,res,negmat,poscell,rc,diffc,indc,indloc,xc,reg,l_svm,k_svm,rcnum)
+%Lagrange optimization (see paper for derivation)
+a = true;
+posvec = 1:4;
+A =  ls_kweigtree(PWM,negmat,poscell,rc,diffc,indc,indloc,xc,l_svm,k_svm,rcnum);
+b = res+A*PWM(l_svm,:)';
+mat = A'*A;
+y = A'*b;
+if reg > 0
+    M = min(eig(mat));
+    B=(mat-reg*M*eye(4))^-1;
+else
+    M = 0; 
+    B = mat^-1;
+end
+ps = B*y;
+p = ps+(1-sum(ps))*B/sum(sum(B))*ones(4,1);
+%The solution to the lagrange optimization problem
+%The following deals with the case if the optimal solution has a negative probability.  I take a shortcut by only considering the cases where the base with the maximum solution is non-zero.  This works just fine in practice since the sum(p) = 1 constraint forces one of the bases to be positive.  It speeds up computation almost two fold.
+if min(p) < 0
+    I = 0;
+    [~,a] = max(p);
+    nvec = posvec;
+    nvec(a) = [];
+    %Check cases where one of the probabilities is zero
+    for i = 1:3
+        Posvec = posvec;
+        Posvec(nvec(i)) = [];
+        MAT = mat;
+        MAT(:,nvec(i)) =[];
+        MAT(nvec(i),:) =[];
+        Y = y(Posvec);
+        if reg > 0
+            B=(MAT-reg*M*eye(3))^-1;
+        else
+            B=(MAT)^-1;
+        end
+        ps = B*Y;
+        p = ps+(1-sum(ps))*B/sum(sum(B))*ones(3,1);%solution
+        %Checks if solution is permitted.  If so, makes sure that it creates a smaller error than other cases
+        if min(p) >= 0
+            vec = b-A(:,Posvec)*p;
+            if I == 0
+                I = 1;
+                P = zeros(4,1);
+                P(Posvec) = p;
+                e = vec'*vec-reg*M*p'*p;
+            else
+                E = vec'*vec-reg*M*p'*p;
+                if E < e
+                    e = E;
+                    P = zeros(4,1);
+                    P(Posvec) = p;
+                end
+            end
+        end
+    end
+    %Check cases where two of the probabilities are zero
+    ind = [nvec(1) nvec(2);nvec(1) nvec(3);nvec(2) nvec(3)];
+    for i = 1:3
+        Posvec = posvec;
+        Posvec(ind(i,:)) = [];
+        MAT = mat;
+        MAT(:,ind(i,:)) =[];
+        MAT(ind(i,:),:) =[];
+        Y = y(Posvec);
+        if reg > 0
+            B=(MAT-reg*M*eye(2))^-1;
+        else
+            B=MAT^-1;
+        end
+        ps = B*Y;
+        p = ps+(1-sum(ps))*B/sum(sum(B))*ones(2,1);%solution
+        %Checks if solution is permitted.  If so, makes sure that it creates a smaller error than other cases
+        if min(p) >= 0
+            vec = b-A(:,Posvec)*p;
+            if I == 0
+                I = 1;
+                P = zeros(4,1);
+                P(Posvec) = p;
+                e = vec'*vec-reg*M*p'*p;
+            else
+                E = vec'*vec-reg*M*p'*p;
+                if E < e
+                    e = E;
+                    P = zeros(4,1);
+                    P(Posvec) = p;
+                end
+            end
+        end 
+    end
+    %Checks to see if one non-zero case is better than the other cases
+    if I == 0
+        P = zeros(4,1);
+        P(a) = 1;
+    else
+        vec = b-A(:,a);
+        E = vec'*vec-reg*M;
+        if E < e
+            e = E;
+            P = zeros(4,1);
+            P(Posvec) = p;
+        end
+    end
+else 
+    P = p;
+end
+kweig = A*(P-PWM(l_svm,:)');
+
+
+function kweig = ls_kweigtree(mat,negmat,poscell,c,s,ind,indloc,x,l,k,rcnum)
+%uses dynamic programming to find the matrix A (kweig in this code) such that A*p = expected gapped kmer vector, where p is the middle column of a 2*l-1 PWM.
+
+%I use a 1st order Markov model to model the flanking bases for a PWM
+p = cell(l,1);
+p{1} = eye(4);
+for i = 1:l-1
+    p{i+1} = p{i}*negmat;
+end
+n = 4^k*max(max(x)); %number of possible k-mers
+mat2 = rot90(mat,2);
+kweig = zeros(n, 4);
+ktree = cell(k-1,1);
+ktree2 = cell(k-1,1);
+[rx,cx] = size(x);
+m=rx;
+M = l-1;
+X = cx*ones(M+1,1);
+for i = 1:cx
+    X(i) = i;
+end
+indloc2 = flipud(indloc);
+for i = 2:5
+    ktree{i} = zeros(4^i,1);
+    ktree2{i} = zeros(4^i,1);
+end
+for i = 0:M
+    if i > M-cx+1
+        m = length(c);
+    end
+    %the following loops is basically dynamic programming for tensor multiplication.  there are multiple cases to consider, hence the if statements.
+    for ii = 1:m
+        if sum((c(ii,:)+i)==l) > 0 && ~(i == M-1 && ii > rx && ii ~= m)
+            indvec = c(ii,:)+i;
+            f = find(indvec == l);
+            indvec(f) = [];
+            loc = indloc(indvec);
+            loc2 = indloc2(indvec);
+            sPWM = mat(indvec,:).';
+            sPWM2 = mat2(indvec,:).';
+            ktree{1} = sPWM(:,1);
+            ktree2{1} = sPWM2(:,1);
+            for iii = s(ii,i+1):k-1
+                if loc(iii)==0
+                    if loc(iii-1)==1 && indvec(iii-1) < l
+                        matt = sPWM(:,iii).'*p{indvec(iii)-l};
+                        a = ktree2{iii-1}.*sPWM2(:,iii).';
+                        ktree2{iii} = a(:);
+                        ktree{iii} = repmat(ktree{iii-1},4,1).*repelem(matt', 4^(iii-1));
+                        %for iiii = 1:4
+                        %    ktree{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree{iii-1}*matt(iiii);
+                            %ktree2{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree2{iii-1}*sPWM2(iiii,iii);
+                        %end
+                    else
+                        matt = p{indvec(iii)-indvec(iii-1)+1};
+                        ktree{iii} = repmat(ktree{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2));
+                        a = ktree2{iii-1}.*sPWM2(:,iii).';
+                        ktree2{iii} = a(:);
+                        %for iiii = 1:4
+                        %    for iiiii = 1:4
+                        %        ktree{iii}(((iiiii-1)*4^(iii-2)+(iiii-1)*4^(iii-1)+1):(4^(iii-2)*iiiii+(iiii-1)*4^(iii-1)))=ktree{iii-1}(((iiiii-1)*4^(iii-2)+1):(4^(iii-2)*iiiii))*matt(iiiii,iiii);
+                        %    end
+                        %    ktree2{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree2{iii-1}*sPWM2(iiii,iii);
+                        %end
+                    end
+                elseif loc2(iii)==0
+                    if loc2(iii-1)==1 && indvec(iii-1) < l
+                        matt = sPWM2(:,iii).'*p{indvec(iii)-l};
+                        a = ktree{iii-1}.*sPWM(:,iii).';
+                        ktree{iii} = a(:);
+                        ktree2{iii} = repmat(ktree2{iii-1},4,1).*repelem(matt', 4^(iii-1));
+                        %for iiii = 1:4
+                        %    ktree2{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree2{iii-1}*matt(iiii);
+                            %ktree{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree{iii-1}*sPWM(iiii,iii);
+                        %end
+                    else
+                        matt = p{indvec(iii)-indvec(iii-1)+1};
+                        ktree2{iii} = repmat(ktree2{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2));
+                        a = ktree{iii-1}.*sPWM(:,iii).';
+                        ktree{iii} = a(:);
+                        %for iiii = 1:4
+                        %    for iiiii = 1:4
+                        %        ktree2{iii}(((iiiii-1)*4^(iii-2)+(iiii-1)*4^(iii-1)+1):(4^(iii-2)*iiiii+(iiii-1)*4^(iii-1)))=ktree2{iii-1}(((iiiii-1)*4^(iii-2)+1):(4^(iii-2)*iiiii))*matt(iiiii,iiii);
+                        %    end
+                        %    ktree{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree{iii-1}*sPWM(iiii,iii);
+                        %end
+                    end
+                else
+                    a = ktree{iii-1}.*sPWM(:,iii).';
+                    ktree{iii} = a(:);
+                    a = ktree2{iii-1}.*sPWM2(:,iii).';
+                    ktree2{iii} = a(:);
+                    %for iiii = 1:4 
+                    %    ktree{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree{iii-1}*sPWM(iiii,iii);
+                    %    ktree2{iii}(((iiii-1)*4^(iii-1)+1):(4^(iii-1)*iiii)) = ktree2{iii-1}*sPWM2(iiii,iii);
+                    %end
+                end
+            end
+            %the weird indexing that I did early in the code comes to fruition.  It is critical to do so to make this computation as fast as possible.
+            if ii <= rx
+                for j = 1:X(i+1)
+                    if x(ii,j) ~= 0 
+                        for iii = 1:2
+                            indvec = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(x(ii,j))-1);
+                            indvec2 = indvec+(5-2*iii)*4^(f-1);
+                            kweig(indvec,iii) = kweig(indvec,iii) + ktree{k-1};
+                            kweig(indvec2,5-iii) = kweig(indvec2,5-iii) + ktree{k-1};
+                            kweig(indvec2,iii) = kweig(indvec2,iii) + ktree2{k-1};
+                            kweig(indvec,5-iii) = kweig(indvec,5-iii) + ktree2{k-1};
+                        end
+                    end
+                end
+            else
+                for iii = 1:2
+                    indvec = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(ii)-1);
+                    indvec2 = indvec+(5-2*iii)*4^(f-1);
+                    kweig(indvec,iii) = kweig(indvec,iii) + ktree{k-1};
+                    kweig(indvec2,5-iii) = kweig(indvec2,5-iii) + ktree{k-1};
+                    kweig(indvec2,iii) = kweig(indvec2,iii) + ktree2{k-1};
+                    kweig(indvec,5-iii) = kweig(indvec,5-iii) + ktree2{k-1};
+                end 
+            end
+        end
+    end
+end
+kweig(4^k*(max(max(x))-rcnum)+1:end,:) = kweig(4^k*(max(max(x))-rcnum)+1:end,:)/sqrt(2);
+
+function [pp, len] = adjust_PWM(p,GC)
+%extends or truncates the PWM based on information.  I try to do it intelligently, so you may disagree on the condition required for adjustment.
+[len,~] = size(p);
+info = zeros(len, 1);
+cut = 0.2;%maximum information of a column to truncate
+ext = 0.7;%minimum information needed to extend
+%The rest of the code is easy enough to read through quickly
+mat = p+(p==0);
+vec = 2+sum(mat.*log(mat)/log(2),2);
+b = true;
+b2 = true;
+while ((vec(1) < cut && max(vec(2:3)) <= ext) || mean(vec(1:3) < cut)) && len > 12
+    p(1,:) = [];
+    vec(1) = [];
+    len = len-1;
+    b = false;
+    if ((vec(end) < cut && max(vec(end-2:end-1)) <= ext) || mean(vec(end-2:end) < cut)) && len > 12
+        vec(end) = [];
+        p(end,:) = [];
+        len = len-1;
+        b2 = false;
+    end
+end
+if b && min(vec(1:2)) > ext && len < 20
+   mat = [GC ; mat];
+   p = [GC;p];
+   len = len+1;
+end
+while ((vec(end) < cut && max(vec(end-2:end-1)) <= ext) || mean(vec(end-2:end) < cut)) && len > 12
+    vec(end) = [];
+    p(end,:) = [];
+    len = len-1;
+    b2 = false;
+end
+if b2 && min(vec(end-1:end)) > ext && len < 20
+    p = [p;GC];
+    len = len+1;
+end
+pp = p;
+
+function info = avg_info(p,l_svm)
+info = zeros(length(p),1);
+for i = 1:length(p)
+    [l,~] = size(p{i});
+    mat = p{i}(l_svm:end-l_svm+1,:)+(p{i}(l_svm:end-l_svm+1,:)==0);
+    info(i) = sum(2+sum(mat.*log(mat)/log(2),2));
+end
+
+function ext_pwm = extendPWM(pwm, n,GCmat)
+mat = repmat(GCmat, n,1);
+ext_pwm = [mat;pwm;mat];
