@@ -1,20 +1,7 @@
-function [gkmc, GCpos, GCneg, mat, mat2] = getgkmcounts(filename,l,k, lk)
+function [gkmc, GCpos, GCneg, mat, mat2] = getgkmcounts(filename,l,k, lk,RC)
 %gets the gapped kmer counts using the alphas to weight each support vector
 % filename is the name of the support vector sequence fa ('_svseq.fa')
 % l and k are the parameters for the length of the gapped kmer (l) and the number of ungapped positions (k)
-if lk == 0
-    l3 = l;
-    k2 = k;
-    l = 10;
-    k = 6;
-    Ker = zeros(l3+1,1);
-    for i = 0:(l3-k2)
-        Ker(l3-i+1) = nchoosek(l3-i,l3-k2-i);
-    end
-end
-
-x = encodekmers(l, k);
-
 if isfile([filename '_svseq.fa']) && isfile([filename '_svalpha.out'])
     filenameseq = [filename '_svseq.fa'];
     filenamealpha = [filename '_svalpha.out'];
@@ -38,6 +25,12 @@ else
     error(['Needs ' filename '_svseq.fa and ' filename '_svalpha.out or ' filename '.model.txt']);
 end
 
+if RC
+    x = encodekmers(l, k);
+else
+    x = encodekmers_norc(l, k);
+end  
+
 [comb,~,~,~,~,rcnum] = genIndex(l,k);
 lcnum = length(comb);
 n = length(alpha);
@@ -59,6 +52,10 @@ a = 2;
 s = '';
 l2 = l-1;
 lcnum2 = lcnum-rcnum;
+Ker = zeros(l+1,1);
+for i = 0:(l-k)
+    Ker(l-i+1) = nchoosek(l-i,l-k-i);
+end
 for i = 1:n
     if mod(i, floor(n/10))==0
         fprintf('%d...', per);
@@ -76,7 +73,11 @@ for i = 1:n
         s = sequences{i};
     end
     ss = letterconvert(s);
-    temp = zeros(4^k*(lcnum*2), 1);
+    if RC
+        temp = zeros(4^k*(lcnum*2), 1);
+    else
+        temp = zeros(4^k*(lcnum), 1);
+    end
     vec = ss(1:l)*pow;
     en = x(vec+1, :);
     temp(en) = temp(en) + 1;
@@ -85,8 +86,10 @@ for i = 1:n
         en = x(vec+1, :);
         temp(en) = temp(en) + 1;
     end
-    temp = temp(1:4^k*lcnum)+temp(4^k*lcnum+1:4^k*2*lcnum);
-    if rcnum > 0
+    if RC
+        temp = temp(1:4^k*lcnum)+temp(4^k*lcnum+1:4^k*2*lcnum);
+    end
+    if rcnum > 0 && RC
         temp(4^k*lcnum2+1:4^k*lcnum)=temp(4^k*lcnum2+1:4^k*lcnum)/sqrt(2);
     end
     if lk == 1
@@ -97,26 +100,34 @@ for i = 1:n
         len(i) = length(ss);
         for ii = 1:4
             for j = 1:2
-                C{ii,j} = zeros(len(i)-l3+1, l3);
+                C{ii,j} = zeros(len(i)-l+1, l);
             end
         end
         for ii = 1:len(i)
-            for j = 0:l3-1
-                if ii - j <= len(i)-l3+1 && ii - j > 0
+            for j = 0:l-1
+                if ii - j <= len(i)-l+1 && ii - j > 0
                     C{ss(ii)+1,1}(ii-j,j+1) = 1;
                 end
             end
         end
-        for ii = 0:3
-            C{ii+1,2} = rot90(C{4-ii,1}, 2);
+        if RC
+            for ii = 0:3
+                C{ii+1,2} = rot90(C{4-ii,1}, 2);
+            end
+            M2 = zeros(len(i)-l+1);
         end
-        M = zeros(len(i)-l3+1);
-        M2 = zeros(len(i)-l3+1);
+        M = zeros(len(i)-l+1);
         for ii = 1:4
             M = M + C{ii,1}*C{ii,1}.';
-            M2 = M2 + C{ii,1}*C{ii,2}.';
+            if RC
+                M2 = M2 + C{ii,1}*C{ii,2}.';
+            end
         end
-        norm = sqrt(sum(sum(Ker(1 + M)+Ker(1 + M2))));
+        if RC
+            norm = sqrt(sum(sum(Ker(1 + M)+Ker(1 + M2))));
+        else
+            norm = sqrt(sum(sum(Ker(1 + M))));
+        end
         gkmc = gkmc + alpha(i)/norm*temp;
     end
     if alpha(i) > 0
@@ -138,9 +149,11 @@ end
 fprintf('\n')
 GCpos = GCpos/alphasum/mean(len(1:np));;
 GCneg = -1*GCneg/alphasum/mean(len(np+1:end));
-mat = (mat+rot90(rot90(mat,3)'))/2;
+if RC
+    mat = (mat+rot90(rot90(mat,3)'))/2;
+    mat2 = (mat2+rot90(rot90(mat2,3)'))/2;
+end
 mat = mat./repmat(sum(mat,2),1,4);
-mat2 = (mat2+rot90(rot90(mat2,3)'))/2;
 mat2 = mat2./repmat(sum(mat2,2),1,4);
 
 
@@ -176,3 +189,16 @@ for i = 1:lcnum
     mat(:,i+lcnum) =  seqvec2(:,c(i,:))*pow+4^k*(lcnum+i-1)+1;
 end
 
+function mat = encodekmers_norc(l,k);
+c = genIndex(l,k);
+lcnum = length(c);
+seqvec = zeros(4^l, l);
+vec = (1:4^l)'-1;
+for i = 1:l
+    seqvec(:,i) = mod(floor(vec/4^(i-1)), 4);
+end
+mat = zeros(4^l, lcnum);
+pow = 4.^(0:k-1)';
+for i = 1:lcnum
+    mat(:,i) = seqvec(:,c(i,:))*pow+4^k*(i-1)+1;
+end
