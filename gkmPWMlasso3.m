@@ -191,6 +191,7 @@ f = [];
 for i = 1:length(FF)
     f = [f;FF{i}];
 end
+f=unique(f);
 %f = find(weigmat(:,1)~=0);
 F = length(f);
 disp('Selecting top motifs')
