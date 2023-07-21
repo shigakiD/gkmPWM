@@ -1,7 +1,7 @@
 function gkmPWMlasso(varargin)
 
-if nargin < 3
-    error('Need at least 3 inputs')
+if nargin < 2
+    error('Need at least 2 inputs')
 end
 
 filename = varargin{1};
