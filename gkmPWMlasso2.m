@@ -60,14 +60,14 @@ end
 
 disp('Counting gapped kmers')
 
-[cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(filename, l_svm2, k_svm2, lk);
+[cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(filename, l_svm2, k_svm2, lk,true);
 if BG_GC == 1
     mat = (mat+mat2)/2;
     GCpos1 = (GCpos1+GCneg1)/2;
     GCneg1 = GCpos1;
 end
 disp('Generating negative set')
-negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm);
+negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,true);
 
 disp('Filtering motifs')
 num = length(strfind(fileread(memefile),'MOTIF'));
