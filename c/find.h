@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *negvec,
+void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *indc,
                         const emxArray_real_T *BY);
 
 void b_eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i);

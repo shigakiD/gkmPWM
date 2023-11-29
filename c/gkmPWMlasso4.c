@@ -112,7 +112,7 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
   bool *b_simmat_data;
   simmat_data = simmat->data;
   emxInit_boolean_T(&b_simmat, 2);
-  /* 'gkmPWMlasso4:462' bin = conncomp(graph(simmat>r)); */
+  /* 'gkmPWMlasso4:473' bin = conncomp(graph(simmat>r)); */
   k = b_simmat->size[0] * b_simmat->size[1];
   b_simmat->size[0] = simmat->size[0];
   b_simmat->size[1] = simmat->size[1];
@@ -128,7 +128,7 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
   graph_graph(b_simmat, t0_Underlying_Ir, t0_Underlying_Jc);
   graph_conncomp(t0_Underlying_Ir, t0_Underlying_Jc, bin);
   bin_data = bin->data;
-  /* 'gkmPWMlasso4:463' n = max(bin); */
+  /* 'gkmPWMlasso4:474' n = max(bin); */
   last = bin->size[1];
   emxFree_boolean_T(&b_simmat);
   emxFree_int32_T(&t0_Underlying_Jc);
@@ -150,8 +150,8 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
       }
     }
   }
-  /* 'gkmPWMlasso4:464' motclus = cell(n,1); */
-  /* 'gkmPWMlasso4:465' for i = 1:n */
+  /* 'gkmPWMlasso4:475' motclus = cell(n,1); */
+  /* 'gkmPWMlasso4:476' for i = 1:n */
   k = (int)n;
   i = motclus->size[0];
   motclus->size[0] = (int)n;
@@ -160,7 +160,7 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
   emxInit_int32_T(&b_r, 2);
   emxInit_boolean_T(&b_bin, 2);
   for (b_i = 0; b_i < k; b_i++) {
-    /* 'gkmPWMlasso4:466' motclus{i} = find(bin == i); */
+    /* 'gkmPWMlasso4:477' motclus{i} = find(bin == i); */
     i = b_bin->size[0] * b_bin->size[1];
     b_bin->size[0] = 1;
     b_bin->size[1] = bin->size[1];
@@ -310,7 +310,7 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
   bool *b_simmat_data;
   simmat_data = simmat->data;
   emxInit_boolean_T(&b_simmat, 2);
-  /* 'gkmPWMlasso4:462' bin = conncomp(graph(simmat>r)); */
+  /* 'gkmPWMlasso4:473' bin = conncomp(graph(simmat>r)); */
   k = b_simmat->size[0] * b_simmat->size[1];
   b_simmat->size[0] = simmat->size[0];
   b_simmat->size[1] = simmat->size[1];
@@ -326,7 +326,7 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
   graph_graph(b_simmat, t1_Underlying_Ir, t1_Underlying_Jc);
   graph_conncomp(t1_Underlying_Ir, t1_Underlying_Jc, bin);
   bin_data = bin->data;
-  /* 'gkmPWMlasso4:463' n = max(bin); */
+  /* 'gkmPWMlasso4:474' n = max(bin); */
   last = bin->size[1];
   emxFree_boolean_T(&b_simmat);
   emxFree_int32_T(&t1_Underlying_Jc);
@@ -348,8 +348,8 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
       }
     }
   }
-  /* 'gkmPWMlasso4:464' motclus = cell(n,1); */
-  /* 'gkmPWMlasso4:465' for i = 1:n */
+  /* 'gkmPWMlasso4:475' motclus = cell(n,1); */
+  /* 'gkmPWMlasso4:476' for i = 1:n */
   k = (int)n;
   i = motclus->size[0];
   motclus->size[0] = (int)n;
@@ -358,7 +358,7 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
   emxInit_int32_T(&c_r, 2);
   emxInit_boolean_T(&b_bin, 2);
   for (b_i = 0; b_i < k; b_i++) {
-    /* 'gkmPWMlasso4:466' motclus{i} = find(bin == i); */
+    /* 'gkmPWMlasso4:477' motclus{i} = find(bin == i); */
     i = b_bin->size[0] * b_bin->size[1];
     b_bin->size[0] = 1;
     b_bin->size[1] = bin->size[1];
@@ -489,7 +489,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   pvec_data = pvec->data;
   weigvec_data = weigvec->data;
   emxInit_real_T(&a, 1);
-  /* 'gkmPWMlasso4:424' [a, b] = sort(pvec, 'descend'); */
+  /* 'gkmPWMlasso4:435' [a, b] = sort(pvec, 'descend'); */
   i = a->size[0];
   a->size[0] = pvec->size[0];
   emxEnsureCapacity_real_T(a, i);
@@ -503,7 +503,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   sort(a, iidx);
   iidx_data = iidx->data;
   a_data = a->data;
-  /* 'gkmPWMlasso4:425' c = [weigvec(b) a E(b)]; */
+  /* 'gkmPWMlasso4:436' c = [weigvec(b) a E(b)]; */
   i = c->size[0] * c->size[1];
   c->size[0] = iidx->size[0];
   c->size[1] = 3;
@@ -524,16 +524,16 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxInit_cell_wrap_1(&ordered_motclus);
   /*  motclus = motclus(b); */
-  /* 'gkmPWMlasso4:427' mylen = length(b); */
-  /* 'gkmPWMlasso4:428' ordered_motclus = cell(mylen, 1); */
-  /* 'gkmPWMlasso4:429' for idx=1:mylen */
+  /* 'gkmPWMlasso4:438' mylen = length(b); */
+  /* 'gkmPWMlasso4:439' ordered_motclus = cell(mylen, 1); */
+  /* 'gkmPWMlasso4:440' for idx=1:mylen */
   i = iidx->size[0];
   i1 = ordered_motclus->size[0];
   ordered_motclus->size[0] = iidx->size[0];
   emxEnsureCapacity_cell_wrap_1(ordered_motclus, i1);
   ordered_motclus_data = ordered_motclus->data;
   for (k = 0; k < i; k++) {
-    /* 'gkmPWMlasso4:430' ordered_motclus{idx} = motclus{b(idx)}; */
+    /* 'gkmPWMlasso4:441' ordered_motclus{idx} = motclus{b(idx)}; */
     i1 = ordered_motclus_data[k].f1->size[0] *
          ordered_motclus_data[k].f1->size[1];
     ordered_motclus_data[k].f1->size[0] = 1;
@@ -548,9 +548,9 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxFree_int32_T(&iidx);
   emxInit_cell_wrap_8(&names);
-  /* 'gkmPWMlasso4:432' motclus = ordered_motclus; */
-  /* 'gkmPWMlasso4:433' [rr,cc] = size(c); */
-  /* 'gkmPWMlasso4:434' names = cell(n,1); */
+  /* 'gkmPWMlasso4:443' motclus = ordered_motclus; */
+  /* 'gkmPWMlasso4:444' [rr,cc] = size(c); */
+  /* 'gkmPWMlasso4:445' names = cell(n,1); */
   nbytes = (int)n;
   i = names->size[0];
   names->size[0] = (int)n;
@@ -560,12 +560,12 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
     names_data[i].f1->size[0] = 1;
     names_data[i].f1->size[1] = 0;
   }
-  /* 'gkmPWMlasso4:435' names = coder.nullcopy(names); */
-  /* 'gkmPWMlasso4:436' i = 0; */
+  /* 'gkmPWMlasso4:446' names = coder.nullcopy(names); */
+  /* 'gkmPWMlasso4:447' i = 0; */
   b_i = 0.0;
-  /* 'gkmPWMlasso4:437' fid = fopen(memefile, 'r'); */
+  /* 'gkmPWMlasso4:448' fid = fopen(memefile, 'r'); */
   fileid = cfopen(memefile, "rb");
-  /* 'gkmPWMlasso4:438' while ~feof(fid) */
+  /* 'gkmPWMlasso4:449' while ~feof(fid) */
   b_NULL = NULL;
   emxInit_char_T(&line, 2);
   do {
@@ -578,20 +578,20 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       i = ((int)st != 0);
     }
     if (i == 0) {
-      /* 'gkmPWMlasso4:439' line = fgetl(fid); */
+      /* 'gkmPWMlasso4:450' line = fgetl(fid); */
       fgetl(fileid, line);
       line_data = line->data;
-      /* 'gkmPWMlasso4:440' if length(line) >= 5 */
+      /* 'gkmPWMlasso4:451' if length(line) >= 5 */
       if (line->size[1] >= 5) {
-        /* 'gkmPWMlasso4:441' if strcmp(line(1:5), 'MOTIF') */
+        /* 'gkmPWMlasso4:452' if strcmp(line(1:5), 'MOTIF') */
         for (i = 0; i < 5; i++) {
           c_a[i] = line_data[i];
         }
         nbytes = memcmp(&c_a[0], &b[0], 5);
         if (nbytes == 0) {
-          /* 'gkmPWMlasso4:442' i = i+1; */
+          /* 'gkmPWMlasso4:453' i = i+1; */
           b_i++;
-          /* 'gkmPWMlasso4:443' [~,name] = strtok(line); */
+          /* 'gkmPWMlasso4:454' [~,name] = strtok(line); */
           nbytes = line->size[1];
           k = 1;
           do {
@@ -649,7 +649,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
             i = k - 2;
             i1 = line->size[1];
           }
-          /* 'gkmPWMlasso4:444' names{i} = strtrim(name); */
+          /* 'gkmPWMlasso4:455' names{i} = strtrim(name); */
           nbytes = 1;
           exitg7 = false;
           while ((!exitg7) && (nbytes <= (i1 - i) - 1)) {
@@ -692,9 +692,9 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       exitg1 = 1;
     }
   } while (exitg1 == 0);
-  /* 'gkmPWMlasso4:448' fclose(fid); */
+  /* 'gkmPWMlasso4:459' fclose(fid); */
   cfclose(fileid);
-  /* 'gkmPWMlasso4:449' fidw = fopen(sprintf('%s_gkmPWMlasso4.out', filename),
+  /* 'gkmPWMlasso4:460' fidw = fopen(sprintf('%s_gkmPWMlasso4.out', filename),
    * 'w'); */
   i = line->size[0] * line->size[1];
   line->size[0] = 1;
@@ -734,7 +734,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxEnsureCapacity_char_T(charStr, i);
   fileid = cfopen(charStr, "wb");
-  /* 'gkmPWMlasso4:450' fprintf(fidw, 'Minimum PWM Length:\t%d\n', int32(minL));
+  /* 'gkmPWMlasso4:461' fprintf(fidw, 'Minimum PWM Length:\t%d\n', int32(minL));
    */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -746,7 +746,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:451' fprintf(fidw, 'Minimum PWM Information:\t%f\n',
+  /* 'gkmPWMlasso4:462' fprintf(fidw, 'Minimum PWM Information:\t%f\n',
    * minInfo); */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -756,7 +756,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:452' fprintf(fidw, 'Correlation with SVM weights:\t%f\n', C);
+  /* 'gkmPWMlasso4:463' fprintf(fidw, 'Correlation with SVM weights:\t%f\n', C);
    */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -766,7 +766,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:453' fprintf(fidw, 'Cluster ID\tMotif ID\tMotif
+  /* 'gkmPWMlasso4:464' fprintf(fidw, 'Cluster ID\tMotif ID\tMotif
    * Name\tRegression Weight\tZ-score\tImportance\n'); */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -777,16 +777,16 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:454' for j = 1:length(E) */
+  /* 'gkmPWMlasso4:465' for j = 1:length(E) */
   i = E->size[0];
   for (k = 0; k < i; k++) {
-    /* 'gkmPWMlasso4:455' for l = 1:length(motclus{j}) */
+    /* 'gkmPWMlasso4:466' for l = 1:length(motclus{j}) */
     i1 = ordered_motclus_data[k].f1->size[1];
     if (0 <= ordered_motclus_data[k].f1->size[1] - 1) {
       c_NULL = NULL;
     }
     for (l = 0; l < i1; l++) {
-      /* 'gkmPWMlasso4:456' fprintf(fidw, '%d\t%d\t%s\t%0.3f\t%0.3f\t%0.3f\n',
+      /* 'gkmPWMlasso4:467' fprintf(fidw, '%d\t%d\t%s\t%0.3f\t%0.3f\t%0.3f\n',
        * int32(j), int32(motclus{j}(l)), names{motclus{j}(l)}, c(j,1), c(j,2),
        * c(j,3)); */
       i2 = line->size[0] * line->size[1];
@@ -820,7 +820,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   emxFree_cell_wrap_8(&names);
   emxFree_cell_wrap_1(&ordered_motclus);
   emxFree_real_T(&c);
-  /* 'gkmPWMlasso4:459' fclose(fidw); */
+  /* 'gkmPWMlasso4:470' fclose(fidw); */
   cfclose(fileid);
 }
 
@@ -850,19 +850,19 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
   int nx;
   int nxout;
   p_data = p->data;
-  /* 'gkmPWMlasso4:470' l = length(p); */
-  /* 'gkmPWMlasso4:471' info = zeros(l, 1); */
+  /* 'gkmPWMlasso4:481' l = length(p); */
+  /* 'gkmPWMlasso4:482' info = zeros(l, 1); */
   nx = p->size[0];
   i = info->size[0];
   info->size[0] = nx;
   emxEnsureCapacity_real_T(info, i);
   info_data = info->data;
-  /* 'gkmPWMlasso4:472' len = zeros(l,1); */
+  /* 'gkmPWMlasso4:483' len = zeros(l,1); */
   i = len->size[0];
   len->size[0] = nx;
   emxEnsureCapacity_real_T(len, i);
   len_data = len->data;
-  /* 'gkmPWMlasso4:473' for i = 1:l */
+  /* 'gkmPWMlasso4:484' for i = 1:l */
   i = p->size[0];
   emxInit_real_T(&mat, 2);
   emxInit_real_T(&vec, 1);
@@ -870,7 +870,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
   emxInit_real_T(&b_r, 2);
   emxInit_real_T(&b_mat, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWMlasso4:474' mat = p{i}+(p{i}==0); */
+    /* 'gkmPWMlasso4:485' mat = p{i}+(p{i}==0); */
     idx = mat->size[0] * mat->size[1];
     mat->size[0] = p_data[b_i].f1->size[0];
     mat->size[1] = p_data[b_i].f1->size[1];
@@ -881,7 +881,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       mat_data[idx] = p_data[b_i].f1->data[idx] +
                       (double)(p_data[b_i].f1->data[idx] == 0.0);
     }
-    /* 'gkmPWMlasso4:475' vec = 2+sum(mat.*log(mat)/log(2),2); */
+    /* 'gkmPWMlasso4:486' vec = 2+sum(mat.*log(mat)/log(2),2); */
     idx = b_r->size[0] * b_r->size[1];
     b_r->size[0] = mat->size[0];
     b_r->size[1] = mat->size[1];
@@ -915,16 +915,16 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
     for (idx = 0; idx < nx; idx++) {
       mat_data[idx] += 2.0;
     }
-    /* 'gkmPWMlasso4:476' mvec = movmean(vec,5); */
+    /* 'gkmPWMlasso4:487' mvec = movmean(vec,5); */
     nx = vec->size[0];
     if (2 <= nx) {
       nx = 2;
     }
     vmovfun(vec, vec->size[0], nx, nx, mvec);
     mvec_data = mvec->data;
-    /* 'gkmPWMlasso4:477' while min(vec(1),mvec(1)) < cut && length(vec) > 1 */
+    /* 'gkmPWMlasso4:488' while min(vec(1),mvec(1)) < cut && length(vec) > 1 */
     while ((fmin(mat_data[0], mvec_data[0]) < 0.0) && (vec->size[0] > 1)) {
-      /* 'gkmPWMlasso4:478' p{i}(1,:) = []; */
+      /* 'gkmPWMlasso4:489' p{i}(1,:) = []; */
       nx = p_data[b_i].f1->size[0] - 2;
       nxout = p_data[b_i].f1->size[1];
       nrows = p_data[b_i].f1->size[0] - 1;
@@ -950,7 +950,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       p_data[b_i].f1->size[0] = nx;
       p_data[b_i].f1->size[1] = nxout + 1;
       emxEnsureCapacity_real_T(p_data[b_i].f1, idx);
-      /* 'gkmPWMlasso4:479' vec(1) = []; */
+      /* 'gkmPWMlasso4:490' vec(1) = []; */
       nx = vec->size[0];
       nxout = vec->size[0];
       for (nrows = 0; nrows <= nxout - 2; nrows++) {
@@ -960,7 +960,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       vec->size[0] = nx - 1;
       emxEnsureCapacity_real_T(vec, idx);
       mat_data = vec->data;
-      /* 'gkmPWMlasso4:480' mvec(1)=[]; */
+      /* 'gkmPWMlasso4:491' mvec(1)=[]; */
       nx = mvec->size[0];
       nxout = mvec->size[0] - 1;
       for (nrows = 0; nrows < nxout; nrows++) {
@@ -974,7 +974,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       }
       emxEnsureCapacity_real_T(mvec, idx);
       mvec_data = mvec->data;
-      /* 'gkmPWMlasso4:481' mat(1,:) = []; */
+      /* 'gkmPWMlasso4:492' mat(1,:) = []; */
       idx = mat->size[0] * mat->size[1];
       if (1 > mat->size[0] - 1) {
         mat->size[0] = 0;
@@ -983,12 +983,12 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       }
       emxEnsureCapacity_real_T(mat, idx);
     }
-    /* 'gkmPWMlasso4:483' while min(mvec(end),vec(end)) < cut && length(vec) > 1
+    /* 'gkmPWMlasso4:494' while min(mvec(end),vec(end)) < cut && length(vec) > 1
      */
     while ((fmin(mvec_data[mvec->size[0] - 1], mat_data[vec->size[0] - 1]) <
             0.0) &&
            (vec->size[0] > 1)) {
-      /* 'gkmPWMlasso4:484' vec(end) = []; */
+      /* 'gkmPWMlasso4:495' vec(end) = []; */
       idx = vec->size[0];
       nx = vec->size[0];
       nxout = vec->size[0] - 1;
@@ -999,7 +999,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       vec->size[0] = nx - 1;
       emxEnsureCapacity_real_T(vec, idx);
       mat_data = vec->data;
-      /* 'gkmPWMlasso4:485' mvec(end)=[]; */
+      /* 'gkmPWMlasso4:496' mvec(end)=[]; */
       idx = mvec->size[0];
       nx = mvec->size[0];
       nxout = mvec->size[0] - 1;
@@ -1014,7 +1014,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       }
       emxEnsureCapacity_real_T(mvec, idx);
       mvec_data = mvec->data;
-      /* 'gkmPWMlasso4:486' mat(end,:) = []; */
+      /* 'gkmPWMlasso4:497' mat(end,:) = []; */
       idx = mat->size[0] * mat->size[1];
       if (1 > mat->size[0] - 1) {
         mat->size[0] = 0;
@@ -1022,7 +1022,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
         mat->size[0]--;
       }
       emxEnsureCapacity_real_T(mat, idx);
-      /* 'gkmPWMlasso4:487' p{i}(end,:) = []; */
+      /* 'gkmPWMlasso4:498' p{i}(end,:) = []; */
       idx = p_data[b_i].f1->size[0];
       nx = p_data[b_i].f1->size[0] - 2;
       nxout = p_data[b_i].f1->size[1];
@@ -1050,9 +1050,9 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       p_data[b_i].f1->size[1] = nxout + 1;
       emxEnsureCapacity_real_T(p_data[b_i].f1, idx);
     }
-    /* 'gkmPWMlasso4:489' info(i) = sum(vec); */
+    /* 'gkmPWMlasso4:500' info(i) = sum(vec); */
     info_data[b_i] = blockedSummation(vec, vec->size[0]);
-    /* 'gkmPWMlasso4:490' [len(i), ~] = size(mat); */
+    /* 'gkmPWMlasso4:501' [len(i), ~] = size(mat); */
     len_data[b_i] = mat->size[0];
   }
   emxFree_real_T(&b_mat);
@@ -1060,7 +1060,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
   emxFree_real_T(&mvec);
   emxFree_real_T(&vec);
   emxFree_real_T(&mat);
-  /* 'gkmPWMlasso4:492' pp = p; */
+  /* 'gkmPWMlasso4:503' pp = p; */
 }
 
 static void u_binary_expand_op(emxArray_real_T *vec, const emxArray_real_T *mat,
@@ -1162,7 +1162,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxArray_real_T *BB;
   emxArray_real_T *BY;
   emxArray_real_T *GCmat;
+  emxArray_real_T *OLS;
+  emxArray_real_T *Pweig;
   emxArray_real_T *Z;
+  emxArray_real_T *b_A;
   emxArray_real_T *b_GCmat;
   emxArray_real_T *b_xc;
   emxArray_real_T *cfile2;
@@ -1176,7 +1179,6 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxArray_real_T *negvec;
   emxArray_real_T *normvec;
   emxArray_real_T *weigmat;
-  emxArray_real_T *weigmat2;
   emxArray_real_T *xc;
   emxArray_real_T *y;
   double comb2_data[2508];
@@ -1203,20 +1205,21 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   double l_svm;
   double rcnum;
   double *AA_data;
+  double *A_data;
   double *BY_data;
   double *B_data;
+  double *OLS_data;
+  double *Pweig_data;
   double *Z_data;
   double *b_comb_data;
-  double *b_diffc_data;
   double *b_indc_data;
   double *cfile2_data;
-  double *f_data;
   double *indvec_data;
   double *loc_data;
   double *negvec_data;
   double *normvec_data;
   double *xc_data;
-  int b_f_data[19];
+  int f_data[19];
   int iidx_data[19];
   int MSE2_size[2];
   int a__3_DF_size[2];
@@ -1382,9 +1385,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     i = diffc->size[0];
     diffc->size[0] = nx;
     emxEnsureCapacity_real_T(diffc, i);
-    b_diffc_data = diffc->data;
+    b_comb_data = diffc->data;
     for (i = 0; i < nx; i++) {
-      b_diffc_data[i] = diffc_data[i];
+      b_comb_data[i] = diffc_data[i];
     }
     i = indc->size[0];
     indc->size[0] = indc_size;
@@ -1480,6 +1483,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   /* 'gkmPWMlasso4:92' p = getmotif(memefile,1:num); */
   emxInit_real_T(&y, 2);
+  Pweig_data = y->data;
   if (size_tmp_idx_1 < 1) {
     y->size[0] = 1;
     y->size[1] = 0;
@@ -1488,10 +1492,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     y->size[0] = 1;
     y->size[1] = size_tmp_idx_1;
     emxEnsureCapacity_real_T(y, i);
-    AA_data = y->data;
+    Pweig_data = y->data;
     loop_ub = size_tmp_idx_1 - 1;
     for (i = 0; i <= loop_ub; i++) {
-      AA_data[i] = (double)i + 1.0;
+      Pweig_data[i] = (double)i + 1.0;
     }
   }
   emxInit_cell_wrap_0(&p);
@@ -1509,9 +1513,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       y->size[0] = 1;
       y->size[1] = p_data[b_i].f1->size[1];
       emxEnsureCapacity_real_T(y, i1);
-      AA_data = y->data;
+      Pweig_data = y->data;
       for (i1 = 0; i1 < loop_ub; i1++) {
-        AA_data[i1] = p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * i1];
+        Pweig_data[i1] = p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * i1];
       }
       a = sum(y);
       /* 'gkmPWMlasso4:97' if abs(a-1)>0 */
@@ -1522,9 +1526,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         y->size[0] = 1;
         y->size[1] = p_data[b_i].f1->size[1];
         emxEnsureCapacity_real_T(y, i1);
-        AA_data = y->data;
+        Pweig_data = y->data;
         for (i1 = 0; i1 < loop_ub; i1++) {
-          AA_data[i1] = p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * i1];
+          Pweig_data[i1] =
+              p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * i1];
         }
         b_maximum(y, &b1, &nx);
         /* 'gkmPWMlasso4:99' p{i}(j,loc) = b1-a+1; */
@@ -1579,17 +1584,17 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   for (i = 0; i < loop_ub; i++) {
     BY_data[i] = matches_data[i];
   }
-  emxInit_real_T(&f, 1);
-  i = f->size[0];
-  f->size[0] = ib->size[0];
-  emxEnsureCapacity_real_T(f, i);
-  f_data = f->data;
+  emxInit_real_T(&A, 1);
+  i = A->size[0];
+  A->size[0] = ib->size[0];
+  emxEnsureCapacity_real_T(A, i);
+  xc_data = A->data;
   loop_ub = ib->size[0];
   for (i = 0; i < loop_ub; i++) {
-    f_data[i] = match_out_data[i];
+    xc_data[i] = match_out_data[i];
   }
   emxInit_real_T(&indvec, 1);
-  do_vectors(BY, f, indvec, idx, ib);
+  do_vectors(BY, A, indvec, idx, ib);
   indvec_data = indvec->data;
   /* 'gkmPWMlasso4:105' n = length(indvec); */
   /* 'gkmPWMlasso4:106' fprintf('Mapping PWMs to gkm space\n'); */
@@ -1606,17 +1611,17 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       u1 = nx;
     }
   }
-  emxInit_real_T(&A, 2);
+  emxInit_real_T(&b_A, 2);
   /* 'gkmPWMlasso4:108' A=zeros(lcnum*4^k_svm,n); */
   i = (int)((double)u1 * pow(4.0, k_svm));
-  i1 = A->size[0] * A->size[1];
-  A->size[0] = i;
-  A->size[1] = indvec->size[0];
-  emxEnsureCapacity_real_T(A, i1);
-  xc_data = A->data;
+  i1 = b_A->size[0] * b_A->size[1];
+  b_A->size[0] = i;
+  b_A->size[1] = indvec->size[0];
+  emxEnsureCapacity_real_T(b_A, i1);
+  A_data = b_A->data;
   loop_ub = i * indvec->size[0];
   for (i1 = 0; i1 < loop_ub; i1++) {
-    xc_data[i1] = 0.0;
+    A_data[i1] = 0.0;
   }
   emxInit_real_T(&AA, 2);
   /* 'gkmPWMlasso4:109' AA=zeros(lcnum*4^k_svm,n); */
@@ -1699,51 +1704,51 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       empty_non_axis_sizes = (loop_ub == 0);
       if (empty_non_axis_sizes || (GCmat->size[0] != 0)) {
-        nx = GCmat->size[0];
-      } else {
-        nx = 0;
-      }
-      if (empty_non_axis_sizes ||
-          ((p_data[(int)indvec_data[j] - 1].f1->size[0] != 0) &&
-           (p_data[(int)indvec_data[j] - 1].f1->size[1] != 0))) {
-        lk = p_data[(int)indvec_data[j] - 1].f1->size[0];
-      } else {
-        lk = 0;
-      }
-      if (empty_non_axis_sizes || (GCmat->size[0] != 0)) {
         indc_size = GCmat->size[0];
       } else {
         indc_size = 0;
       }
+      if (empty_non_axis_sizes ||
+          ((p_data[(int)indvec_data[j] - 1].f1->size[0] != 0) &&
+           (p_data[(int)indvec_data[j] - 1].f1->size[1] != 0))) {
+        nx = p_data[(int)indvec_data[j] - 1].f1->size[0];
+      } else {
+        nx = 0;
+      }
+      if (empty_non_axis_sizes || (GCmat->size[0] != 0)) {
+        lk = GCmat->size[0];
+      } else {
+        lk = 0;
+      }
       b_i = b_GCmat->size[0] * b_GCmat->size[1];
-      b_GCmat->size[0] = (nx + lk) + indc_size;
+      b_GCmat->size[0] = (indc_size + nx) + lk;
       b_GCmat->size[1] = loop_ub;
       emxEnsureCapacity_real_T(b_GCmat, b_i);
       normvec_data = b_GCmat->data;
       for (b_i = 0; b_i < loop_ub; b_i++) {
-        for (i3 = 0; i3 < nx; i3++) {
+        for (i3 = 0; i3 < indc_size; i3++) {
           normvec_data[i3 + b_GCmat->size[0] * b_i] =
-              b_comb_data[i3 + nx * b_i];
+              b_comb_data[i3 + indc_size * b_i];
         }
       }
       for (b_i = 0; b_i < loop_ub; b_i++) {
-        for (i3 = 0; i3 < lk; i3++) {
-          normvec_data[(i3 + nx) + b_GCmat->size[0] * b_i] =
-              p_data[i2].f1->data[i3 + lk * b_i];
+        for (i3 = 0; i3 < nx; i3++) {
+          normvec_data[(i3 + indc_size) + b_GCmat->size[0] * b_i] =
+              p_data[i2].f1->data[i3 + nx * b_i];
         }
       }
       for (i2 = 0; i2 < loop_ub; i2++) {
-        for (b_i = 0; b_i < indc_size; b_i++) {
-          normvec_data[((b_i + nx) + lk) + b_GCmat->size[0] * i2] =
-              b_comb_data[b_i + indc_size * i2];
+        for (b_i = 0; b_i < lk; b_i++) {
+          normvec_data[((b_i + indc_size) + nx) + b_GCmat->size[0] * i2] =
+              b_comb_data[b_i + lk * i2];
         }
       }
       PWM2kmers(b_GCmat, mat, comb2, diffc, indc, loc, xc, l_svm, k_svm, rcnum,
-                f);
-      f_data = f->data;
-      loop_ub = f->size[0];
+                A);
+      xc_data = A->data;
+      loop_ub = A->size[0];
       for (i2 = 0; i2 < loop_ub; i2++) {
-        xc_data[i2 + A->size[0] * j] = f_data[i2];
+        A_data[i2 + b_A->size[0] * j] = xc_data[i2];
       }
     } else {
       /* 'gkmPWMlasso4:122' else */
@@ -1760,99 +1765,99 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       empty_non_axis_sizes = (loop_ub == 0);
       if (empty_non_axis_sizes || (GCmat->size[0] != 0)) {
-        nx = GCmat->size[0];
-      } else {
-        nx = 0;
-      }
-      if (empty_non_axis_sizes ||
-          ((p_data[(int)indvec_data[j] - 1].f1->size[0] != 0) &&
-           (p_data[(int)indvec_data[j] - 1].f1->size[1] != 0))) {
-        lk = p_data[(int)indvec_data[j] - 1].f1->size[0];
-      } else {
-        lk = 0;
-      }
-      if (empty_non_axis_sizes || (GCmat->size[0] != 0)) {
         indc_size = GCmat->size[0];
       } else {
         indc_size = 0;
       }
+      if (empty_non_axis_sizes ||
+          ((p_data[(int)indvec_data[j] - 1].f1->size[0] != 0) &&
+           (p_data[(int)indvec_data[j] - 1].f1->size[1] != 0))) {
+        nx = p_data[(int)indvec_data[j] - 1].f1->size[0];
+      } else {
+        nx = 0;
+      }
+      if (empty_non_axis_sizes || (GCmat->size[0] != 0)) {
+        lk = GCmat->size[0];
+      } else {
+        lk = 0;
+      }
       b_i = b_GCmat->size[0] * b_GCmat->size[1];
-      b_GCmat->size[0] = (nx + lk) + indc_size;
+      b_GCmat->size[0] = (indc_size + nx) + lk;
       b_GCmat->size[1] = loop_ub;
       emxEnsureCapacity_real_T(b_GCmat, b_i);
       normvec_data = b_GCmat->data;
       for (b_i = 0; b_i < loop_ub; b_i++) {
-        for (i3 = 0; i3 < nx; i3++) {
+        for (i3 = 0; i3 < indc_size; i3++) {
           normvec_data[i3 + b_GCmat->size[0] * b_i] =
-              b_comb_data[i3 + nx * b_i];
+              b_comb_data[i3 + indc_size * b_i];
         }
       }
       for (b_i = 0; b_i < loop_ub; b_i++) {
-        for (i3 = 0; i3 < lk; i3++) {
-          normvec_data[(i3 + nx) + b_GCmat->size[0] * b_i] =
-              p_data[i2].f1->data[i3 + lk * b_i];
+        for (i3 = 0; i3 < nx; i3++) {
+          normvec_data[(i3 + indc_size) + b_GCmat->size[0] * b_i] =
+              p_data[i2].f1->data[i3 + nx * b_i];
         }
       }
       for (i2 = 0; i2 < loop_ub; i2++) {
-        for (b_i = 0; b_i < indc_size; b_i++) {
-          normvec_data[((b_i + nx) + lk) + b_GCmat->size[0] * i2] =
-              b_comb_data[b_i + indc_size * i2];
+        for (b_i = 0; b_i < lk; b_i++) {
+          normvec_data[((b_i + indc_size) + nx) + b_GCmat->size[0] * i2] =
+              b_comb_data[b_i + lk * i2];
         }
       }
       PWM2kmers_norc(b_GCmat, mat, comb2, diffc, indc, loc, xc, l_svm, k_svm,
-                     f);
-      f_data = f->data;
-      loop_ub = f->size[0];
+                     A);
+      xc_data = A->data;
+      loop_ub = A->size[0];
       for (i2 = 0; i2 < loop_ub; i2++) {
-        xc_data[i2 + A->size[0] * j] = f_data[i2];
+        A_data[i2 + b_A->size[0] * j] = xc_data[i2];
       }
     }
     /* 'gkmPWMlasso4:125' A(:,j) = A(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
      */
     GCpos1 = (l_svm - 1.0) + b1;
-    if (A->size[0] == negvec->size[0]) {
-      nx = A->size[0] - 1;
-      i2 = f->size[0];
-      f->size[0] = A->size[0];
-      emxEnsureCapacity_real_T(f, i2);
-      f_data = f->data;
+    if (b_A->size[0] == negvec->size[0]) {
+      nx = b_A->size[0] - 1;
+      i2 = A->size[0];
+      A->size[0] = b_A->size[0];
+      emxEnsureCapacity_real_T(A, i2);
+      xc_data = A->data;
       for (i2 = 0; i2 <= nx; i2++) {
-        f_data[i2] = xc_data[i2 + A->size[0] * j] - negvec_data[i2] * GCpos1;
+        xc_data[i2] = A_data[i2 + b_A->size[0] * j] - negvec_data[i2] * GCpos1;
       }
-      loop_ub = f->size[0];
+      loop_ub = A->size[0];
       for (i2 = 0; i2 < loop_ub; i2++) {
-        xc_data[i2 + A->size[0] * j] = f_data[i2];
+        A_data[i2 + b_A->size[0] * j] = xc_data[i2];
       }
     } else {
-      binary_expand_op(A, j, negvec, GCpos1);
-      xc_data = A->data;
+      binary_expand_op(b_A, j, negvec, GCpos1);
+      A_data = b_A->data;
     }
     /* 'gkmPWMlasso4:126' normvec(j) = (A(:,j)'*A(:,j))^0.5; */
-    loop_ub = A->size[0];
+    loop_ub = b_A->size[0];
     i2 = loc->size[0];
-    loc->size[0] = A->size[0];
+    loc->size[0] = b_A->size[0];
     emxEnsureCapacity_real_T(loc, i2);
     loc_data = loc->data;
     i2 = BY->size[0];
-    BY->size[0] = A->size[0];
+    BY->size[0] = b_A->size[0];
     emxEnsureCapacity_real_T(BY, i2);
     BY_data = BY->data;
     for (i2 = 0; i2 < loop_ub; i2++) {
-      b1 = xc_data[i2 + A->size[0] * j];
+      b1 = A_data[i2 + b_A->size[0] * j];
       loc_data[i2] = b1;
       BY_data[i2] = b1;
     }
-    loop_ub = A->size[0];
-    if (A->size[0] < 1) {
+    loop_ub = b_A->size[0];
+    if (b_A->size[0] < 1) {
       b1 = 0.0;
     } else {
-      b1 = cblas_ddot((blasint)A->size[0], &loc_data[0], (blasint)1,
+      b1 = cblas_ddot((blasint)b_A->size[0], &loc_data[0], (blasint)1,
                       &BY_data[0], (blasint)1);
     }
     GCpos1 = sqrt(b1);
     /* 'gkmPWMlasso4:127' AA(:,j) = A(:,j)/normvec(j); */
     for (i2 = 0; i2 < loop_ub; i2++) {
-      AA_data[i2 + AA->size[0] * j] = xc_data[i2 + A->size[0] * j] / GCpos1;
+      AA_data[i2 + AA->size[0] * j] = A_data[i2 + b_A->size[0] * j] / GCpos1;
     }
   }
   emxFree_real_T(&GCmat);
@@ -1927,16 +1932,16 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   i1 = diffc->size[0];
   diffc->size[0] = indvec->size[0];
   emxEnsureCapacity_real_T(diffc, i1);
-  b_diffc_data = diffc->data;
+  b_comb_data = diffc->data;
   if (0 <= indvec->size[0] - 1) {
     GCneg1 = (double)u1 * 10.0;
-    if (GCneg1 <= A->size[0]) {
+    if (GCneg1 <= b_A->size[0]) {
       k = (int)GCneg1;
     } else {
-      k = A->size[0];
+      k = b_A->size[0];
     }
-    i4 = A->size[0];
-    b_loop_ub = A->size[0];
+    i4 = b_A->size[0];
+    b_loop_ub = b_A->size[0];
     if (1 > u1) {
       c_loop_ub = 0;
     } else {
@@ -1947,14 +1952,14 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     /*  [~,I] = sort(A(:,i),'descend'); */
     /*  zvec(i) = mean(cfile2(I(1:lcnum))); */
     /* 'gkmPWMlasso4:146' [~,I2] = maxk(A(:,i), lcnum*10); */
-    i1 = f->size[0];
-    f->size[0] = i4;
-    emxEnsureCapacity_real_T(f, i1);
-    f_data = f->data;
+    i1 = A->size[0];
+    A->size[0] = i4;
+    emxEnsureCapacity_real_T(A, i1);
+    xc_data = A->data;
     for (i1 = 0; i1 < b_loop_ub; i1++) {
-      f_data[i1] = xc_data[i1 + A->size[0] * b_i];
+      xc_data[i1] = A_data[i1 + b_A->size[0] * b_i];
     }
-    exkib(f, k, idx, BY);
+    exkib(A, k, idx, BY);
     matches_data = idx->data;
     loop_ub = idx->size[0];
     i1 = loc->size[0];
@@ -1981,13 +1986,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       /* 'gkmPWMlasso4:151' correlation_matrix = -1*corrcoef(A(I2,i),
        * cfile2(I2)); */
       /* 'gkmPWMlasso4:152' corrvec(i) = correlation_matrix(1,2); */
-      i1 = f->size[0];
-      f->size[0] = loc->size[0];
-      emxEnsureCapacity_real_T(f, i1);
-      f_data = f->data;
+      i1 = A->size[0];
+      A->size[0] = loc->size[0];
+      emxEnsureCapacity_real_T(A, i1);
+      xc_data = A->data;
       loop_ub = loc->size[0];
       for (i1 = 0; i1 < loop_ub; i1++) {
-        f_data[i1] = xc_data[((int)loc_data[i1] + A->size[0] * b_i) - 1];
+        xc_data[i1] = A_data[((int)loc_data[i1] + b_A->size[0] * b_i) - 1];
       }
       i1 = BY->size[0];
       BY->size[0] = loc->size[0];
@@ -1997,8 +2002,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i1 = 0; i1 < loop_ub; i1++) {
         BY_data[i1] = cfile2_data[(int)loc_data[i1] - 1];
       }
-      corrcoef(f, BY, dv);
-      b_diffc_data[b_i] = -dv[2];
+      corrcoef(A, BY, dv);
+      b_comb_data[b_i] = -dv[2];
     } else {
       /* 'gkmPWMlasso4:153' else */
       /*  Alternative to corr */
@@ -2006,13 +2011,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       /* 'gkmPWMlasso4:156' correlation_matrix = corrcoef(A(I2,i), cfile2(I2));
        */
       /* 'gkmPWMlasso4:157' corrvec(i) = correlation_matrix(1,2); */
-      i1 = f->size[0];
-      f->size[0] = loc->size[0];
-      emxEnsureCapacity_real_T(f, i1);
-      f_data = f->data;
+      i1 = A->size[0];
+      A->size[0] = loc->size[0];
+      emxEnsureCapacity_real_T(A, i1);
+      xc_data = A->data;
       loop_ub = loc->size[0];
       for (i1 = 0; i1 < loop_ub; i1++) {
-        f_data[i1] = xc_data[((int)loc_data[i1] + A->size[0] * b_i) - 1];
+        xc_data[i1] = A_data[((int)loc_data[i1] + b_A->size[0] * b_i) - 1];
       }
       i1 = BY->size[0];
       BY->size[0] = loc->size[0];
@@ -2022,10 +2027,11 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i1 = 0; i1 < loop_ub; i1++) {
         BY_data[i1] = cfile2_data[(int)loc_data[i1] - 1];
       }
-      corrcoef(f, BY, dv);
-      b_diffc_data[b_i] = dv[2];
+      corrcoef(A, BY, dv);
+      b_comb_data[b_i] = dv[2];
     }
   }
+  emxFree_real_T(&A);
   /* 'gkmPWMlasso4:160' for i = 1:length(motclus) */
   i = motclus->size[0];
   for (b_i = 0; b_i < i; b_i++) {
@@ -2060,68 +2066,69 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     b_eml_find(b_loc, idx);
     matches_data = idx->data;
-    i1 = f->size[0];
-    f->size[0] = idx->size[0];
-    emxEnsureCapacity_real_T(f, i1);
-    f_data = f->data;
+    i1 = negvec->size[0];
+    negvec->size[0] = idx->size[0];
+    emxEnsureCapacity_real_T(negvec, i1);
+    negvec_data = negvec->data;
     loop_ub = idx->size[0];
     for (i1 = 0; i1 < loop_ub; i1++) {
-      f_data[i1] = matches_data[i1];
+      negvec_data[i1] = matches_data[i1];
     }
     /* 'gkmPWMlasso4:163' if length(f) > 1 */
-    if (f->size[0] > 1) {
+    if (negvec->size[0] > 1) {
       /* 'gkmPWMlasso4:164' [~,bb] = sort(abs(corrvec(motclus{i}(b(f)))),
        * 'descend'); */
       i1 = y->size[0] * y->size[1];
       y->size[0] = 1;
-      y->size[1] = f->size[0];
+      y->size[1] = negvec->size[0];
       emxEnsureCapacity_real_T(y, i1);
-      AA_data = y->data;
-      loop_ub = f->size[0];
+      Pweig_data = y->data;
+      loop_ub = negvec->size[0];
       for (i1 = 0; i1 < loop_ub; i1++) {
-        AA_data[i1] =
-            motclus_data[b_i].f1->data[(int)BY_data[(int)f_data[i1] - 1] - 1];
+        Pweig_data[i1] =
+            motclus_data[b_i]
+                .f1->data[(int)BY_data[(int)negvec_data[i1] - 1] - 1];
       }
-      nx = f->size[0];
-      i1 = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i1);
-      negvec_data = negvec->data;
+      nx = negvec->size[0];
+      i1 = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i1);
+      b_indc_data = indc->data;
       for (k = 0; k < nx; k++) {
-        negvec_data[k] = fabs(b_diffc_data[(int)AA_data[k] - 1]);
+        b_indc_data[k] = fabs(b_comb_data[(int)Pweig_data[k] - 1]);
       }
-      sort(negvec, idx);
+      sort(indc, idx);
       matches_data = idx->data;
       /* 'gkmPWMlasso4:165' b(1:length(f)) = b(bb); */
       i1 = y->size[0] * y->size[1];
       y->size[0] = 1;
-      y->size[1] = f->size[0];
+      y->size[1] = negvec->size[0];
       emxEnsureCapacity_real_T(y, i1);
-      AA_data = y->data;
-      loop_ub = f->size[0];
+      Pweig_data = y->data;
+      loop_ub = negvec->size[0];
       for (i1 = 0; i1 < loop_ub; i1++) {
-        AA_data[i1] = BY_data[matches_data[i1] - 1];
+        Pweig_data[i1] = BY_data[matches_data[i1] - 1];
       }
       loop_ub = y->size[1];
       for (i1 = 0; i1 < loop_ub; i1++) {
-        BY_data[i1] = AA_data[i1];
+        BY_data[i1] = Pweig_data[i1];
       }
     }
     /* 'gkmPWMlasso4:167' B(:,i) = A(:,motclus{i}(b(1))); */
     nx = (int)motclus_data[b_i].f1->data[(int)BY_data[0] - 1];
-    loop_ub = A->size[0];
+    loop_ub = b_A->size[0];
     for (i1 = 0; i1 < loop_ub; i1++) {
-      B_data[i1 + B->size[0] * b_i] = xc_data[i1 + A->size[0] * (nx - 1)];
+      B_data[i1 + B->size[0] * b_i] = A_data[i1 + b_A->size[0] * (nx - 1)];
     }
     /* 'gkmPWMlasso4:168' motclus{i} = motclus{i}(b); */
     i1 = y->size[0] * y->size[1];
     y->size[0] = 1;
     y->size[1] = BY->size[0];
     emxEnsureCapacity_real_T(y, i1);
-    AA_data = y->data;
+    Pweig_data = y->data;
     loop_ub = BY->size[0];
     for (i1 = 0; i1 < loop_ub; i1++) {
-      AA_data[i1] = motclus_data[b_i].f1->data[(int)BY_data[i1] - 1];
+      Pweig_data[i1] = motclus_data[b_i].f1->data[(int)BY_data[i1] - 1];
     }
     i1 = motclus_data[b_i].f1->size[0] * motclus_data[b_i].f1->size[1];
     motclus_data[b_i].f1->size[0] = 1;
@@ -2129,52 +2136,51 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     emxEnsureCapacity_real_T(motclus_data[b_i].f1, i1);
     loop_ub = y->size[1];
     for (i1 = 0; i1 < loop_ub; i1++) {
-      motclus_data[b_i].f1->data[i1] = AA_data[i1];
+      motclus_data[b_i].f1->data[i1] = Pweig_data[i1];
     }
     /* 'gkmPWMlasso4:169' Z(i) = zvec(motclus{i}(1)); */
     Z_data[b_i] = normvec_data[(int)motclus_data[b_i].f1->data[0] - 1];
   }
-  emxFree_real_T(&y);
-  emxFree_real_T(&A);
+  emxFree_real_T(&b_A);
   /* 'gkmPWMlasso4:171' f = find(abs(Z)>1); */
   nx = Z->size[0];
-  i = negvec->size[0];
-  negvec->size[0] = Z->size[0];
-  emxEnsureCapacity_real_T(negvec, i);
-  negvec_data = negvec->data;
+  i = indc->size[0];
+  indc->size[0] = Z->size[0];
+  emxEnsureCapacity_real_T(indc, i);
+  b_indc_data = indc->data;
   for (k = 0; k < nx; k++) {
-    negvec_data[k] = fabs(Z_data[k]);
+    b_indc_data[k] = fabs(Z_data[k]);
   }
   i = b_loc->size[0];
-  b_loc->size[0] = negvec->size[0];
+  b_loc->size[0] = indc->size[0];
   emxEnsureCapacity_boolean_T(b_loc, i);
   b_loc_data = b_loc->data;
-  loop_ub = negvec->size[0];
+  loop_ub = indc->size[0];
   for (i = 0; i < loop_ub; i++) {
-    b_loc_data[i] = (negvec_data[i] > 1.0);
+    b_loc_data[i] = (b_indc_data[i] > 1.0);
   }
   b_eml_find(b_loc, idx);
   matches_data = idx->data;
-  i = f->size[0];
-  f->size[0] = idx->size[0];
-  emxEnsureCapacity_real_T(f, i);
-  f_data = f->data;
+  i = negvec->size[0];
+  negvec->size[0] = idx->size[0];
+  emxEnsureCapacity_real_T(negvec, i);
+  negvec_data = negvec->data;
   loop_ub = idx->size[0];
   for (i = 0; i < loop_ub; i++) {
-    f_data[i] = matches_data[i];
+    negvec_data[i] = matches_data[i];
   }
   /* 'gkmPWMlasso4:172' B = B(:,f); */
   nx = B->size[0] - 1;
   i = b_GCmat->size[0] * b_GCmat->size[1];
   b_GCmat->size[0] = B->size[0];
-  b_GCmat->size[1] = f->size[0];
+  b_GCmat->size[1] = negvec->size[0];
   emxEnsureCapacity_real_T(b_GCmat, i);
   normvec_data = b_GCmat->data;
-  loop_ub = f->size[0];
+  loop_ub = negvec->size[0];
   for (i = 0; i < loop_ub; i++) {
     for (i1 = 0; i1 <= nx; i1++) {
       normvec_data[i1 + b_GCmat->size[0] * i] =
-          B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+          B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
     }
   }
   i = B->size[0] * B->size[1];
@@ -2200,9 +2206,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxInit_cell_wrap_1(&tmp_motclus);
   /*  motclus = motclus(f); */
   /* 'gkmPWMlasso4:175' tmp_motclus = cell(length(f),1); */
-  nx = f->size[0];
+  nx = negvec->size[0];
   i = tmp_motclus->size[0];
-  tmp_motclus->size[0] = f->size[0];
+  tmp_motclus->size[0] = negvec->size[0];
   emxEnsureCapacity_cell_wrap_1(tmp_motclus, i);
   tmp_motclus_data = tmp_motclus->data;
   for (i = 0; i < nx; i++) {
@@ -2211,25 +2217,25 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   /* 'gkmPWMlasso4:176' tmp_motclus = coder.nullcopy(tmp_motclus); */
   /* 'gkmPWMlasso4:177' for idx = 1:length(f) */
-  i = f->size[0];
+  i = negvec->size[0];
   for (nx = 0; nx < i; nx++) {
     /* 'gkmPWMlasso4:178' tmp_motclus{idx} = motclus{f(idx)}; */
     i1 = tmp_motclus_data[nx].f1->size[0] * tmp_motclus_data[nx].f1->size[1];
     tmp_motclus_data[nx].f1->size[0] = 1;
     tmp_motclus_data[nx].f1->size[1] =
-        motclus_data[(int)f_data[nx] - 1].f1->size[1];
+        motclus_data[(int)negvec_data[nx] - 1].f1->size[1];
     emxEnsureCapacity_real_T(tmp_motclus_data[nx].f1, i1);
-    loop_ub = motclus_data[(int)f_data[nx] - 1].f1->size[1];
+    loop_ub = motclus_data[(int)negvec_data[nx] - 1].f1->size[1];
     for (i1 = 0; i1 < loop_ub; i1++) {
       tmp_motclus_data[nx].f1->data[i1] =
-          motclus_data[(int)f_data[nx] - 1].f1->data[i1];
+          motclus_data[(int)negvec_data[nx] - 1].f1->data[i1];
     }
   }
   emxInit_cell_wrap_1(&c_motclus);
   /* 'gkmPWMlasso4:180' motclus = cell(length(f),1); */
-  nx = f->size[0];
+  nx = negvec->size[0];
   i = c_motclus->size[0];
-  c_motclus->size[0] = f->size[0];
+  c_motclus->size[0] = negvec->size[0];
   emxEnsureCapacity_cell_wrap_1(c_motclus, i);
   b_motclus_data = c_motclus->data;
   for (i = 0; i < nx; i++) {
@@ -2256,12 +2262,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   /* 'gkmPWMlasso4:185' Z = Z(f); */
   i = BY->size[0];
-  BY->size[0] = f->size[0];
+  BY->size[0] = negvec->size[0];
   emxEnsureCapacity_real_T(BY, i);
   BY_data = BY->data;
-  loop_ub = f->size[0];
+  loop_ub = negvec->size[0];
   for (i = 0; i < loop_ub; i++) {
-    BY_data[i] = Z_data[(int)f_data[i] - 1];
+    BY_data[i] = Z_data[(int)negvec_data[i] - 1];
   }
   i = Z->size[0];
   Z->size[0] = BY->size[0];
@@ -2273,6 +2279,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   /*  clear A AA loc mat GMmat */
   /* 'gkmPWMlasso4:188' if d == 0 */
+  emxInit_real_T(&OLS, 1);
   emxInit_real_T(&BB, 2);
   if (varargin_10 == 0.0) {
     /* 'gkmPWMlasso4:189' fprintf('Running LASSO\n'); */
@@ -2294,10 +2301,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     i = diffc->size[0];
     diffc->size[0] = cfile2->size[0];
     emxEnsureCapacity_real_T(diffc, i);
-    b_diffc_data = diffc->data;
+    b_comb_data = diffc->data;
     loop_ub = cfile2->size[0] - 1;
     for (i = 0; i <= loop_ub; i++) {
-      b_diffc_data[i] = cfile2_data[i];
+      b_comb_data[i] = cfile2_data[i];
     }
     emxInit_real_T(&weigmat, 2);
     lasso_cvmat(comb, diffc, Z->size[0], weigmat, expl_temp_data, comb_size,
@@ -2330,7 +2337,108 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       F.data[i].f1->size[0] = 0;
     }
     /* 'gkmPWMlasso4:195' F = coder.nullcopy(F); */
-    /* 'gkmPWMlasso4:196' for i = 1:length(FitInfo.DF) */
+    /* 'gkmPWMlasso4:197' f = find(weigmat(:,1)~=0); */
+    loop_ub = weigmat->size[0];
+    i = b_loc->size[0];
+    b_loc->size[0] = weigmat->size[0];
+    emxEnsureCapacity_boolean_T(b_loc, i);
+    b_loc_data = b_loc->data;
+    for (i = 0; i < loop_ub; i++) {
+      b_loc_data[i] = (xc_data[i] != 0.0);
+    }
+    b_eml_find(b_loc, idx);
+    matches_data = idx->data;
+    i = negvec->size[0];
+    negvec->size[0] = idx->size[0];
+    emxEnsureCapacity_real_T(negvec, i);
+    negvec_data = negvec->data;
+    loop_ub = idx->size[0];
+    for (i = 0; i < loop_ub; i++) {
+      negvec_data[i] = matches_data[i];
+    }
+    /* 'gkmPWMlasso4:198' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    loop_ub = B->size[0];
+    i = b_GCmat->size[0] * b_GCmat->size[1];
+    b_GCmat->size[0] = B->size[0];
+    b_GCmat->size[1] = negvec->size[0];
+    emxEnsureCapacity_real_T(b_GCmat, i);
+    normvec_data = b_GCmat->data;
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
+      for (i1 = 0; i1 < loop_ub; i1++) {
+        normvec_data[i1 + b_GCmat->size[0] * i] =
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
+      }
+    }
+    loop_ub = B->size[0];
+    i = comb2->size[0] * comb2->size[1];
+    comb2->size[0] = B->size[0];
+    comb2->size[1] = negvec->size[0];
+    emxEnsureCapacity_real_T(comb2, i);
+    b_comb_data = comb2->data;
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
+      for (i1 = 0; i1 < loop_ub; i1++) {
+        b_comb_data[i1 + comb2->size[0] * i] =
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
+      }
+    }
+    b_mtimes(b_GCmat, comb2, comb);
+    loop_ub = B->size[0];
+    i = comb2->size[0] * comb2->size[1];
+    comb2->size[0] = B->size[0];
+    comb2->size[1] = negvec->size[0];
+    emxEnsureCapacity_real_T(comb2, i);
+    b_comb_data = comb2->data;
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
+      for (i1 = 0; i1 < loop_ub; i1++) {
+        b_comb_data[i1 + comb2->size[0] * i] =
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
+      }
+    }
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (cfile2->size[0] == 0)) {
+      i = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      loop_ub = negvec->size[0];
+      for (i = 0; i < loop_ub; i++) {
+        b_indc_data[i] = 0.0;
+      }
+    } else {
+      i = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)negvec->size[0], (blasint)1, (blasint)B->size[0],
+                  1.0, &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
+                  (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                  (blasint)negvec->size[0]);
+    }
+    mpower(comb, comb2);
+    b_comb_data = comb2->data;
+    if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
+        (indc->size[0] == 0)) {
+      i = loc->size[0];
+      loc->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(loc, i);
+    } else {
+      i = loc->size[0];
+      loc->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(loc, i);
+      loc_data = loc->data;
+      cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+                  (blasint)comb2->size[0], (blasint)1, (blasint)comb2->size[1],
+                  1.0, &b_comb_data[0], (blasint)comb2->size[0],
+                  &b_indc_data[0], (blasint)indc->size[0], 0.0, &loc_data[0],
+                  (blasint)comb2->size[0]);
+    }
+    i = OLS->size[0];
+    OLS->size[0] = loc->size[0];
+    emxEnsureCapacity_real_T(OLS, i);
+    /* 'gkmPWMlasso4:200' for i = 1:length(FitInfo.DF) */
     if (a__3_DF_size[1] == 0) {
       lk = 0;
     } else {
@@ -2347,7 +2455,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       i7 = B->size[0];
     }
     for (b_i = 0; b_i < lk; b_i++) {
-      /* 'gkmPWMlasso4:197' f = find(weigmat(:,i)~=0); */
+      /* 'gkmPWMlasso4:201' f = find(weigmat(:,i)~=0); */
       i = b_loc->size[0];
       b_loc->size[0] = i5;
       emxEnsureCapacity_boolean_T(b_loc, i);
@@ -2357,117 +2465,117 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       b_eml_find(b_loc, idx);
       matches_data = idx->data;
-      i = f->size[0];
-      f->size[0] = idx->size[0];
-      emxEnsureCapacity_real_T(f, i);
-      f_data = f->data;
+      i = negvec->size[0];
+      negvec->size[0] = idx->size[0];
+      emxEnsureCapacity_real_T(negvec, i);
+      negvec_data = negvec->data;
       loop_ub = idx->size[0];
       for (i = 0; i < loop_ub; i++) {
-        f_data[i] = matches_data[i];
+        negvec_data[i] = matches_data[i];
       }
-      /* 'gkmPWMlasso4:198' F{i} = f; */
+      /* 'gkmPWMlasso4:202' F{i} = f; */
       i = F.data[b_i].f1->size[0];
-      F.data[b_i].f1->size[0] = f->size[0];
+      F.data[b_i].f1->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(F.data[b_i].f1, i);
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
-        F.data[b_i].f1->data[i] = f_data[i];
+        F.data[b_i].f1->data[i] = negvec_data[i];
       }
-      /* 'gkmPWMlasso4:199' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+      /* 'gkmPWMlasso4:203' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
       i = b_GCmat->size[0] * b_GCmat->size[1];
       b_GCmat->size[0] = e_loop_ub;
-      b_GCmat->size[1] = f->size[0];
+      b_GCmat->size[1] = negvec->size[0];
       emxEnsureCapacity_real_T(b_GCmat, i);
       normvec_data = b_GCmat->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
         for (i1 = 0; i1 < e_loop_ub; i1++) {
           normvec_data[i1 + b_GCmat->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
         }
       }
       i = comb2->size[0] * comb2->size[1];
       comb2->size[0] = f_loop_ub;
-      comb2->size[1] = f->size[0];
+      comb2->size[1] = negvec->size[0];
       emxEnsureCapacity_real_T(comb2, i);
       b_comb_data = comb2->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
         for (i1 = 0; i1 < f_loop_ub; i1++) {
           b_comb_data[i1 + comb2->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
         }
       }
       b_mtimes(b_GCmat, comb2, comb);
       i = comb2->size[0] * comb2->size[1];
       comb2->size[0] = g_loop_ub;
-      comb2->size[1] = f->size[0];
+      comb2->size[1] = negvec->size[0];
       emxEnsureCapacity_real_T(comb2, i);
       b_comb_data = comb2->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
         for (i1 = 0; i1 < g_loop_ub; i1++) {
           b_comb_data[i1 + comb2->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
         }
       }
-      if ((i6 == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
-        i = negvec->size[0];
-        negvec->size[0] = f->size[0];
-        emxEnsureCapacity_real_T(negvec, i);
-        negvec_data = negvec->data;
-        loop_ub = f->size[0];
+      if ((i6 == 0) || (negvec->size[0] == 0) || (cfile2->size[0] == 0)) {
+        i = indc->size[0];
+        indc->size[0] = negvec->size[0];
+        emxEnsureCapacity_real_T(indc, i);
+        b_indc_data = indc->data;
+        loop_ub = negvec->size[0];
         for (i = 0; i < loop_ub; i++) {
-          negvec_data[i] = 0.0;
+          b_indc_data[i] = 0.0;
         }
       } else {
-        i = negvec->size[0];
-        negvec->size[0] = f->size[0];
-        emxEnsureCapacity_real_T(negvec, i);
-        negvec_data = negvec->data;
+        i = indc->size[0];
+        indc->size[0] = negvec->size[0];
+        emxEnsureCapacity_real_T(indc, i);
+        b_indc_data = indc->data;
         cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-                    (blasint)f->size[0], (blasint)1, (blasint)B->size[0], 1.0,
-                    &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
-                    (blasint)cfile2->size[0], 0.0, &negvec_data[0],
-                    (blasint)f->size[0]);
+                    (blasint)negvec->size[0], (blasint)1, (blasint)B->size[0],
+                    1.0, &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
+                    (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                    (blasint)negvec->size[0]);
       }
       mpower(comb, comb2);
       b_comb_data = comb2->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-          (negvec->size[0] == 0)) {
-        i = diffc->size[0];
-        diffc->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(diffc, i);
-        b_diffc_data = diffc->data;
+          (indc->size[0] == 0)) {
+        i = OLS->size[0];
+        OLS->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(OLS, i);
+        OLS_data = OLS->data;
         loop_ub = comb2->size[0];
         for (i = 0; i < loop_ub; i++) {
-          b_diffc_data[i] = 0.0;
+          OLS_data[i] = 0.0;
         }
       } else {
-        i = diffc->size[0];
-        diffc->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(diffc, i);
-        b_diffc_data = diffc->data;
+        i = OLS->size[0];
+        OLS->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(OLS, i);
+        OLS_data = OLS->data;
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
-            (blasint)comb2->size[0], &negvec_data[0], (blasint)negvec->size[0],
-            0.0, &b_diffc_data[0], (blasint)comb2->size[0]);
+            (blasint)comb2->size[0], &b_indc_data[0], (blasint)indc->size[0],
+            0.0, &OLS_data[0], (blasint)comb2->size[0]);
       }
-      /* 'gkmPWMlasso4:200' res = B(:,f)*OLS; */
+      /* 'gkmPWMlasso4:204' res = B(:,f)*OLS; */
       i = comb2->size[0] * comb2->size[1];
       comb2->size[0] = h_loop_ub;
-      comb2->size[1] = f->size[0];
+      comb2->size[1] = negvec->size[0];
       emxEnsureCapacity_real_T(comb2, i);
       b_comb_data = comb2->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
         for (i1 = 0; i1 < h_loop_ub; i1++) {
           b_comb_data[i1 + comb2->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
         }
       }
-      if ((i7 == 0) || (f->size[0] == 0) || (diffc->size[0] == 0)) {
+      if ((i7 == 0) || (negvec->size[0] == 0) || (OLS->size[0] == 0)) {
         loop_ub = B->size[0];
         i = loc->size[0];
         loc->size[0] = B->size[0];
@@ -2482,27 +2590,27 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         emxEnsureCapacity_real_T(loc, i);
         loc_data = loc->data;
         cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-                    (blasint)B->size[0], (blasint)1, (blasint)f->size[0], 1.0,
-                    &b_comb_data[0], (blasint)B->size[0], &b_diffc_data[0],
-                    (blasint)diffc->size[0], 0.0, &loc_data[0],
+                    (blasint)B->size[0], (blasint)1, (blasint)negvec->size[0],
+                    1.0, &b_comb_data[0], (blasint)B->size[0], &OLS_data[0],
+                    (blasint)OLS->size[0], 0.0, &loc_data[0],
                     (blasint)B->size[0]);
       }
-      /* 'gkmPWMlasso4:201' if sum(abs(res)>0) */
+      /* 'gkmPWMlasso4:205' if sum(abs(res)>0) */
       nx = loc->size[0];
-      i = negvec->size[0];
-      negvec->size[0] = loc->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = loc->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       for (k = 0; k < nx; k++) {
-        negvec_data[k] = fabs(loc_data[k]);
+        b_indc_data[k] = fabs(loc_data[k]);
       }
       i = b_loc->size[0];
-      b_loc->size[0] = negvec->size[0];
+      b_loc->size[0] = indc->size[0];
       emxEnsureCapacity_boolean_T(b_loc, i);
       b_loc_data = b_loc->data;
-      loop_ub = negvec->size[0];
+      loop_ub = indc->size[0];
       for (i = 0; i < loop_ub; i++) {
-        b_loc_data[i] = (negvec_data[i] > 0.0);
+        b_loc_data[i] = (b_indc_data[i] > 0.0);
       }
       nx = b_loc->size[0];
       if (b_loc->size[0] == 0) {
@@ -2514,7 +2622,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         }
       }
       if (indc_size != 0) {
-        /* 'gkmPWMlasso4:202' MSE(i) = (cfile2'*res)^2/(res'*res)/cnorm; */
+        /* 'gkmPWMlasso4:206' MSE(i) = (cfile2'*res)^2/(res'*res)/cnorm; */
         if (cfile2->size[0] < 1) {
           a = 0.0;
         } else {
@@ -2532,7 +2640,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     emxFree_real_T(&weigmat);
     emxInit_cell_wrap_3_1x19(&FF);
-    /* 'gkmPWMlasso4:205' FF = cell(1,length(MSE)-1); */
+    /* 'gkmPWMlasso4:209' FF = cell(1,length(MSE)-1); */
     nx = u1 - 1;
     i = FF.size[0] * FF.size[1];
     FF.size[0] = 1;
@@ -2541,37 +2649,37 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < nx; i++) {
       FF.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:206' FF = coder.nullcopy(FF); */
-    /* 'gkmPWMlasso4:207' MSE2 = zeros(1,length(MSE)-1); */
+    /* 'gkmPWMlasso4:210' FF = coder.nullcopy(FF); */
+    /* 'gkmPWMlasso4:211' MSE2 = zeros(1,length(MSE)-1); */
     MSE2_size[0] = 1;
     if (0 <= nx - 1) {
       memset(&MSE2_data[0], 0, nx * sizeof(double));
     }
-    /* 'gkmPWMlasso4:208' count = 1; */
+    /* 'gkmPWMlasso4:212' count = 1; */
     lk = 0;
-    /* 'gkmPWMlasso4:209' for i = 1:length(MSE)-1 */
+    /* 'gkmPWMlasso4:213' for i = 1:length(MSE)-1 */
     for (b_i = 0; b_i <= u1 - 2; b_i++) {
-      /* 'gkmPWMlasso4:210' if numel(setdiff(F{i}, F{i+1})) > 0 */
+      /* 'gkmPWMlasso4:214' if numel(setdiff(F{i}, F{i+1})) > 0 */
       b_do_vectors(F.data[b_i].f1, F.data[b_i + 1].f1, loc, idx, &nx);
       if (loc->size[0] > 0) {
-        /* 'gkmPWMlasso4:211' FF{count} = setdiff(F{i}, F{i+1}); */
+        /* 'gkmPWMlasso4:215' FF{count} = setdiff(F{i}, F{i+1}); */
         b_do_vectors(F.data[b_i].f1, F.data[b_i + 1].f1, FF.data[lk].f1, idx,
                      &nx);
-        /* 'gkmPWMlasso4:212' MSE2(count) = (MSE(i)-MSE(i+1)); */
+        /* 'gkmPWMlasso4:216' MSE2(count) = (MSE(i)-MSE(i+1)); */
         MSE2_data[lk] = MSE_data[b_i] - MSE_data[b_i + 1];
-        /* 'gkmPWMlasso4:213' count = count +1; */
+        /* 'gkmPWMlasso4:217' count = count +1; */
         lk++;
       }
     }
     emxFree_cell_wrap_3_20(&F);
     emxInit_cell_wrap_3_1x19(&newFF);
-    /* 'gkmPWMlasso4:216' MSE2 = MSE2(1:count-1); */
+    /* 'gkmPWMlasso4:220' MSE2 = MSE2(1:count-1); */
     if (1 > lk) {
       MSE2_size[1] = 0;
     } else {
       MSE2_size[1] = lk;
     }
-    /* 'gkmPWMlasso4:217' newFF = cell(1,count-1); */
+    /* 'gkmPWMlasso4:221' newFF = cell(1,count-1); */
     i = newFF.size[0] * newFF.size[1];
     newFF.size[0] = 1;
     newFF.size[1] = lk;
@@ -2579,10 +2687,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < lk; i++) {
       newFF.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:218' newFF = coder.nullcopy(newFF); */
-    /* 'gkmPWMlasso4:219' for idx = 1:count-1 */
+    /* 'gkmPWMlasso4:222' newFF = coder.nullcopy(newFF); */
+    /* 'gkmPWMlasso4:223' for idx = 1:count-1 */
     for (nx = 0; nx < lk; nx++) {
-      /* 'gkmPWMlasso4:220' newFF{idx} = FF{idx}; */
+      /* 'gkmPWMlasso4:224' newFF{idx} = FF{idx}; */
       loop_ub = FF.data[nx].f1->size[0];
       i = newFF.data[nx].f1->size[0];
       newFF.data[nx].f1->size[0] = FF.data[nx].f1->size[0];
@@ -2592,7 +2700,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     emxInit_cell_wrap_3_1x19(&b_FF);
-    /* 'gkmPWMlasso4:222' FF = cell(1,count-1); */
+    /* 'gkmPWMlasso4:226' FF = cell(1,count-1); */
     i = b_FF.size[0] * b_FF.size[1];
     b_FF.size[0] = 1;
     b_FF.size[1] = lk;
@@ -2600,15 +2708,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < lk; i++) {
       b_FF.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:223' FF = coder.nullcopy(FF); */
+    /* 'gkmPWMlasso4:227' FF = coder.nullcopy(FF); */
     i = FF.size[0] * FF.size[1];
     FF.size[0] = 1;
     FF.size[1] = b_FF.size[1];
     emxEnsureCapacity_cell_wrap_31(FF.data, FF.size, i);
-    /* 'gkmPWMlasso4:224' for idx = 1:count-1 */
+    /* 'gkmPWMlasso4:228' for idx = 1:count-1 */
     emxFree_cell_wrap_3_1x19(&b_FF);
     for (nx = 0; nx < lk; nx++) {
-      /* 'gkmPWMlasso4:225' FF{idx} = newFF{idx}; */
+      /* 'gkmPWMlasso4:229' FF{idx} = newFF{idx}; */
       loop_ub = newFF.data[nx].f1->size[0];
       i = FF.data[nx].f1->size[0];
       FF.data[nx].f1->size[0] = newFF.data[nx].f1->size[0];
@@ -2617,32 +2725,32 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         FF.data[nx].f1->data[i] = newFF.data[nx].f1->data[i];
       }
     }
-    /* 'gkmPWMlasso4:228' res = B*((B.'*B)^-1*(B.'*cfile2)); */
+    /* 'gkmPWMlasso4:232' res = B*((B.'*B)^-1*(B.'*cfile2)); */
     b_mtimes(B, B, comb);
     if ((B->size[0] == 0) || (B->size[1] == 0) || (cfile2->size[0] == 0)) {
-      i = negvec->size[0];
-      negvec->size[0] = B->size[1];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = B->size[1];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       loop_ub = B->size[1];
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = B->size[1];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = B->size[1];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)B->size[1],
                   (blasint)1, (blasint)B->size[0], 1.0, &B_data[0],
                   (blasint)B->size[0], &cfile2_data[0],
-                  (blasint)cfile2->size[0], 0.0, &negvec_data[0],
+                  (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
                   (blasint)B->size[1]);
     }
     mpower(comb, comb2);
     b_comb_data = comb2->data;
     if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-        (negvec->size[0] == 0)) {
+        (indc->size[0] == 0)) {
       i = BY->size[0];
       BY->size[0] = comb2->size[0];
       emxEnsureCapacity_real_T(BY, i);
@@ -2659,7 +2767,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)comb2->size[0], (blasint)1, (blasint)comb2->size[1],
                   1.0, &b_comb_data[0], (blasint)comb2->size[0],
-                  &negvec_data[0], (blasint)negvec->size[0], 0.0, &BY_data[0],
+                  &b_indc_data[0], (blasint)indc->size[0], 0.0, &BY_data[0],
                   (blasint)comb2->size[0]);
     }
     if ((B->size[0] == 0) || (B->size[1] == 0) || (BY->size[0] == 0)) {
@@ -2681,7 +2789,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   &B_data[0], (blasint)B->size[0], &BY_data[0],
                   (blasint)BY->size[0], 0.0, &loc_data[0], (blasint)B->size[0]);
     }
-    /* 'gkmPWMlasso4:229' csm = (cfile2'*res)^2/(res'*res)/cnorm; */
+    /* 'gkmPWMlasso4:233' csm = (cfile2'*res)^2/(res'*res)/cnorm; */
     if (cfile2->size[0] < 1) {
       a = 0.0;
     } else {
@@ -2695,16 +2803,16 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                       &loc_data[0], (blasint)1);
     }
     GCneg1 = a * a / b1 / GCneg1;
-    /* 'gkmPWMlasso4:230' [a,b] = sort(MSE2,'descend'); */
+    /* 'gkmPWMlasso4:234' [a,b] = sort(MSE2,'descend'); */
     c_sort(MSE2_data, MSE2_size, iidx_data, comb_size);
-    /* 'gkmPWMlasso4:231' cs = cumsum(a); */
+    /* 'gkmPWMlasso4:235' cs = cumsum(a); */
     useConstantDim(MSE2_data, MSE2_size);
-    /* 'gkmPWMlasso4:232' cs = cs/csm; */
+    /* 'gkmPWMlasso4:236' cs = cs/csm; */
     loop_ub = MSE2_size[1] - 1;
     for (i = 0; i <= loop_ub; i++) {
       MSE2_data[i] /= GCneg1;
     }
-    /* 'gkmPWMlasso4:233' f = find(cs>0.9); */
+    /* 'gkmPWMlasso4:237' f = find(cs>0.9); */
     b_MSE2_size[0] = 1;
     b_MSE2_size[1] = MSE2_size[1];
     loop_ub = MSE2_size[1];
@@ -2718,204 +2826,248 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     b_MSE2_data.canFreeData = false;
     eml_find(&b_MSE2_data, match_out);
     match_out_data = match_out->data;
+    nx = match_out->size[1];
     loop_ub = match_out->size[1];
     for (i = 0; i < loop_ub; i++) {
-      b_f_data[i] = match_out_data[i];
+      f_data[i] = match_out_data[i];
     }
-    emxInit_cell_wrap_3_1x19(&b_newFF);
-    /*  FF = FF(b(1:f(1))); */
-    /* 'gkmPWMlasso4:235' endIdx = f(1); */
-    /* 'gkmPWMlasso4:236' newFF = cell(1, endIdx); */
-    nx = b_f_data[0];
-    i = b_newFF.size[0] * b_newFF.size[1];
-    b_newFF.size[0] = 1;
-    b_newFF.size[1] = b_f_data[0];
-    emxEnsureCapacity_cell_wrap_31(b_newFF.data, b_newFF.size, i);
-    for (i = 0; i < nx; i++) {
-      b_newFF.data[i].f1->size[0] = 0;
-    }
-    /* 'gkmPWMlasso4:237' newFF = coder.nullcopy(newFF); */
-    i = newFF.size[0] * newFF.size[1];
-    newFF.size[0] = 1;
-    newFF.size[1] = b_newFF.size[1];
-    emxEnsureCapacity_cell_wrap_31(newFF.data, newFF.size, i);
-    /* 'gkmPWMlasso4:238' for idx = 1:endIdx */
-    i = b_f_data[0];
-    emxFree_cell_wrap_3_1x19(&b_newFF);
-    for (nx = 0; nx < i; nx++) {
-      /* 'gkmPWMlasso4:239' newFF{idx} = FF{b(idx)}; */
-      i1 = newFF.data[nx].f1->size[0];
-      i2 = iidx_data[nx];
-      newFF.data[nx].f1->size[0] = FF.data[i2 - 1].f1->size[0];
-      emxEnsureCapacity_real_T(newFF.data[nx].f1, i1);
-      loop_ub = FF.data[i2 - 1].f1->size[0];
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        newFF.data[nx].f1->data[i1] = FF.data[iidx_data[nx] - 1].f1->data[i1];
+    /* 'gkmPWMlasso4:239' if isempty(f) */
+    emxInit_real_T(&f, 2);
+    if (nx == 0) {
+      /* 'gkmPWMlasso4:240' f = 1:length(OLS); */
+      if (OLS->size[0] < 1) {
+        y->size[0] = 1;
+        y->size[1] = 0;
+      } else {
+        i = y->size[0] * y->size[1];
+        y->size[0] = 1;
+        y->size[1] = OLS->size[0];
+        emxEnsureCapacity_real_T(y, i);
+        Pweig_data = y->data;
+        loop_ub = OLS->size[0] - 1;
+        for (i = 0; i <= loop_ub; i++) {
+          Pweig_data[i] = (double)i + 1.0;
+        }
       }
-    }
-    emxFree_cell_wrap_3_1x19(&FF);
-    /* 'gkmPWMlasso4:241' FF = newFF; */
-    /* 'gkmPWMlasso4:243' f = []; */
-    f->size[0] = 0;
-    /* 'gkmPWMlasso4:244' for i = 1:length(FF) */
-    i = newFF.size[1];
-    for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:245' f = [f;FF{i}]; */
-      i1 = f->size[0];
-      loop_ub = newFF.data[b_i].f1->size[0];
-      i2 = f->size[0];
-      f->size[0] += newFF.data[b_i].f1->size[0];
-      emxEnsureCapacity_real_T(f, i2);
-      f_data = f->data;
-      for (i2 = 0; i2 < loop_ub; i2++) {
-        f_data[i1 + i2] = newFF.data[b_i].f1->data[i2];
+      i = f->size[0] * f->size[1];
+      f->size[0] = 1;
+      f->size[1] = y->size[1];
+      emxEnsureCapacity_real_T(f, i);
+      A_data = f->data;
+      loop_ub = y->size[1];
+      for (i = 0; i < loop_ub; i++) {
+        A_data[i] = Pweig_data[i];
+      }
+    } else {
+      emxInit_cell_wrap_3_1x19(&b_newFF);
+      /* 'gkmPWMlasso4:241' else */
+      /*  FF = FF(b(1:f(1))); */
+      /* 'gkmPWMlasso4:243' endIdx = f(1); */
+      /* 'gkmPWMlasso4:244' newFF = cell(1, endIdx); */
+      nx = f_data[0];
+      i = b_newFF.size[0] * b_newFF.size[1];
+      b_newFF.size[0] = 1;
+      b_newFF.size[1] = f_data[0];
+      emxEnsureCapacity_cell_wrap_31(b_newFF.data, b_newFF.size, i);
+      for (i = 0; i < nx; i++) {
+        b_newFF.data[i].f1->size[0] = 0;
+      }
+      /* 'gkmPWMlasso4:245' newFF = coder.nullcopy(newFF); */
+      i = newFF.size[0] * newFF.size[1];
+      newFF.size[0] = 1;
+      newFF.size[1] = b_newFF.size[1];
+      emxEnsureCapacity_cell_wrap_31(newFF.data, newFF.size, i);
+      /* 'gkmPWMlasso4:246' for idx = 1:endIdx */
+      i = f_data[0];
+      emxFree_cell_wrap_3_1x19(&b_newFF);
+      for (nx = 0; nx < i; nx++) {
+        /* 'gkmPWMlasso4:247' newFF{idx} = FF{b(idx)}; */
+        i1 = newFF.data[nx].f1->size[0];
+        i2 = iidx_data[nx];
+        newFF.data[nx].f1->size[0] = FF.data[i2 - 1].f1->size[0];
+        emxEnsureCapacity_real_T(newFF.data[nx].f1, i1);
+        loop_ub = FF.data[i2 - 1].f1->size[0];
+        for (i1 = 0; i1 < loop_ub; i1++) {
+          newFF.data[nx].f1->data[i1] = FF.data[iidx_data[nx] - 1].f1->data[i1];
+        }
+      }
+      /* 'gkmPWMlasso4:249' FF = newFF; */
+      /* 'gkmPWMlasso4:251' f = []; */
+      negvec->size[0] = 0;
+      /* 'gkmPWMlasso4:252' for i = 1:length(FF) */
+      i = newFF.size[1];
+      for (b_i = 0; b_i < i; b_i++) {
+        /* 'gkmPWMlasso4:253' f = [f;FF{i}]; */
+        i1 = negvec->size[0];
+        loop_ub = newFF.data[b_i].f1->size[0];
+        i2 = negvec->size[0];
+        negvec->size[0] += newFF.data[b_i].f1->size[0];
+        emxEnsureCapacity_real_T(negvec, i2);
+        negvec_data = negvec->data;
+        for (i2 = 0; i2 < loop_ub; i2++) {
+          negvec_data[i1 + i2] = newFF.data[b_i].f1->data[i2];
+        }
+      }
+      /* 'gkmPWMlasso4:255' f=unique(f); */
+      unique_vector(negvec, loc);
+      loc_data = loc->data;
+      i = f->size[0] * f->size[1];
+      f->size[0] = loc->size[0];
+      f->size[1] = 1;
+      emxEnsureCapacity_real_T(f, i);
+      A_data = f->data;
+      loop_ub = loc->size[0];
+      for (i = 0; i < loop_ub; i++) {
+        A_data[i] = loc_data[i];
       }
     }
     emxFree_cell_wrap_3_1x19(&newFF);
-    /* 'gkmPWMlasso4:247' f=unique(f); */
-    i = diffc->size[0];
-    diffc->size[0] = f->size[0];
-    emxEnsureCapacity_real_T(diffc, i);
-    b_diffc_data = diffc->data;
-    loop_ub = f->size[0] - 1;
-    for (i = 0; i <= loop_ub; i++) {
-      b_diffc_data[i] = f_data[i];
-    }
-    unique_vector(diffc, f);
-    f_data = f->data;
+    emxFree_cell_wrap_3_1x19(&FF);
     /* f = find(weigmat(:,1)~=0); */
-    /* 'gkmPWMlasso4:249' F = length(f); */
-    /* 'gkmPWMlasso4:250' fprintf('Selecting top motifs\n'); */
+    /* 'gkmPWMlasso4:260' F = length(f); */
+    /* 'gkmPWMlasso4:261' fprintf('Selecting top motifs\n'); */
     printf("Selecting top motifs\n");
     fflush(stdout);
-    /* 'gkmPWMlasso4:251' ind = true; */
+    /* 'gkmPWMlasso4:262' ind = true; */
     empty_non_axis_sizes = true;
-    /* 'gkmPWMlasso4:252' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    /* 'gkmPWMlasso4:263' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    nx = f->size[0] * f->size[1];
+    lk = f->size[0] * f->size[1];
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = nx;
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
     for (i = 0; i < nx; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = lk;
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    for (i = 0; i < lk; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
     b_mtimes(b_GCmat, comb2, comb);
+    nx = f->size[0] * f->size[1];
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = nx;
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
     for (i = 0; i < nx; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
-      i = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
-      loop_ub = f->size[0];
+    if ((B->size[0] == 0) || (f->size[0] * f->size[1] == 0) ||
+        (cfile2->size[0] == 0)) {
+      i = indc->size[0];
+      indc->size[0] = f->size[0] * f->size[1];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      loop_ub = f->size[0] * f->size[1];
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
-      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)f->size[0],
-                  (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
+      i = indc->size[0];
+      indc->size[0] = f->size[0] * f->size[1];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)(f->size[0] * f->size[1]), (blasint)1,
+                  (blasint)B->size[0], 1.0, &b_comb_data[0],
                   (blasint)B->size[0], &cfile2_data[0],
-                  (blasint)cfile2->size[0], 0.0, &negvec_data[0],
-                  (blasint)f->size[0]);
+                  (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                  (blasint)(f->size[0] * f->size[1]));
     }
     mpower(comb, comb2);
     b_comb_data = comb2->data;
     if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-        (negvec->size[0] == 0)) {
-      i = diffc->size[0];
-      diffc->size[0] = comb2->size[0];
-      emxEnsureCapacity_real_T(diffc, i);
-      b_diffc_data = diffc->data;
+        (indc->size[0] == 0)) {
+      i = OLS->size[0];
+      OLS->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(OLS, i);
+      OLS_data = OLS->data;
       loop_ub = comb2->size[0];
       for (i = 0; i < loop_ub; i++) {
-        b_diffc_data[i] = 0.0;
+        OLS_data[i] = 0.0;
       }
     } else {
-      i = diffc->size[0];
-      diffc->size[0] = comb2->size[0];
-      emxEnsureCapacity_real_T(diffc, i);
-      b_diffc_data = diffc->data;
+      i = OLS->size[0];
+      OLS->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(OLS, i);
+      OLS_data = OLS->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)comb2->size[0], (blasint)1, (blasint)comb2->size[1],
                   1.0, &b_comb_data[0], (blasint)comb2->size[0],
-                  &negvec_data[0], (blasint)negvec->size[0], 0.0,
-                  &b_diffc_data[0], (blasint)comb2->size[0]);
+                  &b_indc_data[0], (blasint)indc->size[0], 0.0, &OLS_data[0],
+                  (blasint)comb2->size[0]);
     }
-    /* 'gkmPWMlasso4:253' Pweig = Z(f); */
-    i = indc->size[0];
-    indc->size[0] = f->size[0];
-    emxEnsureCapacity_real_T(indc, i);
-    b_indc_data = indc->data;
-    loop_ub = f->size[0];
+    emxInit_real_T(&Pweig, 2);
+    /* 'gkmPWMlasso4:264' Pweig = Z(f); */
+    i = Pweig->size[0] * Pweig->size[1];
+    Pweig->size[0] = f->size[0];
+    Pweig->size[1] = f->size[1];
+    emxEnsureCapacity_real_T(Pweig, i);
+    Pweig_data = Pweig->data;
+    loop_ub = f->size[0] * f->size[1];
     for (i = 0; i < loop_ub; i++) {
-      b_indc_data[i] = Z_data[(int)f_data[i] - 1];
+      Pweig_data[i] = Z_data[(int)A_data[i] - 1];
     }
-    /* 'gkmPWMlasso4:254' while ind */
+    /* 'gkmPWMlasso4:265' while ind */
     while (empty_non_axis_sizes) {
-      /* 'gkmPWMlasso4:255' ff = []; */
+      /* 'gkmPWMlasso4:266' ff = []; */
       loc->size[0] = 0;
-      /* 'gkmPWMlasso4:256' for i = 1:length(f) */
-      i = f->size[0];
-      for (b_i = 0; b_i < i; b_i++) {
-        /* 'gkmPWMlasso4:257' if sign(OLS(i)) ~= sign(Pweig(i)) */
-        b1 = b_diffc_data[b_i];
-        if (b_diffc_data[b_i] < 0.0) {
+      /* 'gkmPWMlasso4:267' for i = 1:length(f) */
+      if ((f->size[0] == 0) || (f->size[1] == 0)) {
+        u1 = 0;
+      } else {
+        nx = f->size[0];
+        u1 = f->size[1];
+        if (nx >= u1) {
+          u1 = nx;
+        }
+      }
+      for (b_i = 0; b_i < u1; b_i++) {
+        /* 'gkmPWMlasso4:268' if sign(OLS(i)) ~= sign(Pweig(i)) */
+        b1 = OLS_data[b_i];
+        if (OLS_data[b_i] < 0.0) {
           b1 = -1.0;
-        } else if (b_diffc_data[b_i] > 0.0) {
+        } else if (OLS_data[b_i] > 0.0) {
           b1 = 1.0;
         }
-        GCneg1 = b_indc_data[b_i];
-        if (b_indc_data[b_i] < 0.0) {
+        GCneg1 = Pweig_data[b_i];
+        if (Pweig_data[b_i] < 0.0) {
           GCneg1 = -1.0;
-        } else if (b_indc_data[b_i] > 0.0) {
+        } else if (Pweig_data[b_i] > 0.0) {
           GCneg1 = 1.0;
         }
         if (b1 != GCneg1) {
-          /* 'gkmPWMlasso4:258' ff = [ff;i]; */
+          /* 'gkmPWMlasso4:269' ff = [ff;i]; */
+          i = loc->size[0];
           i1 = loc->size[0];
-          i2 = loc->size[0];
           loc->size[0]++;
-          emxEnsureCapacity_real_T(loc, i2);
+          emxEnsureCapacity_real_T(loc, i1);
           loc_data = loc->data;
-          loc_data[i1] = (double)b_i + 1.0;
+          loc_data[i] = (double)b_i + 1.0;
         }
       }
-      /* 'gkmPWMlasso4:261' if length(ff) > 0 */
+      /* 'gkmPWMlasso4:272' if length(ff) > 0 */
       if (loc->size[0] > 0) {
-        /* 'gkmPWMlasso4:262' f(ff) = []; */
+        /* 'gkmPWMlasso4:273' f(ff) = []; */
         i = idx->size[0];
         idx->size[0] = loc->size[0];
         emxEnsureCapacity_int32_T(idx, i);
@@ -2925,300 +3077,326 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           matches_data[i] = (int)loc_data[i];
         }
         b_nullAssignment(f, idx);
-        f_data = f->data;
-        /* 'gkmPWMlasso4:263' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+        A_data = f->data;
+        /* 'gkmPWMlasso4:274' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+        nx = f->size[0] * f->size[1];
+        lk = f->size[0] * f->size[1];
         loop_ub = B->size[0];
         i = b_GCmat->size[0] * b_GCmat->size[1];
         b_GCmat->size[0] = B->size[0];
-        b_GCmat->size[1] = f->size[0];
+        b_GCmat->size[1] = nx;
         emxEnsureCapacity_real_T(b_GCmat, i);
         normvec_data = b_GCmat->data;
-        nx = f->size[0];
-        i = comb2->size[0] * comb2->size[1];
-        comb2->size[0] = B->size[0];
-        comb2->size[1] = f->size[0];
-        emxEnsureCapacity_real_T(comb2, i);
-        b_comb_data = comb2->data;
         for (i = 0; i < nx; i++) {
           for (i1 = 0; i1 < loop_ub; i1++) {
-            GCneg1 = B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
-            normvec_data[i1 + b_GCmat->size[0] * i] = GCneg1;
-            b_comb_data[i1 + comb2->size[0] * i] = GCneg1;
+            normvec_data[i1 + b_GCmat->size[0] * i] =
+                B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
           }
         }
-        b_mtimes(b_GCmat, comb2, comb);
         loop_ub = B->size[0];
         i = comb2->size[0] * comb2->size[1];
         comb2->size[0] = B->size[0];
-        comb2->size[1] = f->size[0];
+        comb2->size[1] = lk;
         emxEnsureCapacity_real_T(comb2, i);
         b_comb_data = comb2->data;
-        nx = f->size[0];
+        for (i = 0; i < lk; i++) {
+          for (i1 = 0; i1 < loop_ub; i1++) {
+            b_comb_data[i1 + comb2->size[0] * i] =
+                B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
+          }
+        }
+        b_mtimes(b_GCmat, comb2, comb);
+        nx = f->size[0] * f->size[1];
+        loop_ub = B->size[0];
+        i = comb2->size[0] * comb2->size[1];
+        comb2->size[0] = B->size[0];
+        comb2->size[1] = nx;
+        emxEnsureCapacity_real_T(comb2, i);
+        b_comb_data = comb2->data;
         for (i = 0; i < nx; i++) {
           for (i1 = 0; i1 < loop_ub; i1++) {
             b_comb_data[i1 + comb2->size[0] * i] =
-                B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+                B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
           }
         }
-        if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
-          i = negvec->size[0];
-          negvec->size[0] = f->size[0];
-          emxEnsureCapacity_real_T(negvec, i);
-          negvec_data = negvec->data;
-          loop_ub = f->size[0];
+        if ((B->size[0] == 0) || (f->size[0] * f->size[1] == 0) ||
+            (cfile2->size[0] == 0)) {
+          i = indc->size[0];
+          indc->size[0] = f->size[0] * f->size[1];
+          emxEnsureCapacity_real_T(indc, i);
+          b_indc_data = indc->data;
+          loop_ub = f->size[0] * f->size[1];
           for (i = 0; i < loop_ub; i++) {
-            negvec_data[i] = 0.0;
+            b_indc_data[i] = 0.0;
           }
         } else {
-          i = negvec->size[0];
-          negvec->size[0] = f->size[0];
-          emxEnsureCapacity_real_T(negvec, i);
-          negvec_data = negvec->data;
+          i = indc->size[0];
+          indc->size[0] = f->size[0] * f->size[1];
+          emxEnsureCapacity_real_T(indc, i);
+          b_indc_data = indc->data;
           cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-                      (blasint)f->size[0], (blasint)1, (blasint)B->size[0], 1.0,
-                      &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
-                      (blasint)cfile2->size[0], 0.0, &negvec_data[0],
-                      (blasint)f->size[0]);
+                      (blasint)(f->size[0] * f->size[1]), (blasint)1,
+                      (blasint)B->size[0], 1.0, &b_comb_data[0],
+                      (blasint)B->size[0], &cfile2_data[0],
+                      (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                      (blasint)(f->size[0] * f->size[1]));
         }
         mpower(comb, comb2);
         b_comb_data = comb2->data;
         if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-            (negvec->size[0] == 0)) {
-          i = diffc->size[0];
-          diffc->size[0] = comb2->size[0];
-          emxEnsureCapacity_real_T(diffc, i);
-          b_diffc_data = diffc->data;
+            (indc->size[0] == 0)) {
+          i = OLS->size[0];
+          OLS->size[0] = comb2->size[0];
+          emxEnsureCapacity_real_T(OLS, i);
+          OLS_data = OLS->data;
           loop_ub = comb2->size[0];
           for (i = 0; i < loop_ub; i++) {
-            b_diffc_data[i] = 0.0;
+            OLS_data[i] = 0.0;
           }
         } else {
-          i = diffc->size[0];
-          diffc->size[0] = comb2->size[0];
-          emxEnsureCapacity_real_T(diffc, i);
-          b_diffc_data = diffc->data;
+          i = OLS->size[0];
+          OLS->size[0] = comb2->size[0];
+          emxEnsureCapacity_real_T(OLS, i);
+          OLS_data = OLS->data;
           cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                       (blasint)comb2->size[0], (blasint)1,
                       (blasint)comb2->size[1], 1.0, &b_comb_data[0],
-                      (blasint)comb2->size[0], &negvec_data[0],
-                      (blasint)negvec->size[0], 0.0, &b_diffc_data[0],
+                      (blasint)comb2->size[0], &b_indc_data[0],
+                      (blasint)indc->size[0], 0.0, &OLS_data[0],
                       (blasint)comb2->size[0]);
         }
-        /* 'gkmPWMlasso4:264' Pweig = Z(f); */
-        i = indc->size[0];
-        indc->size[0] = f->size[0];
-        emxEnsureCapacity_real_T(indc, i);
-        b_indc_data = indc->data;
-        loop_ub = f->size[0];
+        /* 'gkmPWMlasso4:275' Pweig = Z(f); */
+        i = Pweig->size[0] * Pweig->size[1];
+        Pweig->size[0] = f->size[0];
+        Pweig->size[1] = f->size[1];
+        emxEnsureCapacity_real_T(Pweig, i);
+        Pweig_data = Pweig->data;
+        loop_ub = f->size[0] * f->size[1];
         for (i = 0; i < loop_ub; i++) {
-          b_indc_data[i] = Z_data[(int)f_data[i] - 1];
+          Pweig_data[i] = Z_data[(int)A_data[i] - 1];
         }
       } else {
-        /* 'gkmPWMlasso4:265' else */
-        /* 'gkmPWMlasso4:266' ind = false; */
+        /* 'gkmPWMlasso4:276' else */
+        /* 'gkmPWMlasso4:277' ind = false; */
         empty_non_axis_sizes = false;
       }
     }
-    /* 'gkmPWMlasso4:269' BB = B(:,f); */
+    /* 'gkmPWMlasso4:280' BB = B(:,f); */
+    nx = f->size[0] * f->size[1];
     loop_ub = B->size[0];
     i = BB->size[0] * BB->size[1];
     BB->size[0] = B->size[0];
-    BB->size[1] = f->size[0];
+    BB->size[1] = nx;
     emxEnsureCapacity_real_T(BB, i);
     AA_data = BB->data;
-    nx = f->size[0];
     for (i = 0; i < nx; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         AA_data[i1 + BB->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
-    /* 'gkmPWMlasso4:270' BX = B(:,f)'*B(:,f); */
+    /* 'gkmPWMlasso4:281' BX = B(:,f)'*B(:,f); */
+    nx = f->size[0] * f->size[1];
+    lk = f->size[0] * f->size[1];
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = nx;
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
     for (i = 0; i < nx; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = lk;
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    for (i = 0; i < lk; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
     b_mtimes(b_GCmat, comb2, xc);
     xc_data = xc->data;
-    /* 'gkmPWMlasso4:271' BY = B(:,f)'*cfile2; */
+    /* 'gkmPWMlasso4:282' BY = B(:,f)'*cfile2; */
+    nx = f->size[0] * f->size[1];
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = nx;
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
     for (i = 0; i < nx; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
+    if ((B->size[0] == 0) || (f->size[0] * f->size[1] == 0) ||
+        (cfile2->size[0] == 0)) {
       i = BY->size[0];
-      BY->size[0] = f->size[0];
+      BY->size[0] = f->size[0] * f->size[1];
       emxEnsureCapacity_real_T(BY, i);
       BY_data = BY->data;
-      loop_ub = f->size[0];
+      loop_ub = f->size[0] * f->size[1];
       for (i = 0; i < loop_ub; i++) {
         BY_data[i] = 0.0;
       }
     } else {
       i = BY->size[0];
-      BY->size[0] = f->size[0];
+      BY->size[0] = f->size[0] * f->size[1];
       emxEnsureCapacity_real_T(BY, i);
       BY_data = BY->data;
-      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)f->size[0],
-                  (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)(f->size[0] * f->size[1]), (blasint)1,
+                  (blasint)B->size[0], 1.0, &b_comb_data[0],
                   (blasint)B->size[0], &cfile2_data[0],
                   (blasint)cfile2->size[0], 0.0, &BY_data[0],
-                  (blasint)f->size[0]);
+                  (blasint)(f->size[0] * f->size[1]));
     }
-    /* 'gkmPWMlasso4:272' E = zeros(length(f),1); */
+    /* 'gkmPWMlasso4:283' E = zeros(length(f),1); */
+    if ((f->size[0] == 0) || (f->size[1] == 0)) {
+      u1 = 0;
+    } else {
+      nx = f->size[0];
+      u1 = f->size[1];
+      if (nx >= u1) {
+        u1 = nx;
+      }
+    }
     i = normvec->size[0];
-    normvec->size[0] = f->size[0];
+    normvec->size[0] = u1;
     emxEnsureCapacity_real_T(normvec, i);
     normvec_data = normvec->data;
-    loop_ub = f->size[0];
-    for (i = 0; i < loop_ub; i++) {
+    for (i = 0; i < u1; i++) {
       normvec_data[i] = 0.0;
     }
-    /* 'gkmPWMlasso4:273' for i = 1:length(f) */
-    i = f->size[0];
-    if (0 <= f->size[0] - 1) {
+    /* 'gkmPWMlasso4:284' for i = 1:length(f) */
+    if ((f->size[0] == 0) || (f->size[1] == 0)) {
+      u1 = 0;
+    } else {
+      nx = f->size[0];
+      u1 = f->size[1];
+      if (nx >= u1) {
+        u1 = nx;
+      }
       i_loop_ub = xc->size[0] * xc->size[1];
       j_loop_ub = BY->size[0];
       nxout = BY->size[0] - 1;
       k_loop_ub = BB->size[0] * BB->size[1];
     }
-    for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:274' B = BB; */
-      /* 'gkmPWMlasso4:275' BBX = BX; */
-      /* 'gkmPWMlasso4:276' BBY = BY; */
-      /* 'gkmPWMlasso4:277' B(:,i) = []; */
-      /* 'gkmPWMlasso4:278' BBX(:,i) = []; */
-      /* 'gkmPWMlasso4:279' BBX(i,:) = []; */
-      /* 'gkmPWMlasso4:280' BBY(i) = []; */
-      /* 'gkmPWMlasso4:281' res = cfile2-B*(BBX^-1*BBY); */
-      i1 = comb->size[0] * comb->size[1];
+    for (b_i = 0; b_i < u1; b_i++) {
+      /* 'gkmPWMlasso4:285' B = BB; */
+      /* 'gkmPWMlasso4:286' BBX = BX; */
+      /* 'gkmPWMlasso4:287' BBY = BY; */
+      /* 'gkmPWMlasso4:288' B(:,i) = []; */
+      /* 'gkmPWMlasso4:289' BBX(:,i) = []; */
+      /* 'gkmPWMlasso4:290' BBX(i,:) = []; */
+      /* 'gkmPWMlasso4:291' BBY(i) = []; */
+      /* 'gkmPWMlasso4:292' res = cfile2-B*(BBX^-1*BBY); */
+      i = comb->size[0] * comb->size[1];
       comb->size[0] = xc->size[0];
       comb->size[1] = xc->size[1];
-      emxEnsureCapacity_real_T(comb, i1);
+      emxEnsureCapacity_real_T(comb, i);
       b_comb_data = comb->data;
-      for (i1 = 0; i1 < i_loop_ub; i1++) {
-        b_comb_data[i1] = xc_data[i1];
+      for (i = 0; i < i_loop_ub; i++) {
+        b_comb_data[i] = xc_data[i];
       }
       c_nullAssignment(comb, b_i + 1);
       nullAssignment(comb, b_i + 1);
       mpower(comb, comb2);
       b_comb_data = comb2->data;
       nx = b_i + 1;
-      i1 = loc->size[0];
+      i = loc->size[0];
       loc->size[0] = BY->size[0];
-      emxEnsureCapacity_real_T(loc, i1);
+      emxEnsureCapacity_real_T(loc, i);
       loc_data = loc->data;
-      for (i1 = 0; i1 < j_loop_ub; i1++) {
-        loc_data[i1] = BY_data[i1];
+      for (i = 0; i < j_loop_ub; i++) {
+        loc_data[i] = BY_data[i];
       }
       for (k = nx; k <= nxout; k++) {
         loc_data[k - 1] = loc_data[k];
       }
-      i1 = loc->size[0];
+      i = loc->size[0];
       if (1 > BY->size[0] - 1) {
         loc->size[0] = 0;
       } else {
         loc->size[0] = BY->size[0] - 1;
       }
-      emxEnsureCapacity_real_T(loc, i1);
+      emxEnsureCapacity_real_T(loc, i);
       loc_data = loc->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
           (loc->size[0] == 0)) {
-        i1 = negvec->size[0];
-        negvec->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(negvec, i1);
-        negvec_data = negvec->data;
+        i = indc->size[0];
+        indc->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(indc, i);
+        b_indc_data = indc->data;
         loop_ub = comb2->size[0];
-        for (i1 = 0; i1 < loop_ub; i1++) {
-          negvec_data[i1] = 0.0;
+        for (i = 0; i < loop_ub; i++) {
+          b_indc_data[i] = 0.0;
         }
       } else {
-        i1 = negvec->size[0];
-        negvec->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(negvec, i1);
-        negvec_data = negvec->data;
+        i = indc->size[0];
+        indc->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(indc, i);
+        b_indc_data = indc->data;
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
             (blasint)comb2->size[0], &loc_data[0], (blasint)loc->size[0], 0.0,
-            &negvec_data[0], (blasint)comb2->size[0]);
+            &b_indc_data[0], (blasint)comb2->size[0]);
       }
-      i1 = comb2->size[0] * comb2->size[1];
+      i = comb2->size[0] * comb2->size[1];
       comb2->size[0] = BB->size[0];
       comb2->size[1] = BB->size[1];
-      emxEnsureCapacity_real_T(comb2, i1);
+      emxEnsureCapacity_real_T(comb2, i);
       b_comb_data = comb2->data;
-      for (i1 = 0; i1 < k_loop_ub; i1++) {
-        b_comb_data[i1] = AA_data[i1];
+      for (i = 0; i < k_loop_ub; i++) {
+        b_comb_data[i] = AA_data[i];
       }
       c_nullAssignment(comb2, b_i + 1);
       b_comb_data = comb2->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-          (negvec->size[0] == 0)) {
-        i1 = loc->size[0];
+          (indc->size[0] == 0)) {
+        i = loc->size[0];
         loc->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(loc, i1);
+        emxEnsureCapacity_real_T(loc, i);
         loc_data = loc->data;
         loop_ub = comb2->size[0];
-        for (i1 = 0; i1 < loop_ub; i1++) {
-          loc_data[i1] = 0.0;
+        for (i = 0; i < loop_ub; i++) {
+          loc_data[i] = 0.0;
         }
       } else {
-        i1 = loc->size[0];
+        i = loc->size[0];
         loc->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(loc, i1);
+        emxEnsureCapacity_real_T(loc, i);
         loc_data = loc->data;
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
-            (blasint)comb2->size[0], &negvec_data[0], (blasint)negvec->size[0],
+            (blasint)comb2->size[0], &b_indc_data[0], (blasint)indc->size[0],
             0.0, &loc_data[0], (blasint)comb2->size[0]);
       }
       loop_ub = cfile2->size[0];
       if (cfile2->size[0] == loc->size[0]) {
-        i1 = loc->size[0];
+        i = loc->size[0];
         loc->size[0] = cfile2->size[0];
-        emxEnsureCapacity_real_T(loc, i1);
+        emxEnsureCapacity_real_T(loc, i);
         loc_data = loc->data;
-        for (i1 = 0; i1 < loop_ub; i1++) {
-          loc_data[i1] = cfile2_data[i1] - loc_data[i1];
+        for (i = 0; i < loop_ub; i++) {
+          loc_data[i] = cfile2_data[i] - loc_data[i];
         }
       } else {
         minus(loc, cfile2);
         loc_data = loc->data;
       }
-      /* 'gkmPWMlasso4:282' E(i) = sqrt(res'*res); */
+      /* 'gkmPWMlasso4:293' E(i) = sqrt(res'*res); */
       if (loc->size[0] < 1) {
         b1 = 0.0;
       } else {
@@ -3227,8 +3405,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       normvec_data[b_i] = sqrt(b1);
     }
-    /* 'gkmPWMlasso4:284' res = cfile2-BB*OLS; */
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (diffc->size[0] == 0)) {
+    /* 'gkmPWMlasso4:295' res = cfile2-BB*OLS; */
+    if ((B->size[0] == 0) || (f->size[0] * f->size[1] == 0) ||
+        (OLS->size[0] == 0)) {
       loop_ub = B->size[0];
       i = loc->size[0];
       loc->size[0] = B->size[0];
@@ -3243,10 +3422,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       emxEnsureCapacity_real_T(loc, i);
       loc_data = loc->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-                  (blasint)B->size[0], (blasint)1, (blasint)f->size[0], 1.0,
-                  &AA_data[0], (blasint)B->size[0], &b_diffc_data[0],
-                  (blasint)diffc->size[0], 0.0, &loc_data[0],
-                  (blasint)B->size[0]);
+                  (blasint)B->size[0], (blasint)1,
+                  (blasint)(f->size[0] * f->size[1]), 1.0, &AA_data[0],
+                  (blasint)B->size[0], &OLS_data[0], (blasint)OLS->size[0], 0.0,
+                  &loc_data[0], (blasint)B->size[0]);
     }
     if (cfile2->size[0] == loc->size[0]) {
       i = loc->size[0];
@@ -3261,7 +3440,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       minus(loc, cfile2);
       loc_data = loc->data;
     }
-    /* 'gkmPWMlasso4:285' EE = sqrt(res'*res); */
+    /* 'gkmPWMlasso4:296' EE = sqrt(res'*res); */
     if (loc->size[0] < 1) {
       b1 = 0.0;
     } else {
@@ -3269,35 +3448,44 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                       &loc_data[0], (blasint)1);
     }
     GCneg1 = sqrt(b1);
-    /* 'gkmPWMlasso4:286' E = (E-EE)/EE; */
+    /* 'gkmPWMlasso4:297' E = (E-EE)/EE; */
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = (normvec_data[i] - GCneg1) / GCneg1;
     }
     /*  motclus = motclus(f); */
-    /* 'gkmPWMlasso4:288' mylen = length(f); */
-    /* 'gkmPWMlasso4:289' newMotclus = cell(mylen, 1); */
-    /* 'gkmPWMlasso4:290' for idx=1:mylen */
-    i = f->size[0];
-    i1 = c_motclus->size[0];
-    c_motclus->size[0] = f->size[0];
-    emxEnsureCapacity_cell_wrap_1(c_motclus, i1);
-    b_motclus_data = c_motclus->data;
-    for (nx = 0; nx < i; nx++) {
-      /* 'gkmPWMlasso4:291' newMotclus{idx} = motclus{f(idx)}; */
-      i1 = b_motclus_data[nx].f1->size[0] * b_motclus_data[nx].f1->size[1];
-      b_motclus_data[nx].f1->size[0] = 1;
-      b_motclus_data[nx].f1->size[1] =
-          motclus_data[(int)f_data[nx] - 1].f1->size[1];
-      emxEnsureCapacity_real_T(b_motclus_data[nx].f1, i1);
-      loop_ub = motclus_data[(int)f_data[nx] - 1].f1->size[1];
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        b_motclus_data[nx].f1->data[i1] =
-            motclus_data[(int)f_data[nx] - 1].f1->data[i1];
+    /* 'gkmPWMlasso4:299' mylen = length(f); */
+    if ((f->size[0] == 0) || (f->size[1] == 0)) {
+      u1 = 0;
+    } else {
+      nx = f->size[0];
+      u1 = f->size[1];
+      if (nx >= u1) {
+        u1 = nx;
       }
     }
-    /* 'gkmPWMlasso4:293' motclus = newMotclus; */
-    /* 'gkmPWMlasso4:295' f = find(E/max(E) >= 0.01); */
+    /* 'gkmPWMlasso4:300' newMotclus = cell(mylen, 1); */
+    /* 'gkmPWMlasso4:301' for idx=1:mylen */
+    i = c_motclus->size[0];
+    c_motclus->size[0] = u1;
+    emxEnsureCapacity_cell_wrap_1(c_motclus, i);
+    b_motclus_data = c_motclus->data;
+    for (nx = 0; nx < u1; nx++) {
+      /* 'gkmPWMlasso4:302' newMotclus{idx} = motclus{f(idx)}; */
+      i = b_motclus_data[nx].f1->size[0] * b_motclus_data[nx].f1->size[1];
+      b_motclus_data[nx].f1->size[0] = 1;
+      b_motclus_data[nx].f1->size[1] =
+          motclus_data[(int)A_data[nx] - 1].f1->size[1];
+      emxEnsureCapacity_real_T(b_motclus_data[nx].f1, i);
+      loop_ub = motclus_data[(int)A_data[nx] - 1].f1->size[1];
+      for (i = 0; i < loop_ub; i++) {
+        b_motclus_data[nx].f1->data[i] =
+            motclus_data[(int)A_data[nx] - 1].f1->data[i];
+      }
+    }
+    emxFree_real_T(&f);
+    /* 'gkmPWMlasso4:304' motclus = newMotclus; */
+    /* 'gkmPWMlasso4:306' f = find(E/max(E) >= 0.01); */
     GCneg1 = maximum(normvec);
     i = b_loc->size[0];
     b_loc->size[0] = normvec->size[0];
@@ -3309,15 +3497,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     b_eml_find(b_loc, idx);
     matches_data = idx->data;
-    i = f->size[0];
-    f->size[0] = idx->size[0];
-    emxEnsureCapacity_real_T(f, i);
-    f_data = f->data;
+    i = negvec->size[0];
+    negvec->size[0] = idx->size[0];
+    emxEnsureCapacity_real_T(negvec, i);
+    negvec_data = negvec->data;
     loop_ub = idx->size[0];
     for (i = 0; i < loop_ub; i++) {
-      f_data[i] = matches_data[i];
+      negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:296' B = BB; */
+    /* 'gkmPWMlasso4:307' B = BB; */
     i = B->size[0] * B->size[1];
     B->size[0] = BB->size[0];
     B->size[1] = BB->size[1];
@@ -3327,18 +3515,18 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       B_data[i] = AA_data[i];
     }
-    /* 'gkmPWMlasso4:297' BB = B(:,f); */
+    /* 'gkmPWMlasso4:308' BB = B(:,f); */
     nx = BB->size[0] - 1;
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = BB->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    loop_ub = f->size[0];
+    loop_ub = negvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       for (i1 = 0; i1 <= nx; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            AA_data[i1 + BB->size[0] * ((int)f_data[i] - 1)];
+            AA_data[i1 + BB->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     i = BB->size[0] * BB->size[1];
@@ -3350,95 +3538,95 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       AA_data[i] = normvec_data[i];
     }
-    /* 'gkmPWMlasso4:298' BX = B(:,f)'*B(:,f); */
+    /* 'gkmPWMlasso4:309' BX = B(:,f)'*B(:,f); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     b_mtimes(b_GCmat, comb2, xc);
     xc_data = xc->data;
-    /* 'gkmPWMlasso4:299' BY = B(:,f)'*cfile2; */
+    /* 'gkmPWMlasso4:310' BY = B(:,f)'*cfile2; */
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (cfile2->size[0] == 0)) {
       i = BY->size[0];
-      BY->size[0] = f->size[0];
+      BY->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(BY, i);
       BY_data = BY->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
         BY_data[i] = 0.0;
       }
     } else {
       i = BY->size[0];
-      BY->size[0] = f->size[0];
+      BY->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(BY, i);
       BY_data = BY->data;
-      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)f->size[0],
-                  (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
-                  (blasint)B->size[0], &cfile2_data[0],
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)negvec->size[0], (blasint)1, (blasint)B->size[0],
+                  1.0, &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
                   (blasint)cfile2->size[0], 0.0, &BY_data[0],
-                  (blasint)f->size[0]);
+                  (blasint)negvec->size[0]);
     }
-    /* 'gkmPWMlasso4:300' E = zeros(length(f),1); */
+    /* 'gkmPWMlasso4:311' E = zeros(length(f),1); */
     i = normvec->size[0];
-    normvec->size[0] = f->size[0];
+    normvec->size[0] = negvec->size[0];
     emxEnsureCapacity_real_T(normvec, i);
     normvec_data = normvec->data;
-    loop_ub = f->size[0];
+    loop_ub = negvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = 0.0;
     }
-    /* 'gkmPWMlasso4:301' for i = 1:length(f) */
-    i = f->size[0];
-    if (0 <= f->size[0] - 1) {
+    /* 'gkmPWMlasso4:312' for i = 1:length(f) */
+    i = negvec->size[0];
+    if (0 <= negvec->size[0] - 1) {
       l_loop_ub = xc->size[0] * xc->size[1];
       m_loop_ub = BY->size[0];
       b_nxout = BY->size[0] - 1;
       n_loop_ub = BB->size[0] * BB->size[1];
     }
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:302' B = BB; */
-      /* 'gkmPWMlasso4:303' BBX = BX; */
-      /* 'gkmPWMlasso4:304' BBY = BY; */
-      /* 'gkmPWMlasso4:305' B(:,i) = []; */
-      /* 'gkmPWMlasso4:306' BBX(:,i) = []; */
-      /* 'gkmPWMlasso4:307' BBX(i,:) = []; */
-      /* 'gkmPWMlasso4:308' BBY(i) = []; */
-      /* 'gkmPWMlasso4:309' res = cfile2-B*(BBX^-1*BBY); */
+      /* 'gkmPWMlasso4:313' B = BB; */
+      /* 'gkmPWMlasso4:314' BBX = BX; */
+      /* 'gkmPWMlasso4:315' BBY = BY; */
+      /* 'gkmPWMlasso4:316' B(:,i) = []; */
+      /* 'gkmPWMlasso4:317' BBX(:,i) = []; */
+      /* 'gkmPWMlasso4:318' BBX(i,:) = []; */
+      /* 'gkmPWMlasso4:319' BBY(i) = []; */
+      /* 'gkmPWMlasso4:320' res = cfile2-B*(BBX^-1*BBY); */
       i1 = comb->size[0] * comb->size[1];
       comb->size[0] = xc->size[0];
       comb->size[1] = xc->size[1];
@@ -3472,24 +3660,24 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       loc_data = loc->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
           (loc->size[0] == 0)) {
-        i1 = negvec->size[0];
-        negvec->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(negvec, i1);
-        negvec_data = negvec->data;
+        i1 = indc->size[0];
+        indc->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(indc, i1);
+        b_indc_data = indc->data;
         loop_ub = comb2->size[0];
         for (i1 = 0; i1 < loop_ub; i1++) {
-          negvec_data[i1] = 0.0;
+          b_indc_data[i1] = 0.0;
         }
       } else {
-        i1 = negvec->size[0];
-        negvec->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(negvec, i1);
-        negvec_data = negvec->data;
+        i1 = indc->size[0];
+        indc->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(indc, i1);
+        b_indc_data = indc->data;
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
             (blasint)comb2->size[0], &loc_data[0], (blasint)loc->size[0], 0.0,
-            &negvec_data[0], (blasint)comb2->size[0]);
+            &b_indc_data[0], (blasint)comb2->size[0]);
       }
       i1 = comb2->size[0] * comb2->size[1];
       comb2->size[0] = BB->size[0];
@@ -3502,7 +3690,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       c_nullAssignment(comb2, b_i + 1);
       b_comb_data = comb2->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-          (negvec->size[0] == 0)) {
+          (indc->size[0] == 0)) {
         i1 = loc->size[0];
         loc->size[0] = comb2->size[0];
         emxEnsureCapacity_real_T(loc, i1);
@@ -3519,7 +3707,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
-            (blasint)comb2->size[0], &negvec_data[0], (blasint)negvec->size[0],
+            (blasint)comb2->size[0], &b_indc_data[0], (blasint)indc->size[0],
             0.0, &loc_data[0], (blasint)comb2->size[0]);
       }
       loop_ub = cfile2->size[0];
@@ -3535,7 +3723,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         minus(loc, cfile2);
         loc_data = loc->data;
       }
-      /* 'gkmPWMlasso4:310' E(i) = sqrt(res'*res); */
+      /* 'gkmPWMlasso4:321' E(i) = sqrt(res'*res); */
       if (loc->size[0] < 1) {
         b1 = 0.0;
       } else {
@@ -3544,70 +3732,54 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       normvec_data[b_i] = sqrt(b1);
     }
-    /* 'gkmPWMlasso4:312' OLS = (BB.'*BB)^-1*(BB.'*cfile2); */
+    /* 'gkmPWMlasso4:323' OLS = (BB.'*BB)^-1*(BB.'*cfile2); */
     b_mtimes(BB, BB, comb);
     if ((BB->size[0] == 0) || (BB->size[1] == 0) || (cfile2->size[0] == 0)) {
-      i = negvec->size[0];
-      negvec->size[0] = BB->size[1];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = BB->size[1];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       loop_ub = BB->size[1];
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = BB->size[1];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = BB->size[1];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)BB->size[1],
                   (blasint)1, (blasint)BB->size[0], 1.0, &AA_data[0],
                   (blasint)BB->size[0], &cfile2_data[0],
-                  (blasint)cfile2->size[0], 0.0, &negvec_data[0],
+                  (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
                   (blasint)BB->size[1]);
     }
     mpower(comb, comb2);
     b_comb_data = comb2->data;
     if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-        (negvec->size[0] == 0)) {
-      i = diffc->size[0];
-      diffc->size[0] = comb2->size[0];
-      emxEnsureCapacity_real_T(diffc, i);
-      b_diffc_data = diffc->data;
+        (indc->size[0] == 0)) {
+      i = OLS->size[0];
+      OLS->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(OLS, i);
+      OLS_data = OLS->data;
       loop_ub = comb2->size[0];
       for (i = 0; i < loop_ub; i++) {
-        b_diffc_data[i] = 0.0;
+        OLS_data[i] = 0.0;
       }
     } else {
-      i = diffc->size[0];
-      diffc->size[0] = comb2->size[0];
-      emxEnsureCapacity_real_T(diffc, i);
-      b_diffc_data = diffc->data;
+      i = OLS->size[0];
+      OLS->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(OLS, i);
+      OLS_data = OLS->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)comb2->size[0], (blasint)1, (blasint)comb2->size[1],
                   1.0, &b_comb_data[0], (blasint)comb2->size[0],
-                  &negvec_data[0], (blasint)negvec->size[0], 0.0,
-                  &b_diffc_data[0], (blasint)comb2->size[0]);
+                  &b_indc_data[0], (blasint)indc->size[0], 0.0, &OLS_data[0],
+                  (blasint)comb2->size[0]);
     }
-    /* 'gkmPWMlasso4:313' Pweig = Pweig(f); */
-    i = BY->size[0];
-    BY->size[0] = f->size[0];
-    emxEnsureCapacity_real_T(BY, i);
-    BY_data = BY->data;
-    loop_ub = f->size[0];
-    for (i = 0; i < loop_ub; i++) {
-      BY_data[i] = b_indc_data[(int)f_data[i] - 1];
-    }
-    i = indc->size[0];
-    indc->size[0] = BY->size[0];
-    emxEnsureCapacity_real_T(indc, i);
-    b_indc_data = indc->data;
-    loop_ub = BY->size[0];
-    for (i = 0; i < loop_ub; i++) {
-      b_indc_data[i] = BY_data[i];
-    }
-    /* 'gkmPWMlasso4:314' res = cfile2-BB*OLS; */
-    if ((BB->size[0] == 0) || (BB->size[1] == 0) || (diffc->size[0] == 0)) {
+    /* 'gkmPWMlasso4:324' Pweig = Pweig(f); */
+    /* 'gkmPWMlasso4:325' res = cfile2-BB*OLS; */
+    if ((BB->size[0] == 0) || (BB->size[1] == 0) || (OLS->size[0] == 0)) {
       i = loc->size[0];
       loc->size[0] = BB->size[0];
       emxEnsureCapacity_real_T(loc, i);
@@ -3623,8 +3795,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       loc_data = loc->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)BB->size[0], (blasint)1, (blasint)BB->size[1], 1.0,
-                  &AA_data[0], (blasint)BB->size[0], &b_diffc_data[0],
-                  (blasint)diffc->size[0], 0.0, &loc_data[0],
+                  &AA_data[0], (blasint)BB->size[0], &OLS_data[0],
+                  (blasint)OLS->size[0], 0.0, &loc_data[0],
                   (blasint)BB->size[0]);
     }
     if (cfile2->size[0] == loc->size[0]) {
@@ -3640,7 +3812,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       minus(loc, cfile2);
       loc_data = loc->data;
     }
-    /* 'gkmPWMlasso4:315' EE = sqrt(res'*res); */
+    /* 'gkmPWMlasso4:326' EE = sqrt(res'*res); */
     if (loc->size[0] < 1) {
       b1 = 0.0;
     } else {
@@ -3648,15 +3820,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                       &loc_data[0], (blasint)1);
     }
     GCneg1 = sqrt(b1);
-    /* 'gkmPWMlasso4:316' E = (E-EE)/EE; */
+    /* 'gkmPWMlasso4:327' E = (E-EE)/EE; */
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = (normvec_data[i] - GCneg1) / GCneg1;
     }
-    /* 'gkmPWMlasso4:317' for i = 1:length(motclus) */
+    /* 'gkmPWMlasso4:328' for i = 1:length(motclus) */
     i = c_motclus->size[0];
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:318' motclus{i} = indvec(motclus{i})'; */
+      /* 'gkmPWMlasso4:329' motclus{i} = indvec(motclus{i})'; */
       i1 = b_motclus_data[b_i].f1->size[0] * b_motclus_data[b_i].f1->size[1];
       b_motclus_data[b_i].f1->size[0] = 1;
       emxEnsureCapacity_real_T(b_motclus_data[b_i].f1, i1);
@@ -3667,74 +3839,83 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     /*  motclus = motclus(f); */
-    /* 'gkmPWMlasso4:321' mylen = length(f); */
-    /* 'gkmPWMlasso4:322' newMotclus = cell(mylen, 1); */
-    /* 'gkmPWMlasso4:323' for idx=1:mylen */
-    i = f->size[0];
+    /* 'gkmPWMlasso4:332' mylen = length(f); */
+    /* 'gkmPWMlasso4:333' newMotclus = cell(mylen, 1); */
+    /* 'gkmPWMlasso4:334' for idx=1:mylen */
+    i = negvec->size[0];
     i1 = tmp_motclus->size[0];
-    tmp_motclus->size[0] = f->size[0];
+    tmp_motclus->size[0] = negvec->size[0];
     emxEnsureCapacity_cell_wrap_1(tmp_motclus, i1);
     tmp_motclus_data = tmp_motclus->data;
     for (nx = 0; nx < i; nx++) {
-      /* 'gkmPWMlasso4:324' newMotclus{idx} = motclus{f(idx)}; */
+      /* 'gkmPWMlasso4:335' newMotclus{idx} = motclus{f(idx)}; */
       i1 = tmp_motclus_data[nx].f1->size[0] * tmp_motclus_data[nx].f1->size[1];
       tmp_motclus_data[nx].f1->size[0] = 1;
       tmp_motclus_data[nx].f1->size[1] =
-          b_motclus_data[(int)f_data[nx] - 1].f1->size[1];
+          b_motclus_data[(int)negvec_data[nx] - 1].f1->size[1];
       emxEnsureCapacity_real_T(tmp_motclus_data[nx].f1, i1);
-      loop_ub = b_motclus_data[(int)f_data[nx] - 1].f1->size[1];
+      loop_ub = b_motclus_data[(int)negvec_data[nx] - 1].f1->size[1];
       for (i1 = 0; i1 < loop_ub; i1++) {
         tmp_motclus_data[nx].f1->data[i1] =
-            b_motclus_data[(int)f_data[nx] - 1].f1->data[i1];
+            b_motclus_data[(int)negvec_data[nx] - 1].f1->data[i1];
       }
     }
-    /* 'gkmPWMlasso4:326' motclus = newMotclus; */
-    /* 'gkmPWMlasso4:328' correlation = corrcoef(cfile2, BB*OLS); */
-    if ((BB->size[0] == 0) || (BB->size[1] == 0) || (diffc->size[0] == 0)) {
-      i = negvec->size[0];
-      negvec->size[0] = BB->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+    /* 'gkmPWMlasso4:337' motclus = newMotclus; */
+    /* 'gkmPWMlasso4:339' correlation = corrcoef(cfile2, BB*OLS); */
+    if ((BB->size[0] == 0) || (BB->size[1] == 0) || (OLS->size[0] == 0)) {
+      i = indc->size[0];
+      indc->size[0] = BB->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       loop_ub = BB->size[0];
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = BB->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = BB->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)BB->size[0], (blasint)1, (blasint)BB->size[1], 1.0,
-                  &AA_data[0], (blasint)BB->size[0], &b_diffc_data[0],
-                  (blasint)diffc->size[0], 0.0, &negvec_data[0],
+                  &AA_data[0], (blasint)BB->size[0], &OLS_data[0],
+                  (blasint)OLS->size[0], 0.0, &b_indc_data[0],
                   (blasint)BB->size[0]);
     }
-    /* 'gkmPWMlasso4:329' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
+    /* 'gkmPWMlasso4:340' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
      * sprintf("%s_%d_%d", filename, int32(l_svm2),
      * int32(k_svm2)),memefile,num,minL, minInfo, correlation(1,2)); */
-    GCneg1 = maximum(diffc);
+    GCneg1 = maximum(OLS);
     GCpos1 = maximum(normvec);
     b_sprintf(varargin_1, (int)rt_roundd(varargin_6),
               (int)rt_roundd(varargin_7), text);
-    loop_ub = diffc->size[0];
+    loop_ub = OLS->size[0];
     for (i = 0; i < loop_ub; i++) {
-      b_diffc_data[i] /= GCneg1;
+      OLS_data[i] /= GCneg1;
     }
+    i = BY->size[0];
+    BY->size[0] = negvec->size[0];
+    emxEnsureCapacity_real_T(BY, i);
+    BY_data = BY->data;
+    loop_ub = negvec->size[0];
+    for (i = 0; i < loop_ub; i++) {
+      BY_data[i] = Pweig_data[(int)negvec_data[i] - 1];
+    }
+    emxFree_real_T(&Pweig);
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] /= GCpos1;
     }
-    corrcoef(cfile2, negvec, dv);
-    gettopmotifs(diffc, indc, normvec, tmp_motclus, text, varargin_2,
+    corrcoef(cfile2, indc, dv);
+    gettopmotifs(OLS, BY, normvec, tmp_motclus, text, varargin_2,
                  size_tmp_idx_1, varargin_3, varargin_4, dv[2]);
   } else {
-    /* 'gkmPWMlasso4:331' else */
-    /* 'gkmPWMlasso4:333' fprintf('Running LASSO (1)\n'); */
+    /* 'gkmPWMlasso4:342' else */
+    /* 'gkmPWMlasso4:344' fprintf('Running LASSO (1)\n'); */
     printf("Running LASSO (1)\n");
     fflush(stdout);
     /*  weigmat = lasso_cvmat(B, cfile2,'DFmax', d,'Standardize', false); */
-    /* 'gkmPWMlasso4:335' [weigmat, ~] = lasso_cvmat(B, cfile2, d, false, 100);
+    /* 'gkmPWMlasso4:346' [weigmat, ~] = lasso_cvmat(B, cfile2, d, false, 100);
      */
     i = comb->size[0] * comb->size[1];
     comb->size[0] = B->size[0];
@@ -3748,17 +3929,17 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     i = diffc->size[0];
     diffc->size[0] = cfile2->size[0];
     emxEnsureCapacity_real_T(diffc, i);
-    b_diffc_data = diffc->data;
+    b_comb_data = diffc->data;
     loop_ub = cfile2->size[0] - 1;
     for (i = 0; i <= loop_ub; i++) {
-      b_diffc_data[i] = cfile2_data[i];
+      b_comb_data[i] = cfile2_data[i];
     }
     emxInit_real_T(&weigmat, 2);
     b_lasso_cvmat(comb, diffc, varargin_10, weigmat, expl_temp_data, comb_size,
                   b_expl_temp_data, comb2_size, &GCneg1, a__3_DF_data,
                   a__3_DF_size, c_expl_temp_data, expl_temp_size);
     xc_data = weigmat->data;
-    /* 'gkmPWMlasso4:337' f = find(weigmat(:,1)~=0); */
+    /* 'gkmPWMlasso4:348' f = find(weigmat(:,1)~=0); */
     loop_ub = weigmat->size[0];
     i = b_loc->size[0];
     b_loc->size[0] = weigmat->size[0];
@@ -3769,80 +3950,80 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     b_eml_find(b_loc, idx);
     matches_data = idx->data;
-    i = f->size[0];
-    f->size[0] = idx->size[0];
-    emxEnsureCapacity_real_T(f, i);
-    f_data = f->data;
+    i = negvec->size[0];
+    negvec->size[0] = idx->size[0];
+    emxEnsureCapacity_real_T(negvec, i);
+    negvec_data = negvec->data;
     loop_ub = idx->size[0];
     for (i = 0; i < loop_ub; i++) {
-      f_data[i] = matches_data[i];
+      negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:338' cfile3 = cfile2 -
+    /* 'gkmPWMlasso4:349' cfile3 = cfile2 -
      * B(:,f)*((B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2)); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     b_mtimes(b_GCmat, comb2, comb);
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
-      i = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
-      loop_ub = f->size[0];
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (cfile2->size[0] == 0)) {
+      i = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
-      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)f->size[0],
-                  (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
-                  (blasint)B->size[0], &cfile2_data[0],
-                  (blasint)cfile2->size[0], 0.0, &negvec_data[0],
-                  (blasint)f->size[0]);
+      i = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)negvec->size[0], (blasint)1, (blasint)B->size[0],
+                  1.0, &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
+                  (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                  (blasint)negvec->size[0]);
     }
     mpower(comb, comb2);
     b_comb_data = comb2->data;
     if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-        (negvec->size[0] == 0)) {
+        (indc->size[0] == 0)) {
       i = BY->size[0];
       BY->size[0] = comb2->size[0];
       emxEnsureCapacity_real_T(BY, i);
@@ -3859,23 +4040,23 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)comb2->size[0], (blasint)1, (blasint)comb2->size[1],
                   1.0, &b_comb_data[0], (blasint)comb2->size[0],
-                  &negvec_data[0], (blasint)negvec->size[0], 0.0, &BY_data[0],
+                  &b_indc_data[0], (blasint)indc->size[0], 0.0, &BY_data[0],
                   (blasint)comb2->size[0]);
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (BY->size[0] == 0)) {
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (BY->size[0] == 0)) {
       loop_ub = B->size[0];
       i = loc->size[0];
       loc->size[0] = B->size[0];
@@ -3890,17 +4071,17 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       emxEnsureCapacity_real_T(loc, i);
       loc_data = loc->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-                  (blasint)B->size[0], (blasint)1, (blasint)f->size[0], 1.0,
-                  &b_comb_data[0], (blasint)B->size[0], &BY_data[0],
+                  (blasint)B->size[0], (blasint)1, (blasint)negvec->size[0],
+                  1.0, &b_comb_data[0], (blasint)B->size[0], &BY_data[0],
                   (blasint)BY->size[0], 0.0, &loc_data[0], (blasint)B->size[0]);
     }
-    /* 'gkmPWMlasso4:340' fprintf('Running LASSO (2)\n'); */
+    /* 'gkmPWMlasso4:351' fprintf('Running LASSO (2)\n'); */
     printf("Running LASSO (2)\n");
     fflush(stdout);
     /*  weigmat2 = lasso_cvmat(B, cfile3,'DFmax', d,'Standardize', false); */
-    /* 'gkmPWMlasso4:342' [weigmat2, ~] = lasso_cvmat(B, cfile3, d, false, 100);
+    /* 'gkmPWMlasso4:353' [weigmat2, ~] = lasso_cvmat(B, cfile3, d, false, 100);
      */
-    emxInit_real_T(&weigmat2, 2);
+    emxInit_real_T(&f, 2);
     if (cfile2->size[0] == loc->size[0]) {
       i = loc->size[0];
       loc->size[0] = cfile2->size[0];
@@ -3919,105 +4100,103 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i <= loop_ub; i++) {
         b_comb_data[i] = B_data[i];
       }
-      b_lasso_cvmat(comb, loc, varargin_10, weigmat2, d_expl_temp_data,
-                    comb_size, e_expl_temp_data, comb2_size, &GCneg1,
-                    a__3_DF_data, a__3_DF_size, f_expl_temp_data,
-                    expl_temp_size);
-      AA_data = weigmat2->data;
+      b_lasso_cvmat(comb, loc, varargin_10, f, d_expl_temp_data, comb_size,
+                    e_expl_temp_data, comb2_size, &GCneg1, a__3_DF_data,
+                    a__3_DF_size, f_expl_temp_data, expl_temp_size);
+      AA_data = f->data;
       loc_data = loc->data;
     } else {
-      c_binary_expand_op(B, cfile2, loc, varargin_10, weigmat2,
-                         d_expl_temp_data, comb_size, e_expl_temp_data,
-                         comb2_size, a__3_DF_data, a__3_DF_size,
-                         f_expl_temp_data, expl_temp_size);
-      AA_data = weigmat2->data;
+      c_binary_expand_op(B, cfile2, loc, varargin_10, f, d_expl_temp_data,
+                         comb_size, e_expl_temp_data, comb2_size, a__3_DF_data,
+                         a__3_DF_size, f_expl_temp_data, expl_temp_size);
+      AA_data = f->data;
     }
-    /* 'gkmPWMlasso4:344' weigmat = abs(weigmat(:,1)) + abs(weigmat2(:,1)); */
-    /* 'gkmPWMlasso4:345' f = find(weigmat~=0); */
+    /* 'gkmPWMlasso4:355' weigmat = abs(weigmat(:,1)) + abs(weigmat2(:,1)); */
+    /* 'gkmPWMlasso4:356' f = find(weigmat~=0); */
     nx = weigmat->size[0] - 1;
-    i = negvec->size[0];
-    negvec->size[0] = weigmat->size[0];
-    emxEnsureCapacity_real_T(negvec, i);
-    negvec_data = negvec->data;
+    i = indc->size[0];
+    indc->size[0] = weigmat->size[0];
+    emxEnsureCapacity_real_T(indc, i);
+    b_indc_data = indc->data;
     for (k = 0; k <= nx; k++) {
-      negvec_data[k] = fabs(xc_data[k]);
+      b_indc_data[k] = fabs(xc_data[k]);
     }
     emxFree_real_T(&weigmat);
-    nx = weigmat2->size[0] - 1;
+    nx = f->size[0] - 1;
     i = BY->size[0];
-    BY->size[0] = weigmat2->size[0];
+    BY->size[0] = f->size[0];
     emxEnsureCapacity_real_T(BY, i);
     BY_data = BY->data;
     for (k = 0; k <= nx; k++) {
       BY_data[k] = fabs(AA_data[k]);
     }
-    emxFree_real_T(&weigmat2);
-    if (negvec->size[0] == BY->size[0]) {
+    emxFree_real_T(&f);
+    if (indc->size[0] == BY->size[0]) {
       i = b_loc->size[0];
-      b_loc->size[0] = negvec->size[0];
+      b_loc->size[0] = indc->size[0];
       emxEnsureCapacity_boolean_T(b_loc, i);
       b_loc_data = b_loc->data;
-      loop_ub = negvec->size[0];
+      loop_ub = indc->size[0];
       for (i = 0; i < loop_ub; i++) {
-        b_loc_data[i] = (negvec_data[i] + BY_data[i] != 0.0);
+        b_loc_data[i] = (b_indc_data[i] + BY_data[i] != 0.0);
       }
       b_eml_find(b_loc, idx);
       matches_data = idx->data;
     } else {
-      b_binary_expand_op(idx, negvec, BY);
+      b_binary_expand_op(idx, indc, BY);
       matches_data = idx->data;
     }
-    i = f->size[0];
-    f->size[0] = idx->size[0];
-    emxEnsureCapacity_real_T(f, i);
-    f_data = f->data;
+    i = negvec->size[0];
+    negvec->size[0] = idx->size[0];
+    emxEnsureCapacity_real_T(negvec, i);
+    negvec_data = negvec->data;
     loop_ub = idx->size[0];
     for (i = 0; i < loop_ub; i++) {
-      f_data[i] = matches_data[i];
+      negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:346' motclus2 = clus_simmat_eig(corrcoef(B(:,f)),0.6); */
+    /* 'gkmPWMlasso4:357' motclus2 = clus_simmat_eig(corrcoef(B(:,f)),0.6); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     b_corrcoef(b_GCmat, comb);
     b_clus_simmat_eig(comb, tmp_motclus);
     tmp_motclus_data = tmp_motclus->data;
-    /* 'gkmPWMlasso4:347' if length(length(motclus2)) ~= length(f) */
-    if (1 != f->size[0]) {
-      /* 'gkmPWMlasso4:348' f2 = f; */
+    /* 'gkmPWMlasso4:358' if length(length(motclus2)) ~= length(f) */
+    if (1 != negvec->size[0]) {
+      /* 'gkmPWMlasso4:359' f2 = f; */
       i = loc->size[0];
-      loc->size[0] = f->size[0];
+      loc->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(loc, i);
       loc_data = loc->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
-        loc_data[i] = f_data[i];
+        loc_data[i] = negvec_data[i];
       }
-      /* 'gkmPWMlasso4:349' f = zeros(length(motclus2),1); */
-      i = f->size[0];
-      f->size[0] = tmp_motclus->size[0];
-      emxEnsureCapacity_real_T(f, i);
-      f_data = f->data;
+      /* 'gkmPWMlasso4:360' f = zeros(length(motclus2),1); */
+      i = negvec->size[0];
+      negvec->size[0] = tmp_motclus->size[0];
+      emxEnsureCapacity_real_T(negvec, i);
+      negvec_data = negvec->data;
       loop_ub = tmp_motclus->size[0];
       for (i = 0; i < loop_ub; i++) {
-        f_data[i] = 0.0;
+        negvec_data[i] = 0.0;
       }
-      /* 'gkmPWMlasso4:350' for i = 1:length(motclus2) */
+      /* 'gkmPWMlasso4:361' for i = 1:length(motclus2) */
       i = tmp_motclus->size[0];
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'gkmPWMlasso4:351' if length(motclus2{i}) > 1 */
+        /* 'gkmPWMlasso4:362' if length(motclus2{i}) > 1 */
         if (tmp_motclus_data[b_i].f1->size[1] > 1) {
-          /* 'gkmPWMlasso4:352' [~,f3] = max(abs(Z(f2(motclus2{i})))); */
+          /* 'gkmPWMlasso4:363' [~,f3] = max(abs(Z(f2(motclus2{i})))); */
           nx = tmp_motclus_data[b_i].f1->size[1];
           i1 = BY->size[0];
           BY->size[0] = tmp_motclus_data[b_i].f1->size[1];
@@ -4030,169 +4209,183 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                        1]);
           }
           d_maximum(BY, &GCneg1, &nx);
-          /* 'gkmPWMlasso4:353' f(i) = f2(motclus2{i}(f3)); */
-          f_data[b_i] =
+          /* 'gkmPWMlasso4:364' f(i) = f2(motclus2{i}(f3)); */
+          negvec_data[b_i] =
               loc_data[(int)tmp_motclus_data[b_i].f1->data[nx - 1] - 1];
         } else {
-          /* 'gkmPWMlasso4:354' else */
-          /* 'gkmPWMlasso4:355' f(i) = f2(motclus2{i}(1)); */
-          f_data[b_i] = loc_data[(int)tmp_motclus_data[b_i].f1->data[0] - 1];
+          /* 'gkmPWMlasso4:365' else */
+          /* 'gkmPWMlasso4:366' f(i) = f2(motclus2{i}(1)); */
+          negvec_data[b_i] =
+              loc_data[(int)tmp_motclus_data[b_i].f1->data[0] - 1];
         }
       }
     }
-    /* 'gkmPWMlasso4:359' [a,b] = sort(abs(Z(f)), 'descend'); */
-    nx = f->size[0];
-    i = negvec->size[0];
-    negvec->size[0] = f->size[0];
-    emxEnsureCapacity_real_T(negvec, i);
-    negvec_data = negvec->data;
+    /* 'gkmPWMlasso4:370' [a,b] = sort(abs(Z(f)), 'descend'); */
+    nx = negvec->size[0];
+    i = indc->size[0];
+    indc->size[0] = negvec->size[0];
+    emxEnsureCapacity_real_T(indc, i);
+    b_indc_data = indc->data;
     for (k = 0; k < nx; k++) {
-      negvec_data[k] = fabs(Z_data[(int)f_data[k] - 1]);
+      b_indc_data[k] = fabs(Z_data[(int)negvec_data[k] - 1]);
     }
-    sort(negvec, idx);
+    sort(indc, idx);
     matches_data = idx->data;
-    /* 'gkmPWMlasso4:360' f = f(b); */
+    /* 'gkmPWMlasso4:371' f = f(b); */
     i = BY->size[0];
     BY->size[0] = idx->size[0];
     emxEnsureCapacity_real_T(BY, i);
     BY_data = BY->data;
     loop_ub = idx->size[0];
     for (i = 0; i < loop_ub; i++) {
-      BY_data[i] = f_data[matches_data[i] - 1];
+      BY_data[i] = negvec_data[matches_data[i] - 1];
     }
-    i = f->size[0];
-    f->size[0] = BY->size[0];
-    emxEnsureCapacity_real_T(f, i);
-    f_data = f->data;
+    i = negvec->size[0];
+    negvec->size[0] = BY->size[0];
+    emxEnsureCapacity_real_T(negvec, i);
+    negvec_data = negvec->data;
     loop_ub = BY->size[0];
     for (i = 0; i < loop_ub; i++) {
-      f_data[i] = BY_data[i];
+      negvec_data[i] = BY_data[i];
     }
-    /* 'gkmPWMlasso4:361' F = length(f); */
-    GCneg1 = f->size[0];
-    /* 'gkmPWMlasso4:362' fprintf('Selecting top motifs\n') */
+    /* 'gkmPWMlasso4:372' F = length(f); */
+    GCneg1 = negvec->size[0];
+    /* 'gkmPWMlasso4:373' fprintf('Selecting top motifs\n') */
     printf("Selecting top motifs\n");
     fflush(stdout);
-    /* 'gkmPWMlasso4:363' ind = true; */
-    /* 'gkmPWMlasso4:364' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    /* 'gkmPWMlasso4:374' ind = true; */
+    /* 'gkmPWMlasso4:375' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     b_mtimes(b_GCmat, comb2, comb);
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
-      i = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
-      loop_ub = f->size[0];
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (cfile2->size[0] == 0)) {
+      i = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = f->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
-      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)f->size[0],
-                  (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
-                  (blasint)B->size[0], &cfile2_data[0],
-                  (blasint)cfile2->size[0], 0.0, &negvec_data[0],
-                  (blasint)f->size[0]);
+      i = indc->size[0];
+      indc->size[0] = negvec->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)negvec->size[0], (blasint)1, (blasint)B->size[0],
+                  1.0, &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
+                  (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                  (blasint)negvec->size[0]);
     }
     mpower(comb, comb2);
     b_comb_data = comb2->data;
     if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-        (negvec->size[0] == 0)) {
-      i = diffc->size[0];
-      diffc->size[0] = comb2->size[0];
-      emxEnsureCapacity_real_T(diffc, i);
-      b_diffc_data = diffc->data;
+        (indc->size[0] == 0)) {
+      i = OLS->size[0];
+      OLS->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(OLS, i);
+      OLS_data = OLS->data;
       loop_ub = comb2->size[0];
       for (i = 0; i < loop_ub; i++) {
-        b_diffc_data[i] = 0.0;
+        OLS_data[i] = 0.0;
       }
     } else {
-      i = diffc->size[0];
-      diffc->size[0] = comb2->size[0];
-      emxEnsureCapacity_real_T(diffc, i);
-      b_diffc_data = diffc->data;
+      i = OLS->size[0];
+      OLS->size[0] = comb2->size[0];
+      emxEnsureCapacity_real_T(OLS, i);
+      OLS_data = OLS->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                   (blasint)comb2->size[0], (blasint)1, (blasint)comb2->size[1],
                   1.0, &b_comb_data[0], (blasint)comb2->size[0],
-                  &negvec_data[0], (blasint)negvec->size[0], 0.0,
-                  &b_diffc_data[0], (blasint)comb2->size[0]);
+                  &b_indc_data[0], (blasint)indc->size[0], 0.0, &OLS_data[0],
+                  (blasint)comb2->size[0]);
     }
-    /* 'gkmPWMlasso4:365' Pweig = Z(f); */
-    i = indc->size[0];
-    indc->size[0] = f->size[0];
-    emxEnsureCapacity_real_T(indc, i);
-    b_indc_data = indc->data;
-    loop_ub = f->size[0];
+    /* 'gkmPWMlasso4:376' Pweig = Z(f); */
+    i = diffc->size[0];
+    diffc->size[0] = negvec->size[0];
+    emxEnsureCapacity_real_T(diffc, i);
+    b_comb_data = diffc->data;
+    loop_ub = negvec->size[0];
     for (i = 0; i < loop_ub; i++) {
-      b_indc_data[i] = Z_data[(int)f_data[i] - 1];
+      b_comb_data[i] = Z_data[(int)negvec_data[i] - 1];
     }
-    /* 'gkmPWMlasso4:366' while ind && F >= d */
+    /* 'gkmPWMlasso4:377' while ind && F >= d */
     exitg1 = false;
     while ((!exitg1) && (GCneg1 >= varargin_10)) {
-      /* 'gkmPWMlasso4:367' OLS =
+      /* 'gkmPWMlasso4:378' OLS =
        * (B(:,f(1:d)).'*B(:,f(1:d)))^-1*(B(:,f(1:d)).'*cfile2); */
       if (1.0 > varargin_10) {
         loop_ub = 0;
+        indc_size = 0;
         nx = 0;
-        lk = 0;
       } else {
         loop_ub = (int)varargin_10;
+        indc_size = (int)varargin_10;
         nx = (int)varargin_10;
-        lk = (int)varargin_10;
       }
-      indc_size = B->size[0];
+      lk = B->size[0];
       i = b_GCmat->size[0] * b_GCmat->size[1];
       b_GCmat->size[0] = B->size[0];
       b_GCmat->size[1] = loop_ub;
       emxEnsureCapacity_real_T(b_GCmat, i);
       normvec_data = b_GCmat->data;
       for (i = 0; i < loop_ub; i++) {
-        for (i1 = 0; i1 < indc_size; i1++) {
+        for (i1 = 0; i1 < lk; i1++) {
           normvec_data[i1 + b_GCmat->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
         }
       }
+      loop_ub = B->size[0];
+      i = comb2->size[0] * comb2->size[1];
+      comb2->size[0] = B->size[0];
+      comb2->size[1] = indc_size;
+      emxEnsureCapacity_real_T(comb2, i);
+      b_comb_data = comb2->data;
+      for (i = 0; i < indc_size; i++) {
+        for (i1 = 0; i1 < loop_ub; i1++) {
+          b_comb_data[i1 + comb2->size[0] * i] =
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
+        }
+      }
+      b_mtimes(b_GCmat, comb2, comb);
       loop_ub = B->size[0];
       i = comb2->size[0] * comb2->size[1];
       comb2->size[0] = B->size[0];
@@ -4202,97 +4395,84 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < nx; i++) {
         for (i1 = 0; i1 < loop_ub; i1++) {
           b_comb_data[i1 + comb2->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+              B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
         }
       }
-      b_mtimes(b_GCmat, comb2, comb);
-      loop_ub = B->size[0];
-      i = comb2->size[0] * comb2->size[1];
-      comb2->size[0] = B->size[0];
-      comb2->size[1] = lk;
-      emxEnsureCapacity_real_T(comb2, i);
-      b_comb_data = comb2->data;
-      for (i = 0; i < lk; i++) {
-        for (i1 = 0; i1 < loop_ub; i1++) {
-          b_comb_data[i1 + comb2->size[0] * i] =
-              B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
-        }
-      }
-      if ((B->size[0] == 0) || (lk == 0) || (cfile2->size[0] == 0)) {
-        i = negvec->size[0];
-        negvec->size[0] = lk;
-        emxEnsureCapacity_real_T(negvec, i);
-        negvec_data = negvec->data;
-        for (i = 0; i < lk; i++) {
-          negvec_data[i] = 0.0;
+      if ((B->size[0] == 0) || (nx == 0) || (cfile2->size[0] == 0)) {
+        i = indc->size[0];
+        indc->size[0] = nx;
+        emxEnsureCapacity_real_T(indc, i);
+        b_indc_data = indc->data;
+        for (i = 0; i < nx; i++) {
+          b_indc_data[i] = 0.0;
         }
       } else {
-        i = negvec->size[0];
-        negvec->size[0] = lk;
-        emxEnsureCapacity_real_T(negvec, i);
-        negvec_data = negvec->data;
-        cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)lk,
+        i = indc->size[0];
+        indc->size[0] = nx;
+        emxEnsureCapacity_real_T(indc, i);
+        b_indc_data = indc->data;
+        cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)nx,
                     (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
                     (blasint)B->size[0], &cfile2_data[0],
-                    (blasint)cfile2->size[0], 0.0, &negvec_data[0],
-                    (blasint)lk);
+                    (blasint)cfile2->size[0], 0.0, &b_indc_data[0],
+                    (blasint)nx);
       }
       mpower(comb, comb2);
       b_comb_data = comb2->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-          (negvec->size[0] == 0)) {
-        i = diffc->size[0];
-        diffc->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(diffc, i);
-        b_diffc_data = diffc->data;
+          (indc->size[0] == 0)) {
+        i = OLS->size[0];
+        OLS->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(OLS, i);
+        OLS_data = OLS->data;
         loop_ub = comb2->size[0];
         for (i = 0; i < loop_ub; i++) {
-          b_diffc_data[i] = 0.0;
+          OLS_data[i] = 0.0;
         }
       } else {
-        i = diffc->size[0];
-        diffc->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(diffc, i);
-        b_diffc_data = diffc->data;
+        i = OLS->size[0];
+        OLS->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(OLS, i);
+        OLS_data = OLS->data;
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
-            (blasint)comb2->size[0], &negvec_data[0], (blasint)negvec->size[0],
-            0.0, &b_diffc_data[0], (blasint)comb2->size[0]);
+            (blasint)comb2->size[0], &b_indc_data[0], (blasint)indc->size[0],
+            0.0, &OLS_data[0], (blasint)comb2->size[0]);
       }
-      /* 'gkmPWMlasso4:368' Pweig = Z(f(1:d)); */
+      /* 'gkmPWMlasso4:379' Pweig = Z(f(1:d)); */
       if (1.0 > varargin_10) {
         loop_ub = 0;
       } else {
         loop_ub = (int)varargin_10;
       }
-      i = indc->size[0];
-      indc->size[0] = loop_ub;
-      emxEnsureCapacity_real_T(indc, i);
-      b_indc_data = indc->data;
+      i = diffc->size[0];
+      diffc->size[0] = loop_ub;
+      emxEnsureCapacity_real_T(diffc, i);
+      b_comb_data = diffc->data;
       for (i = 0; i < loop_ub; i++) {
-        b_indc_data[i] = Z_data[(int)f_data[i] - 1];
+        b_comb_data[i] = Z_data[(int)negvec_data[i] - 1];
       }
-      /* 'gkmPWMlasso4:369' ff = []; */
+      /* 'gkmPWMlasso4:380' ff = []; */
       loc->size[0] = 0;
-      /* 'gkmPWMlasso4:370' for i = 1:d */
+      /* 'gkmPWMlasso4:381' for i = 1:d */
       i = (int)varargin_10;
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'gkmPWMlasso4:371' if sign(OLS(i)) ~= sign(Pweig(i)) */
-        b1 = b_diffc_data[b_i];
-        if (b_diffc_data[b_i] < 0.0) {
+        /* 'gkmPWMlasso4:382' if sign(OLS(i)) ~= sign(Pweig(i)) */
+        b1 = OLS_data[b_i];
+        if (OLS_data[b_i] < 0.0) {
           b1 = -1.0;
-        } else if (b_diffc_data[b_i] > 0.0) {
+        } else if (OLS_data[b_i] > 0.0) {
           b1 = 1.0;
         }
-        GCpos1 = Z_data[(int)f_data[b_i] - 1];
+        GCpos1 = Z_data[(int)negvec_data[b_i] - 1];
         if (GCpos1 < 0.0) {
           GCpos1 = -1.0;
         } else if (GCpos1 > 0.0) {
           GCpos1 = 1.0;
         }
         if (b1 != GCpos1) {
-          /* 'gkmPWMlasso4:372' ff = [ff;i]; */
+          /* 'gkmPWMlasso4:383' ff = [ff;i]; */
           i1 = loc->size[0];
           i2 = loc->size[0];
           loc->size[0]++;
@@ -4301,10 +4481,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           loc_data[i1] = (double)b_i + 1.0;
         }
       }
-      /* 'gkmPWMlasso4:375' if length(ff) > 0 && F - length(ff) >= d */
+      /* 'gkmPWMlasso4:386' if length(ff) > 0 && F - length(ff) >= d */
       if ((loc->size[0] > 0) &&
           (GCneg1 - (double)loc->size[0] >= varargin_10)) {
-        /* 'gkmPWMlasso4:376' f(ff) = []; */
+        /* 'gkmPWMlasso4:387' f(ff) = []; */
         i = idx->size[0];
         idx->size[0] = loc->size[0];
         emxEnsureCapacity_int32_T(idx, i);
@@ -4313,22 +4493,22 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         for (i = 0; i < loop_ub; i++) {
           matches_data[i] = (int)loc_data[i];
         }
-        b_nullAssignment(f, idx);
-        f_data = f->data;
-        /* 'gkmPWMlasso4:377' F = F - length(ff); */
+        d_nullAssignment(negvec, idx);
+        negvec_data = negvec->data;
+        /* 'gkmPWMlasso4:388' F = F - length(ff); */
         GCneg1 -= (double)loc->size[0];
       } else {
-        /* 'gkmPWMlasso4:378' else */
-        /* 'gkmPWMlasso4:379' ind = false; */
-        /* 'gkmPWMlasso4:380' f = f(1:d); */
-        i = f->size[0];
+        /* 'gkmPWMlasso4:389' else */
+        /* 'gkmPWMlasso4:390' ind = false; */
+        /* 'gkmPWMlasso4:391' f = f(1:d); */
+        i = negvec->size[0];
         if (1.0 > varargin_10) {
-          f->size[0] = 0;
+          negvec->size[0] = 0;
         } else {
-          f->size[0] = (int)varargin_10;
+          negvec->size[0] = (int)varargin_10;
         }
-        emxEnsureCapacity_real_T(f, i);
-        f_data = f->data;
+        emxEnsureCapacity_real_T(negvec, i);
+        negvec_data = negvec->data;
         exitg1 = true;
       }
     }
@@ -4336,109 +4516,109 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     /*      OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
     /*      Pweig = Z(f); */
     /*  end */
-    /* 'gkmPWMlasso4:387' BB = B(:,f); */
+    /* 'gkmPWMlasso4:398' BB = B(:,f); */
     loop_ub = B->size[0];
     i = BB->size[0] * BB->size[1];
     BB->size[0] = B->size[0];
-    BB->size[1] = f->size[0];
+    BB->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(BB, i);
     AA_data = BB->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         AA_data[i1 + BB->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    /* 'gkmPWMlasso4:388' BX = B(:,f)'*B(:,f); */
+    /* 'gkmPWMlasso4:399' BX = B(:,f)'*B(:,f); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
-    b_GCmat->size[1] = f->size[0];
+    b_GCmat->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(b_GCmat, i);
     normvec_data = b_GCmat->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         normvec_data[i1 + b_GCmat->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
     b_mtimes(b_GCmat, comb2, xc);
     xc_data = xc->data;
-    /* 'gkmPWMlasso4:389' BY = B(:,f)'*cfile2; */
+    /* 'gkmPWMlasso4:400' BY = B(:,f)'*cfile2; */
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
-    comb2->size[1] = f->size[0];
+    comb2->size[1] = negvec->size[0];
     emxEnsureCapacity_real_T(comb2, i);
     b_comb_data = comb2->data;
-    nx = f->size[0];
-    for (i = 0; i < nx; i++) {
+    indc_size = negvec->size[0];
+    for (i = 0; i < indc_size; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_comb_data[i1 + comb2->size[0] * i] =
-            B_data[i1 + B->size[0] * ((int)f_data[i] - 1)];
+            B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (cfile2->size[0] == 0)) {
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (cfile2->size[0] == 0)) {
       i = BY->size[0];
-      BY->size[0] = f->size[0];
+      BY->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(BY, i);
       BY_data = BY->data;
-      loop_ub = f->size[0];
+      loop_ub = negvec->size[0];
       for (i = 0; i < loop_ub; i++) {
         BY_data[i] = 0.0;
       }
     } else {
       i = BY->size[0];
-      BY->size[0] = f->size[0];
+      BY->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(BY, i);
       BY_data = BY->data;
-      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)f->size[0],
-                  (blasint)1, (blasint)B->size[0], 1.0, &b_comb_data[0],
-                  (blasint)B->size[0], &cfile2_data[0],
+      cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+                  (blasint)negvec->size[0], (blasint)1, (blasint)B->size[0],
+                  1.0, &b_comb_data[0], (blasint)B->size[0], &cfile2_data[0],
                   (blasint)cfile2->size[0], 0.0, &BY_data[0],
-                  (blasint)f->size[0]);
+                  (blasint)negvec->size[0]);
     }
-    /* 'gkmPWMlasso4:390' E = zeros(length(f),1); */
+    /* 'gkmPWMlasso4:401' E = zeros(length(f),1); */
     i = normvec->size[0];
-    normvec->size[0] = f->size[0];
+    normvec->size[0] = negvec->size[0];
     emxEnsureCapacity_real_T(normvec, i);
     normvec_data = normvec->data;
-    loop_ub = f->size[0];
+    loop_ub = negvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = 0.0;
     }
-    /* 'gkmPWMlasso4:391' for i = 1:length(f) */
-    i = f->size[0];
-    if (0 <= f->size[0] - 1) {
+    /* 'gkmPWMlasso4:402' for i = 1:length(f) */
+    i = negvec->size[0];
+    if (0 <= negvec->size[0] - 1) {
       d_loop_ub = xc->size[0] * xc->size[1];
       e_loop_ub = BY->size[0];
       nxout = BY->size[0] - 1;
       f_loop_ub = BB->size[0] * BB->size[1];
     }
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:392' B = BB; */
-      /* 'gkmPWMlasso4:393' BBX = BX; */
-      /* 'gkmPWMlasso4:394' BBY = BY; */
-      /* 'gkmPWMlasso4:395' B(:,i) = []; */
-      /* 'gkmPWMlasso4:396' BBX(:,i) = []; */
-      /* 'gkmPWMlasso4:397' BBX(i,:) = []; */
-      /* 'gkmPWMlasso4:398' BBY(i) = []; */
-      /* 'gkmPWMlasso4:399' res = cfile2-B*(BBX^-1*BBY); */
+      /* 'gkmPWMlasso4:403' B = BB; */
+      /* 'gkmPWMlasso4:404' BBX = BX; */
+      /* 'gkmPWMlasso4:405' BBY = BY; */
+      /* 'gkmPWMlasso4:406' B(:,i) = []; */
+      /* 'gkmPWMlasso4:407' BBX(:,i) = []; */
+      /* 'gkmPWMlasso4:408' BBX(i,:) = []; */
+      /* 'gkmPWMlasso4:409' BBY(i) = []; */
+      /* 'gkmPWMlasso4:410' res = cfile2-B*(BBX^-1*BBY); */
       i1 = comb->size[0] * comb->size[1];
       comb->size[0] = xc->size[0];
       comb->size[1] = xc->size[1];
@@ -4472,24 +4652,24 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       loc_data = loc->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
           (loc->size[0] == 0)) {
-        i1 = negvec->size[0];
-        negvec->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(negvec, i1);
-        negvec_data = negvec->data;
+        i1 = indc->size[0];
+        indc->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(indc, i1);
+        b_indc_data = indc->data;
         loop_ub = comb2->size[0];
         for (i1 = 0; i1 < loop_ub; i1++) {
-          negvec_data[i1] = 0.0;
+          b_indc_data[i1] = 0.0;
         }
       } else {
-        i1 = negvec->size[0];
-        negvec->size[0] = comb2->size[0];
-        emxEnsureCapacity_real_T(negvec, i1);
-        negvec_data = negvec->data;
+        i1 = indc->size[0];
+        indc->size[0] = comb2->size[0];
+        emxEnsureCapacity_real_T(indc, i1);
+        b_indc_data = indc->data;
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
             (blasint)comb2->size[0], &loc_data[0], (blasint)loc->size[0], 0.0,
-            &negvec_data[0], (blasint)comb2->size[0]);
+            &b_indc_data[0], (blasint)comb2->size[0]);
       }
       i1 = comb2->size[0] * comb2->size[1];
       comb2->size[0] = BB->size[0];
@@ -4502,7 +4682,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       c_nullAssignment(comb2, b_i + 1);
       b_comb_data = comb2->data;
       if ((comb2->size[0] == 0) || (comb2->size[1] == 0) ||
-          (negvec->size[0] == 0)) {
+          (indc->size[0] == 0)) {
         i1 = loc->size[0];
         loc->size[0] = comb2->size[0];
         emxEnsureCapacity_real_T(loc, i1);
@@ -4519,7 +4699,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         cblas_dgemm(
             CblasColMajor, CblasNoTrans, CblasNoTrans, (blasint)comb2->size[0],
             (blasint)1, (blasint)comb2->size[1], 1.0, &b_comb_data[0],
-            (blasint)comb2->size[0], &negvec_data[0], (blasint)negvec->size[0],
+            (blasint)comb2->size[0], &b_indc_data[0], (blasint)indc->size[0],
             0.0, &loc_data[0], (blasint)comb2->size[0]);
       }
       loop_ub = cfile2->size[0];
@@ -4535,7 +4715,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         minus(loc, cfile2);
         loc_data = loc->data;
       }
-      /* 'gkmPWMlasso4:400' E(i) = sqrt(res'*res); */
+      /* 'gkmPWMlasso4:411' E(i) = sqrt(res'*res); */
       if (loc->size[0] < 1) {
         b1 = 0.0;
       } else {
@@ -4544,8 +4724,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       normvec_data[b_i] = sqrt(b1);
     }
-    /* 'gkmPWMlasso4:402' res = cfile2-BB*OLS; */
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (diffc->size[0] == 0)) {
+    /* 'gkmPWMlasso4:413' res = cfile2-BB*OLS; */
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (OLS->size[0] == 0)) {
       loop_ub = B->size[0];
       i = loc->size[0];
       loc->size[0] = B->size[0];
@@ -4560,9 +4740,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       emxEnsureCapacity_real_T(loc, i);
       loc_data = loc->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-                  (blasint)B->size[0], (blasint)1, (blasint)f->size[0], 1.0,
-                  &AA_data[0], (blasint)B->size[0], &b_diffc_data[0],
-                  (blasint)diffc->size[0], 0.0, &loc_data[0],
+                  (blasint)B->size[0], (blasint)1, (blasint)negvec->size[0],
+                  1.0, &AA_data[0], (blasint)B->size[0], &OLS_data[0],
+                  (blasint)OLS->size[0], 0.0, &loc_data[0],
                   (blasint)B->size[0]);
     }
     if (cfile2->size[0] == loc->size[0]) {
@@ -4578,7 +4758,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       minus(loc, cfile2);
       loc_data = loc->data;
     }
-    /* 'gkmPWMlasso4:403' EE = sqrt(res'*res); */
+    /* 'gkmPWMlasso4:414' EE = sqrt(res'*res); */
     if (loc->size[0] < 1) {
       b1 = 0.0;
     } else {
@@ -4586,15 +4766,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                       &loc_data[0], (blasint)1);
     }
     GCneg1 = sqrt(b1);
-    /* 'gkmPWMlasso4:404' E = (E-EE)/EE; */
+    /* 'gkmPWMlasso4:415' E = (E-EE)/EE; */
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = (normvec_data[i] - GCneg1) / GCneg1;
     }
-    /* 'gkmPWMlasso4:405' for i = 1:length(motclus) */
+    /* 'gkmPWMlasso4:416' for i = 1:length(motclus) */
     i = motclus->size[0];
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:406' motclus{i} = indvec(motclus{i})'; */
+      /* 'gkmPWMlasso4:417' motclus{i} = indvec(motclus{i})'; */
       i1 = motclus_data[b_i].f1->size[0] * motclus_data[b_i].f1->size[1];
       motclus_data[b_i].f1->size[0] = 1;
       emxEnsureCapacity_real_T(motclus_data[b_i].f1, i1);
@@ -4605,79 +4785,80 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     /*  motclus = motclus(f); */
-    /* 'gkmPWMlasso4:409' mylen = length(f); */
-    /* 'gkmPWMlasso4:410' newMotclus = cell(mylen, 1); */
-    /* 'gkmPWMlasso4:411' for idx=1:mylen */
-    i = f->size[0];
+    /* 'gkmPWMlasso4:420' mylen = length(f); */
+    /* 'gkmPWMlasso4:421' newMotclus = cell(mylen, 1); */
+    /* 'gkmPWMlasso4:422' for idx=1:mylen */
+    i = negvec->size[0];
     i1 = c_motclus->size[0];
-    c_motclus->size[0] = f->size[0];
+    c_motclus->size[0] = negvec->size[0];
     emxEnsureCapacity_cell_wrap_1(c_motclus, i1);
     b_motclus_data = c_motclus->data;
     for (nx = 0; nx < i; nx++) {
-      /* 'gkmPWMlasso4:412' newMotclus{idx} = motclus{f(idx)}; */
+      /* 'gkmPWMlasso4:423' newMotclus{idx} = motclus{f(idx)}; */
       i1 = b_motclus_data[nx].f1->size[0] * b_motclus_data[nx].f1->size[1];
       b_motclus_data[nx].f1->size[0] = 1;
       b_motclus_data[nx].f1->size[1] =
-          motclus_data[(int)f_data[nx] - 1].f1->size[1];
+          motclus_data[(int)negvec_data[nx] - 1].f1->size[1];
       emxEnsureCapacity_real_T(b_motclus_data[nx].f1, i1);
-      loop_ub = motclus_data[(int)f_data[nx] - 1].f1->size[1];
+      loop_ub = motclus_data[(int)negvec_data[nx] - 1].f1->size[1];
       for (i1 = 0; i1 < loop_ub; i1++) {
         b_motclus_data[nx].f1->data[i1] =
-            motclus_data[(int)f_data[nx] - 1].f1->data[i1];
+            motclus_data[(int)negvec_data[nx] - 1].f1->data[i1];
       }
     }
-    /* 'gkmPWMlasso4:414' motclus = newMotclus; */
-    /* 'gkmPWMlasso4:416' correlation = corrcoef(cfile2, BB*OLS); */
-    if ((B->size[0] == 0) || (f->size[0] == 0) || (diffc->size[0] == 0)) {
+    /* 'gkmPWMlasso4:425' motclus = newMotclus; */
+    /* 'gkmPWMlasso4:427' correlation = corrcoef(cfile2, BB*OLS); */
+    if ((B->size[0] == 0) || (negvec->size[0] == 0) || (OLS->size[0] == 0)) {
       loop_ub = B->size[0];
-      i = negvec->size[0];
-      negvec->size[0] = B->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = B->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       for (i = 0; i < loop_ub; i++) {
-        negvec_data[i] = 0.0;
+        b_indc_data[i] = 0.0;
       }
     } else {
-      i = negvec->size[0];
-      negvec->size[0] = B->size[0];
-      emxEnsureCapacity_real_T(negvec, i);
-      negvec_data = negvec->data;
+      i = indc->size[0];
+      indc->size[0] = B->size[0];
+      emxEnsureCapacity_real_T(indc, i);
+      b_indc_data = indc->data;
       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-                  (blasint)B->size[0], (blasint)1, (blasint)f->size[0], 1.0,
-                  &AA_data[0], (blasint)B->size[0], &b_diffc_data[0],
-                  (blasint)diffc->size[0], 0.0, &negvec_data[0],
+                  (blasint)B->size[0], (blasint)1, (blasint)negvec->size[0],
+                  1.0, &AA_data[0], (blasint)B->size[0], &OLS_data[0],
+                  (blasint)OLS->size[0], 0.0, &b_indc_data[0],
                   (blasint)B->size[0]);
     }
-    /* 'gkmPWMlasso4:417' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
+    /* 'gkmPWMlasso4:428' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
      * sprintf("%s_%d_%d", filename, int32(l_svm2),
      * int32(k_svm2)),memefile,num,minL, minInfo, correlation(1,2)); */
-    GCneg1 = maximum(diffc);
+    GCneg1 = maximum(OLS);
     GCpos1 = maximum(normvec);
     b_sprintf(varargin_1, (int)rt_roundd(varargin_6),
               (int)rt_roundd(varargin_7), text);
-    loop_ub = diffc->size[0];
+    loop_ub = OLS->size[0];
     for (i = 0; i < loop_ub; i++) {
-      b_diffc_data[i] /= GCneg1;
+      OLS_data[i] /= GCneg1;
     }
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] /= GCpos1;
     }
-    corrcoef(cfile2, negvec, dv);
-    gettopmotifs(diffc, indc, normvec, c_motclus, text, varargin_2,
+    corrcoef(cfile2, indc, dv);
+    gettopmotifs(OLS, diffc, normvec, c_motclus, text, varargin_2,
                  size_tmp_idx_1, varargin_3, varargin_4, dv[2]);
   }
   emxFree_real_T(&b_GCmat);
   emxFree_boolean_T(&b_loc);
   emxFree_int32_T(&idx);
   emxFree_int32_T(&match_out);
+  emxFree_real_T(&y);
   emxFree_char_T(&text);
   emxFree_cell_wrap_1(&c_motclus);
   emxFree_real_T(&loc);
   emxFree_real_T(&BY);
   emxFree_real_T(&BB);
+  emxFree_real_T(&OLS);
   emxFree_cell_wrap_1(&tmp_motclus);
-  emxFree_real_T(&f);
   emxFree_real_T(&Z);
   emxFree_real_T(&B);
   emxFree_real_T(&cfile2);
@@ -4690,7 +4871,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxFree_real_T(&diffc);
   emxFree_real_T(&comb2);
   emxFree_real_T(&comb);
-  /* 'gkmPWMlasso4:421' fprintf('Done\n'); */
+  /* 'gkmPWMlasso4:432' fprintf('Done\n'); */
   printf("Done\n");
   fflush(stdout);
 }

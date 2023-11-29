@@ -16,41 +16,41 @@
 #include <string.h>
 
 /* Function Definitions */
-void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *negvec,
+void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *indc,
                         const emxArray_real_T *BY)
 {
-  emxArray_boolean_T *b_negvec;
+  emxArray_boolean_T *b_indc;
   const double *BY_data;
-  const double *negvec_data;
+  const double *indc_data;
   int i;
   int loop_ub;
   int stride_0_0;
   int stride_1_0;
-  bool *b_negvec_data;
+  bool *b_indc_data;
   BY_data = BY->data;
-  negvec_data = negvec->data;
-  emxInit_boolean_T(&b_negvec, 1);
-  i = b_negvec->size[0];
+  indc_data = indc->data;
+  emxInit_boolean_T(&b_indc, 1);
+  i = b_indc->size[0];
   if (BY->size[0] == 1) {
-    b_negvec->size[0] = negvec->size[0];
+    b_indc->size[0] = indc->size[0];
   } else {
-    b_negvec->size[0] = BY->size[0];
+    b_indc->size[0] = BY->size[0];
   }
-  emxEnsureCapacity_boolean_T(b_negvec, i);
-  b_negvec_data = b_negvec->data;
-  stride_0_0 = (negvec->size[0] != 1);
+  emxEnsureCapacity_boolean_T(b_indc, i);
+  b_indc_data = b_indc->data;
+  stride_0_0 = (indc->size[0] != 1);
   stride_1_0 = (BY->size[0] != 1);
   if (BY->size[0] == 1) {
-    loop_ub = negvec->size[0];
+    loop_ub = indc->size[0];
   } else {
     loop_ub = BY->size[0];
   }
   for (i = 0; i < loop_ub; i++) {
-    b_negvec_data[i] =
-        (negvec_data[i * stride_0_0] + BY_data[i * stride_1_0] != 0.0);
+    b_indc_data[i] =
+        (indc_data[i * stride_0_0] + BY_data[i * stride_1_0] != 0.0);
   }
-  b_eml_find(b_negvec, idx);
-  emxFree_boolean_T(&b_negvec);
+  b_eml_find(b_indc, idx);
+  emxFree_boolean_T(&b_indc);
 }
 
 /*
