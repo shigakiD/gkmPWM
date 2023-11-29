@@ -11,9 +11,9 @@
 
 /* Include files */
 #include "nchoosek.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_rtwutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_rtwutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <math.h>
 #include <string.h>
 

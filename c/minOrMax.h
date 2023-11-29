@@ -13,7 +13,7 @@
 #define MINORMAX_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -27,6 +27,8 @@ extern "C" {
 void b_maximum(const emxArray_real_T *x, double *ex, int *idx);
 
 void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex);
+
+void d_maximum(const emxArray_real_T *x, double *ex, int *idx);
 
 double maximum(const emxArray_real_T *x);
 

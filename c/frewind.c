@@ -12,6 +12,7 @@
 /* Include files */
 #include "frewind.h"
 #include "fileManager.h"
+#include "lapacke.h"
 #include <stdio.h>
 #include <string.h>
 

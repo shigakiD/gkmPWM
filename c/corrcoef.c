@@ -11,12 +11,133 @@
 
 /* Include files */
 #include "corrcoef.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <math.h>
 #include <string.h>
 
 /* Function Definitions */
+/*
+ *
+ */
+void b_corrcoef(const emxArray_real_T *x, emxArray_real_T *b_r)
+{
+  emxArray_real_T *b_x;
+  emxArray_real_T *d;
+  const double *x_data;
+  double b_d;
+  double s;
+  double *d_data;
+  double *r_data;
+  int b_i;
+  int b_n;
+  int fm;
+  int i;
+  int j;
+  int k;
+  int n;
+  x_data = x->data;
+  emxInit_real_T(&b_x, 2);
+  i = b_x->size[0] * b_x->size[1];
+  b_x->size[0] = x->size[0];
+  b_x->size[1] = x->size[1];
+  emxEnsureCapacity_real_T(b_x, i);
+  d_data = b_x->data;
+  fm = x->size[0] * x->size[1];
+  for (i = 0; i < fm; i++) {
+    d_data[i] = x_data[i];
+  }
+  n = x->size[0] - 1;
+  b_n = x->size[1];
+  i = b_r->size[0] * b_r->size[1];
+  b_r->size[0] = x->size[1];
+  b_r->size[1] = x->size[1];
+  emxEnsureCapacity_real_T(b_r, i);
+  r_data = b_r->data;
+  fm = x->size[1] * x->size[1];
+  for (i = 0; i < fm; i++) {
+    r_data[i] = 0.0;
+  }
+  if (x->size[0] < 2) {
+    i = b_r->size[0] * b_r->size[1];
+    b_r->size[0] = x->size[1];
+    b_r->size[1] = x->size[1];
+    emxEnsureCapacity_real_T(b_r, i);
+    r_data = b_r->data;
+    fm = x->size[1] * x->size[1];
+    for (i = 0; i < fm; i++) {
+      r_data[i] = 0.0;
+    }
+  } else {
+    for (j = 0; j < b_n; j++) {
+      s = 0.0;
+      for (b_i = 0; b_i <= n; b_i++) {
+        s += d_data[b_i + b_x->size[0] * j];
+      }
+      s /= (double)x->size[0];
+      for (b_i = 0; b_i <= n; b_i++) {
+        d_data[b_i + b_x->size[0] * j] -= s;
+      }
+    }
+    fm = x->size[0] - 1;
+    for (j = 0; j < b_n; j++) {
+      s = 0.0;
+      for (k = 0; k <= n; k++) {
+        b_d = d_data[k + b_x->size[0] * j];
+        s += b_d * b_d;
+      }
+      r_data[j + b_r->size[0] * j] = s / (double)fm;
+      i = j + 2;
+      for (b_i = i; b_i <= b_n; b_i++) {
+        s = 0.0;
+        for (k = 0; k <= n; k++) {
+          s += d_data[k + b_x->size[0] * (b_i - 1)] *
+               d_data[k + b_x->size[0] * j];
+        }
+        r_data[(b_i + b_r->size[0] * j) - 1] = s / (double)fm;
+      }
+    }
+  }
+  emxFree_real_T(&b_x);
+  emxInit_real_T(&d, 1);
+  fm = b_r->size[0];
+  i = d->size[0];
+  d->size[0] = b_r->size[0];
+  emxEnsureCapacity_real_T(d, i);
+  d_data = d->data;
+  for (k = 0; k < fm; k++) {
+    d_data[k] = sqrt(r_data[k + b_r->size[0] * k]);
+  }
+  for (j = 0; j < fm; j++) {
+    i = j + 2;
+    for (b_i = i; b_i <= fm; b_i++) {
+      r_data[(b_i + b_r->size[0] * j) - 1] =
+          r_data[(b_i + b_r->size[0] * j) - 1] / d_data[b_i - 1] / d_data[j];
+    }
+    for (b_i = i; b_i <= fm; b_i++) {
+      b_d = r_data[(b_i + b_r->size[0] * j) - 1];
+      s = fabs(b_d);
+      if (s > 1.0) {
+        r_data[(b_i + b_r->size[0] * j) - 1] = b_d / s;
+      }
+      r_data[j + b_r->size[0] * (b_i - 1)] =
+          r_data[(b_i + b_r->size[0] * j) - 1];
+    }
+    if (r_data[j + b_r->size[0] * j] > 0.0) {
+      s = r_data[j + b_r->size[0] * j];
+      if (s < 0.0) {
+        s = -1.0;
+      } else if (s > 0.0) {
+        s = 1.0;
+      }
+      r_data[j + b_r->size[0] * j] = s;
+    } else {
+      r_data[j + b_r->size[0] * j] = 0.0;
+    }
+  }
+  emxFree_real_T(&d);
+}
+
 /*
  *
  */

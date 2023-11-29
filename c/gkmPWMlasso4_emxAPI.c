@@ -3,16 +3,16 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_emxAPI.c
+ * gkmPWMlasso4_emxAPI.c
  *
- * Code generation for function 'gkmPWMlasso3_emxAPI'
+ * Code generation for function 'gkmPWMlasso4_emxAPI'
  *
  */
 
 /* Include files */
-#include "gkmPWMlasso3_emxAPI.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxAPI.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -90,4 +90,4 @@ void emxInitArray_char_T(emxArray_char_T **pEmxArray, int numDimensions)
   emxInit_char_T(pEmxArray, numDimensions);
 }
 
-/* End of code generation (gkmPWMlasso3_emxAPI.c) */
+/* End of code generation (gkmPWMlasso4_emxAPI.c) */

@@ -3,17 +3,17 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_emxutil.h
+ * gkmPWMlasso4_emxutil.h
  *
- * Code generation for function 'gkmPWMlasso3_emxutil'
+ * Code generation for function 'gkmPWMlasso4_emxutil'
  *
  */
 
-#ifndef GKMPWMLASSO3_EMXUTIL_H
-#define GKMPWMLASSO3_EMXUTIL_H
+#ifndef GKMPWMLASSO4_EMXUTIL_H
+#define GKMPWMLASSO4_EMXUTIL_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -44,10 +44,10 @@ extern void emxEnsureCapacity_cell_wrap_1(emxArray_cell_wrap_1 *emxArray,
 extern void emxEnsureCapacity_cell_wrap_12(emxArray_cell_wrap_12 *emxArray,
                                            int oldNumel);
 
-extern void emxEnsureCapacity_cell_wrap_3(cell_wrap_3 data[100], int size,
+extern void emxEnsureCapacity_cell_wrap_3(cell_wrap_3 data[20], int size,
                                           int oldNumel);
 
-extern void emxEnsureCapacity_cell_wrap_31(cell_wrap_3 data[99],
+extern void emxEnsureCapacity_cell_wrap_31(cell_wrap_3 data[19],
                                            const int size[2], int oldNumel);
 
 extern void emxEnsureCapacity_cell_wrap_32(emxArray_cell_wrap_3 *emxArray,
@@ -62,6 +62,9 @@ extern void emxEnsureCapacity_cell_wrap_9(emxArray_cell_wrap_9 *emxArray,
 extern void emxEnsureCapacity_char_T(emxArray_char_T *emxArray, int oldNumel);
 
 extern void emxEnsureCapacity_int32_T(emxArray_int32_T *emxArray, int oldNumel);
+
+extern void emxEnsureCapacity_lapack_int(emxArray_lapack_int *emxArray,
+                                         int oldNumel);
 
 extern void emxEnsureCapacity_real_T(emxArray_real_T *emxArray, int oldNumel);
 
@@ -80,11 +83,11 @@ extern void emxExpand_cell_wrap_1(emxArray_cell_wrap_1 *emxArray, int fromIndex,
 extern void emxExpand_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int fromIndex,
                                   int toIndex);
 
-extern void emxExpand_cell_wrap_3_100(cell_wrap_3 data[100], int fromIndex,
-                                      int toIndex);
-
-extern void emxExpand_cell_wrap_3_1x99(cell_wrap_3 data[99], int fromIndex,
+extern void emxExpand_cell_wrap_3_1x19(cell_wrap_3 data[19], int fromIndex,
                                        int toIndex);
+
+extern void emxExpand_cell_wrap_3_20(cell_wrap_3 data[20], int fromIndex,
+                                     int toIndex);
 
 extern void emxExpand_cell_wrap_8(emxArray_cell_wrap_8 *emxArray, int fromIndex,
                                   int toIndex);
@@ -116,9 +119,9 @@ extern void emxFree_cell_wrap_12(emxArray_cell_wrap_12 **pEmxArray);
 
 extern void emxFree_cell_wrap_3(emxArray_cell_wrap_3 **pEmxArray);
 
-extern void emxFree_cell_wrap_3_100(emxArray_cell_wrap_3_100 *pEmxArray);
+extern void emxFree_cell_wrap_3_1x19(emxArray_cell_wrap_3_1x19 *pEmxArray);
 
-extern void emxFree_cell_wrap_3_1x99(emxArray_cell_wrap_3_1x99 *pEmxArray);
+extern void emxFree_cell_wrap_3_20(emxArray_cell_wrap_3_20 *pEmxArray);
 
 extern void emxFree_cell_wrap_8(emxArray_cell_wrap_8 **pEmxArray);
 
@@ -127,6 +130,8 @@ extern void emxFree_cell_wrap_9(emxArray_cell_wrap_9 **pEmxArray);
 extern void emxFree_char_T(emxArray_char_T **pEmxArray);
 
 extern void emxFree_int32_T(emxArray_int32_T **pEmxArray);
+
+extern void emxFree_lapack_int(emxArray_lapack_int **pEmxArray);
 
 extern void emxFree_real_T(emxArray_real_T **pEmxArray);
 
@@ -159,9 +164,9 @@ extern void emxInit_cell_wrap_12(emxArray_cell_wrap_12 **pEmxArray);
 
 extern void emxInit_cell_wrap_3(emxArray_cell_wrap_3 **pEmxArray);
 
-extern void emxInit_cell_wrap_3_100(emxArray_cell_wrap_3_100 *pEmxArray);
+extern void emxInit_cell_wrap_3_1x19(emxArray_cell_wrap_3_1x19 *pEmxArray);
 
-extern void emxInit_cell_wrap_3_1x99(emxArray_cell_wrap_3_1x99 *pEmxArray);
+extern void emxInit_cell_wrap_3_20(emxArray_cell_wrap_3_20 *pEmxArray);
 
 extern void emxInit_cell_wrap_8(emxArray_cell_wrap_8 **pEmxArray);
 
@@ -170,6 +175,8 @@ extern void emxInit_cell_wrap_9(emxArray_cell_wrap_9 **pEmxArray);
 extern void emxInit_char_T(emxArray_char_T **pEmxArray, int numDimensions);
 
 extern void emxInit_int32_T(emxArray_int32_T **pEmxArray, int numDimensions);
+
+extern void emxInit_lapack_int(emxArray_lapack_int **pEmxArray);
 
 extern void emxInit_real_T(emxArray_real_T **pEmxArray, int numDimensions);
 
@@ -186,11 +193,11 @@ extern void emxTrim_cell_wrap_1(emxArray_cell_wrap_1 *emxArray, int fromIndex,
 extern void emxTrim_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int fromIndex,
                                 int toIndex);
 
-extern void emxTrim_cell_wrap_3_100(cell_wrap_3 data[100], int fromIndex,
-                                    int toIndex);
-
-extern void emxTrim_cell_wrap_3_1x99(cell_wrap_3 data[99], int fromIndex,
+extern void emxTrim_cell_wrap_3_1x19(cell_wrap_3 data[19], int fromIndex,
                                      int toIndex);
+
+extern void emxTrim_cell_wrap_3_20(cell_wrap_3 data[20], int fromIndex,
+                                   int toIndex);
 
 extern void emxTrim_cell_wrap_8(emxArray_cell_wrap_8 *emxArray, int fromIndex,
                                 int toIndex);
@@ -203,4 +210,4 @@ extern void emxTrim_cell_wrap_9(emxArray_cell_wrap_9 *emxArray, int fromIndex,
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso3_emxutil.h) */
+/* End of code generation (gkmPWMlasso4_emxutil.h) */

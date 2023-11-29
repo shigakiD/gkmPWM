@@ -12,6 +12,7 @@
 /* Include files */
 #include "fseek.h"
 #include "fileManager.h"
+#include "lapacke.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>

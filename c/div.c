@@ -11,12 +11,12 @@
 
 /* Include files */
 #include "div.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */
-void q_binary_expand_op(emxArray_real_T *b, const emxArray_real_T *b_b,
+void v_binary_expand_op(emxArray_real_T *b, const emxArray_real_T *b_b,
                         const emxArray_real_T *fit)
 {
   emxArray_real_T *c_b;

@@ -3,16 +3,17 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * eye.h
+ * combineVectorElements.h
  *
- * Code generation for function 'eye'
+ * Code generation for function 'combineVectorElements'
  *
  */
 
-#ifndef EYE_H
-#define EYE_H
+#ifndef COMBINEVECTORELEMENTS_H
+#define COMBINEVECTORELEMENTS_H
 
 /* Include files */
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -23,11 +24,12 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void eye(double b_I[16]);
+void combineVectorElements(const emxArray_boolean_T *x, int y_data[],
+                           int y_size[2]);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (eye.h) */
+/* End of code generation (combineVectorElements.h) */

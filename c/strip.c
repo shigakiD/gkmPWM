@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "strip.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */

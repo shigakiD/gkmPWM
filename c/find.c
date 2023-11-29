@@ -11,11 +11,48 @@
 
 /* Include files */
 #include "find.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */
+void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *negvec,
+                        const emxArray_real_T *BY)
+{
+  emxArray_boolean_T *b_negvec;
+  const double *BY_data;
+  const double *negvec_data;
+  int i;
+  int loop_ub;
+  int stride_0_0;
+  int stride_1_0;
+  bool *b_negvec_data;
+  BY_data = BY->data;
+  negvec_data = negvec->data;
+  emxInit_boolean_T(&b_negvec, 1);
+  i = b_negvec->size[0];
+  if (BY->size[0] == 1) {
+    b_negvec->size[0] = negvec->size[0];
+  } else {
+    b_negvec->size[0] = BY->size[0];
+  }
+  emxEnsureCapacity_boolean_T(b_negvec, i);
+  b_negvec_data = b_negvec->data;
+  stride_0_0 = (negvec->size[0] != 1);
+  stride_1_0 = (BY->size[0] != 1);
+  if (BY->size[0] == 1) {
+    loop_ub = negvec->size[0];
+  } else {
+    loop_ub = BY->size[0];
+  }
+  for (i = 0; i < loop_ub; i++) {
+    b_negvec_data[i] =
+        (negvec_data[i * stride_0_0] + BY_data[i * stride_1_0] != 0.0);
+  }
+  b_eml_find(b_negvec, idx);
+  emxFree_boolean_T(&b_negvec);
+}
+
 /*
  *
  */
@@ -62,43 +99,6 @@ void b_eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i)
     }
     emxEnsureCapacity_int32_T(i, ii);
   }
-}
-
-void c_binary_expand_op(emxArray_int32_T *iidx, const emxArray_real_T *loc,
-                        const emxArray_real_T *f, double varargin_4)
-{
-  emxArray_boolean_T *b_loc;
-  const double *f_data;
-  const double *loc_data;
-  int i;
-  int loop_ub;
-  int stride_0_0;
-  int stride_1_0;
-  bool *b_loc_data;
-  f_data = f->data;
-  loc_data = loc->data;
-  emxInit_boolean_T(&b_loc, 1);
-  i = b_loc->size[0];
-  if (f->size[0] == 1) {
-    b_loc->size[0] = loc->size[0];
-  } else {
-    b_loc->size[0] = f->size[0];
-  }
-  emxEnsureCapacity_boolean_T(b_loc, i);
-  b_loc_data = b_loc->data;
-  stride_0_0 = (loc->size[0] != 1);
-  stride_1_0 = (f->size[0] != 1);
-  if (f->size[0] == 1) {
-    loop_ub = loc->size[0];
-  } else {
-    loop_ub = f->size[0];
-  }
-  for (i = 0; i < loop_ub; i++) {
-    b_loc_data[i] =
-        (loc_data[i * stride_0_0] / f_data[i * stride_1_0] >= varargin_4);
-  }
-  b_eml_find(b_loc, iidx);
-  emxFree_boolean_T(&b_loc);
 }
 
 /*
@@ -162,6 +162,43 @@ void d_eml_find(const bool x[210], int i_data[], int *i_size)
   } else {
     *i_size = idx;
   }
+}
+
+void e_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *loc,
+                        const emxArray_real_T *Z, double varargin_4)
+{
+  emxArray_boolean_T *b_loc;
+  const double *Z_data;
+  const double *loc_data;
+  int i;
+  int loop_ub;
+  int stride_0_0;
+  int stride_1_0;
+  bool *b_loc_data;
+  Z_data = Z->data;
+  loc_data = loc->data;
+  emxInit_boolean_T(&b_loc, 1);
+  i = b_loc->size[0];
+  if (Z->size[0] == 1) {
+    b_loc->size[0] = loc->size[0];
+  } else {
+    b_loc->size[0] = Z->size[0];
+  }
+  emxEnsureCapacity_boolean_T(b_loc, i);
+  b_loc_data = b_loc->data;
+  stride_0_0 = (loc->size[0] != 1);
+  stride_1_0 = (Z->size[0] != 1);
+  if (Z->size[0] == 1) {
+    loop_ub = loc->size[0];
+  } else {
+    loop_ub = Z->size[0];
+  }
+  for (i = 0; i < loop_ub; i++) {
+    b_loc_data[i] =
+        (loc_data[i * stride_0_0] / Z_data[i * stride_1_0] >= varargin_4);
+  }
+  b_eml_find(b_loc, idx);
+  emxFree_boolean_T(&b_loc);
 }
 
 /*

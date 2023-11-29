@@ -3,17 +3,17 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * repelem.h
+ * extremeKElements.h
  *
- * Code generation for function 'repelem'
+ * Code generation for function 'extremeKElements'
  *
  */
 
-#ifndef REPELEM_H
-#define REPELEM_H
+#ifndef EXTREMEKELEMENTS_H
+#define EXTREMEKELEMENTS_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,11 +24,12 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void repelem(const double x[16], double varargin_1, emxArray_real_T *y);
+void exkib(const emxArray_real_T *a, int k, emxArray_int32_T *idx,
+           emxArray_real_T *b);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (repelem.h) */
+/* End of code generation (extremeKElements.h) */

@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "minOrMax.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */
@@ -79,6 +79,41 @@ void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex)
         if (ex_data[j] < d) {
           ex_data[j] = d;
         }
+      }
+    }
+  }
+}
+
+/*
+ *
+ */
+void d_maximum(const emxArray_real_T *x, double *ex, int *idx)
+{
+  const double *x_data;
+  double d;
+  int k;
+  int last;
+  x_data = x->data;
+  last = x->size[0];
+  if (x->size[0] <= 2) {
+    if (x->size[0] == 1) {
+      *ex = x_data[0];
+      *idx = 1;
+    } else if (x_data[0] < x_data[x->size[0] - 1]) {
+      *ex = x_data[x->size[0] - 1];
+      *idx = x->size[0];
+    } else {
+      *ex = x_data[0];
+      *idx = 1;
+    }
+  } else {
+    *ex = x_data[0];
+    *idx = 1;
+    for (k = 2; k <= last; k++) {
+      d = x_data[k - 1];
+      if (*ex < d) {
+        *ex = d;
+        *idx = k;
       }
     }
   }

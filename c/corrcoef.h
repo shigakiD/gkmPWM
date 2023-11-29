@@ -13,7 +13,7 @@
 #define CORRCOEF_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,6 +24,8 @@ extern "C" {
 #endif
 
 /* Function Declarations */
+void b_corrcoef(const emxArray_real_T *x, emxArray_real_T *b_r);
+
 void corrcoef(const emxArray_real_T *x, const emxArray_real_T *varargin_1,
               double b_r[4]);
 

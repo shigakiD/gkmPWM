@@ -11,9 +11,10 @@
 
 /* Include files */
 #include "mpower.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include "cblas.h"
+#include "lapacke.h"
 #include <string.h>
 
 /* Function Definitions */
@@ -22,25 +23,20 @@
  */
 void mpower(const emxArray_real_T *a, emxArray_real_T *c)
 {
-  blasint idxmax_t;
+  lapack_int info_t;
+  lapack_int *ipiv_t_data;
   emxArray_int32_T *ipiv;
   emxArray_int32_T *p;
+  emxArray_lapack_int *ipiv_t;
   emxArray_real_T *x;
   const double *a_data;
-  double temp;
   double *c_data;
   double *x_data;
-  int b;
+  int b_i;
   int b_n;
   int i;
-  int j;
-  int jj;
-  int jp1j;
   int k;
-  int mmj_tmp;
   int n;
-  int temp_tmp;
-  int u1;
   int yk;
   int *ipiv_data;
   int *p_data;
@@ -77,59 +73,42 @@ void mpower(const emxArray_real_T *a, emxArray_real_T *c)
       x_data[i] = a_data[i];
     }
     emxInit_int32_T(&ipiv, 2);
-    b_n = a->size[0];
+    emxInit_lapack_int(&ipiv_t);
+    i = ipiv_t->size[0];
+    ipiv_t->size[0] = a->size[0];
+    emxEnsureCapacity_lapack_int(ipiv_t, i);
+    ipiv_t_data = ipiv_t->data;
+    info_t = LAPACKE_dgetrf_work(LAPACK_COL_MAJOR, (lapack_int)a->size[0],
+                                 (lapack_int)a->size[0], &x_data[0],
+                                 (lapack_int)a->size[0], &ipiv_t_data[0]);
     i = ipiv->size[0] * ipiv->size[1];
     ipiv->size[0] = 1;
-    ipiv->size[1] = a->size[0];
+    ipiv->size[1] = ipiv_t->size[0];
     emxEnsureCapacity_int32_T(ipiv, i);
     ipiv_data = ipiv->data;
-    ipiv_data[0] = 1;
-    yk = 1;
-    for (k = 2; k <= b_n; k++) {
-      yk++;
-      ipiv_data[k - 1] = yk;
-    }
-    yk = a->size[0] - 1;
-    u1 = a->size[0];
-    if (yk <= u1) {
-      u1 = yk;
-    }
-    for (j = 0; j < u1; j++) {
-      mmj_tmp = n - j;
-      b = j * (n + 1);
-      jj = j * (a->size[0] + 1);
-      jp1j = b + 2;
-      if (mmj_tmp < 1) {
-        yk = -1;
-      } else {
-        idxmax_t = cblas_idamax((blasint)mmj_tmp, &x_data[b], (blasint)1);
-        yk = (int)idxmax_t;
+    if ((int)info_t < 0) {
+      yk = x->size[0];
+      b_n = x->size[1];
+      i = x->size[0] * x->size[1];
+      x->size[0] = yk;
+      x->size[1] = b_n;
+      emxEnsureCapacity_real_T(x, i);
+      x_data = x->data;
+      yk *= b_n;
+      for (i = 0; i < yk; i++) {
+        x_data[i] = 0.0;
       }
-      if (x_data[jj + yk] != 0.0) {
-        if (yk != 0) {
-          b_n = j + yk;
-          ipiv_data[j] = b_n + 1;
-          for (k = 0; k < n; k++) {
-            yk = k * n;
-            temp_tmp = j + yk;
-            temp = x_data[temp_tmp];
-            i = b_n + yk;
-            x_data[temp_tmp] = x_data[i];
-            x_data[i] = temp;
-          }
-        }
-        i = jj + mmj_tmp;
-        for (yk = jp1j; yk <= i; yk++) {
-          x_data[yk - 1] /= x_data[jj];
-        }
+      i = ipiv_t->size[0] - 1;
+      for (k = 0; k <= i; k++) {
+        ipiv_data[k] = k + 1;
       }
-      if (mmj_tmp - 1 >= 1) {
-        cblas_dger(CblasColMajor, (blasint)(mmj_tmp - 1),
-                   (blasint)(mmj_tmp - 1), -1.0, &x_data[jj + 1], (blasint)1,
-                   &x_data[b + n], (blasint)n, &x_data[(b + n) + 1],
-                   (blasint)n);
+    } else {
+      i = ipiv_t->size[0] - 1;
+      for (k = 0; k <= i; k++) {
+        ipiv_data[k] = (int)ipiv_t_data[k];
       }
     }
+    emxFree_lapack_int(&ipiv_t);
     emxInit_int32_T(&p, 2);
     b_n = a->size[0];
     i = p->size[0] * p->size[1];
@@ -156,13 +135,13 @@ void mpower(const emxArray_real_T *a, emxArray_real_T *c)
     for (k = 0; k < n; k++) {
       i = p_data[k];
       c_data[k + c->size[0] * (i - 1)] = 1.0;
-      for (j = k + 1; j <= n; j++) {
-        if (c_data[(j + c->size[0] * (i - 1)) - 1] != 0.0) {
-          b_n = j + 1;
-          for (yk = b_n; yk <= n; yk++) {
-            c_data[(yk + c->size[0] * (i - 1)) - 1] -=
-                c_data[(j + c->size[0] * (i - 1)) - 1] *
-                x_data[(yk + x->size[0] * (j - 1)) - 1];
+      for (yk = k + 1; yk <= n; yk++) {
+        if (c_data[(yk + c->size[0] * (i - 1)) - 1] != 0.0) {
+          b_n = yk + 1;
+          for (b_i = b_n; b_i <= n; b_i++) {
+            c_data[(b_i + c->size[0] * (i - 1)) - 1] -=
+                c_data[(yk + c->size[0] * (i - 1)) - 1] *
+                x_data[(b_i + x->size[0] * (yk - 1)) - 1];
           }
         }
       }

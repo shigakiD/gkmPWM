@@ -11,9 +11,9 @@
 
 /* Include files */
 #include "list.h"
-#include "gkmPWMlasso3_data.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_data.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */

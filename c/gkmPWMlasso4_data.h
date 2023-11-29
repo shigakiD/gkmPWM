@@ -3,27 +3,27 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_data.h
+ * gkmPWMlasso4_data.h
  *
- * Code generation for function 'gkmPWMlasso3_data'
+ * Code generation for function 'gkmPWMlasso4_data'
  *
  */
 
-#ifndef GKMPWMLASSO3_DATA_H
-#define GKMPWMLASSO3_DATA_H
+#ifndef GKMPWMLASSO4_DATA_H
+#define GKMPWMLASSO4_DATA_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
 #include <stdlib.h>
 
 /* Variable Declarations */
-extern omp_nest_lock_t gkmPWMlasso3_nestLockGlobal;
+extern omp_nest_lock_t gkmPWMlasso4_nestLockGlobal;
 extern const bool bv[128];
 extern const struct_T r;
-extern bool isInitialized_gkmPWMlasso3;
+extern bool isInitialized_gkmPWMlasso4;
 
 #endif
-/* End of code generation (gkmPWMlasso3_data.h) */
+/* End of code generation (gkmPWMlasso4_data.h) */

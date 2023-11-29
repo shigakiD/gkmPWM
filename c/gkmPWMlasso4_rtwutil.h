@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_rtwutil.h
+ * gkmPWMlasso4_rtwutil.h
  *
- * Code generation for function 'gkmPWMlasso3_rtwutil'
+ * Code generation for function 'gkmPWMlasso4_rtwutil'
  *
  */
 
-#ifndef GKMPWMLASSO3_RTWUTIL_H
-#define GKMPWMLASSO3_RTWUTIL_H
+#ifndef GKMPWMLASSO4_RTWUTIL_H
+#define GKMPWMLASSO4_RTWUTIL_H
 
 /* Include files */
 #include "rtwtypes.h"
@@ -30,4 +30,4 @@ extern double rt_roundd(double u);
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso3_rtwutil.h) */
+/* End of code generation (gkmPWMlasso4_rtwutil.h) */

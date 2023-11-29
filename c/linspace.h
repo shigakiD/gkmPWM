@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_terminate.h
+ * linspace.h
  *
- * Code generation for function 'gkmPWMlasso3_terminate'
+ * Code generation for function 'linspace'
  *
  */
 
-#ifndef GKMPWMLASSO3_TERMINATE_H
-#define GKMPWMLASSO3_TERMINATE_H
+#ifndef LINSPACE_H
+#define LINSPACE_H
 
 /* Include files */
 #include "rtwtypes.h"
@@ -23,11 +23,11 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void gkmPWMlasso3_terminate(void);
+void linspace(double d1, double d2, double n, double y_data[], int y_size[2]);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso3_terminate.h) */
+/* End of code generation (linspace.h) */

@@ -13,7 +13,7 @@
 #define DIV_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void q_binary_expand_op(emxArray_real_T *b, const emxArray_real_T *b_b,
+void v_binary_expand_op(emxArray_real_T *b, const emxArray_real_T *b_b,
                         const emxArray_real_T *fit);
 
 #ifdef __cplusplus

@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "rot90.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */
@@ -71,7 +71,8 @@ void rot90(const emxArray_real_T *A, emxArray_real_T *B)
   B_data = B->data;
   if (A->size[0] * A->size[1] >= 8192) {
     j = A->size[1] - 1;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(b_i)
+#pragma omp parallel for num_threads(                                          \
+    1 > omp_get_max_threads() ? omp_get_max_threads() : 1) private(b_i)
 
     for (b_j = 0; b_j <= j; b_j++) {
       for (b_i = 0; b_i < m; b_i++) {

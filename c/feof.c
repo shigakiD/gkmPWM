@@ -12,6 +12,7 @@
 /* Include files */
 #include "feof.h"
 #include "fileManager.h"
+#include "lapacke.h"
 #include <stdio.h>
 #include <string.h>
 

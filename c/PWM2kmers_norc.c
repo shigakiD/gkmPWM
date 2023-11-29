@@ -12,12 +12,51 @@
 /* Include files */
 #include "PWM2kmers_norc.h"
 #include "PWM2kmers.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <math.h>
 #include <string.h>
 
+/* Function Declarations */
+static void r_binary_expand_op(emxArray_real_T *kweig, int i1, int i2, int i3,
+                               const emxArray_cell_wrap_3 *ktree, double k,
+                               int i4, int i5);
+
 /* Function Definitions */
+static void r_binary_expand_op(emxArray_real_T *kweig, int i1, int i2, int i3,
+                               const emxArray_cell_wrap_3 *ktree, double k,
+                               int i4, int i5)
+{
+  const cell_wrap_3 *ktree_data;
+  emxArray_real_T *b_kweig;
+  double *b_kweig_data;
+  double *kweig_data;
+  int i;
+  int stride_0_1;
+  int stride_1_1;
+  int unnamed_idx_1;
+  ktree_data = ktree->data;
+  kweig_data = kweig->data;
+  emxInit_real_T(&b_kweig, 2);
+  unnamed_idx_1 = i4 - i5;
+  i = b_kweig->size[0] * b_kweig->size[1];
+  b_kweig->size[0] = 1;
+  b_kweig->size[1] = unnamed_idx_1;
+  emxEnsureCapacity_real_T(b_kweig, i);
+  b_kweig_data = b_kweig->data;
+  stride_0_1 = ((i3 - i2) + 1 != 1);
+  stride_1_1 = (ktree_data[(int)k - 1].f1->size[0] != 1);
+  for (i = 0; i < unnamed_idx_1; i++) {
+    b_kweig_data[i] = kweig_data[i2 + i * stride_0_1] +
+                      ktree_data[(int)k - 1].f1->data[i * stride_1_1];
+  }
+  unnamed_idx_1 = b_kweig->size[1];
+  for (i = 0; i < unnamed_idx_1; i++) {
+    kweig_data[i1 + i] = b_kweig_data[i];
+  }
+  emxFree_real_T(&b_kweig);
+}
+
 /*
  * function [kweig] = PWM2kmers_norc(mat,negmat,c,s,ind,indloc,x,l,k,rcnum)
  */
@@ -365,7 +404,7 @@ void PWM2kmers_norc(const emxArray_real_T *mat, const double negmat[16],
                       a_data[b_k] * y_data[b_k];
                 }
               } else {
-                l_binary_expand_op(ktree, b_i3, b_r, y);
+                n_binary_expand_op(ktree, b_i3, b_r, y);
                 ktree_data = ktree->data;
               }
             }
@@ -438,7 +477,7 @@ void PWM2kmers_norc(const emxArray_real_T *mat, const double negmat[16],
                   kweig_data[ibcol + b_k] = indvec_data[b_k];
                 }
               } else {
-                m_binary_expand_op(kweig, ibcol, b_k, i2 - 1, ktree, k, nrows,
+                r_binary_expand_op(kweig, ibcol, b_k, i2 - 1, ktree, k, nrows,
                                    ibcol - 1);
                 kweig_data = kweig->data;
               }
@@ -477,7 +516,7 @@ void PWM2kmers_norc(const emxArray_real_T *mat, const double negmat[16],
               kweig_data[i2 + i1] = indvec_data[i1];
             }
           } else {
-            m_binary_expand_op(kweig, i2, i1, b_k - 1, ktree, k, ibcol, i2 - 1);
+            r_binary_expand_op(kweig, i2, i1, b_k - 1, ktree, k, ibcol, i2 - 1);
             kweig_data = kweig->data;
           }
         }

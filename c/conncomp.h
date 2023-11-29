@@ -3,16 +3,17 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_initialize.h
+ * conncomp.h
  *
- * Code generation for function 'gkmPWMlasso3_initialize'
+ * Code generation for function 'conncomp'
  *
  */
 
-#ifndef GKMPWMLASSO3_INITIALIZE_H
-#define GKMPWMLASSO3_INITIALIZE_H
+#ifndef CONNCOMP_H
+#define CONNCOMP_H
 
 /* Include files */
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -23,11 +24,13 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void gkmPWMlasso3_initialize(void);
+void graph_conncomp(const emxArray_int32_T *G_Underlying_Ir,
+                    const emxArray_int32_T *G_Underlying_Jc,
+                    emxArray_real_T *bins);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso3_initialize.h) */
+/* End of code generation (conncomp.h) */

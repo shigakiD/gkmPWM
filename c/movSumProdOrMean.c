@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "movSumProdOrMean.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include <string.h>
 
 /* Function Definitions */
@@ -47,8 +47,11 @@ void vmovfun(const emxArray_real_T *x, int nx, int kleft, int kright,
     y_data[i] = 0.0;
   }
   loop_ub = nx - 1;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-    iLeft, ipnf, vlen, b_y, lastBlockLength, nblocks, b_k, ib, bsum, hi)
+#pragma omp parallel for num_threads(                                          \
+    1 > omp_get_max_threads() ? omp_get_max_threads()                          \
+                              : 1) private(iLeft, ipnf, vlen, b_y,             \
+                                           lastBlockLength, nblocks, b_k, ib,  \
+                                           bsum, hi)
 
   for (k = 0; k <= loop_ub; k++) {
     if (k + 1 <= kleft) {

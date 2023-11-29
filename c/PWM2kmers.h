@@ -13,7 +13,7 @@
 #define PWM2KMERS_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -30,13 +30,9 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
                const emxArray_real_T *x, double l, double k, double rcnum,
                emxArray_real_T *kweig);
 
-void l_binary_expand_op(emxArray_cell_wrap_3 *ktree2, double i3,
+void n_binary_expand_op(emxArray_cell_wrap_3 *ktree2, double i3,
                         const emxArray_real_T *r1,
-                        const emxArray_real_T *sPWM_tmp);
-
-void m_binary_expand_op(emxArray_real_T *kweig2, int i1, int i2, int i3,
-                        const emxArray_cell_wrap_3 *ktree2, double k, int i4,
-                        int i5);
+                        const emxArray_real_T *repmatt);
 
 #ifdef __cplusplus
 }

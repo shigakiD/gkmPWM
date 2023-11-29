@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_rtwutil.c
+ * gkmPWMlasso4_rtwutil.c
  *
- * Code generation for function 'gkmPWMlasso3_rtwutil'
+ * Code generation for function 'gkmPWMlasso4_rtwutil'
  *
  */
 
 /* Include files */
-#include "gkmPWMlasso3_rtwutil.h"
+#include "gkmPWMlasso4_rtwutil.h"
 #include <math.h>
 #include <string.h>
 
@@ -32,4 +32,4 @@ double rt_roundd(double u)
   return y;
 }
 
-/* End of code generation (gkmPWMlasso3_rtwutil.c) */
+/* End of code generation (gkmPWMlasso4_rtwutil.c) */

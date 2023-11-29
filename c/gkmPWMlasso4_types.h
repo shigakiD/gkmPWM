@@ -3,17 +3,18 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_types.h
+ * gkmPWMlasso4_types.h
  *
- * Code generation for function 'gkmPWMlasso3'
+ * Code generation for function 'gkmPWMlasso4'
  *
  */
 
-#ifndef GKMPWMLASSO3_TYPES_H
-#define GKMPWMLASSO3_TYPES_H
+#ifndef GKMPWMLASSO4_TYPES_H
+#define GKMPWMLASSO4_TYPES_H
 
 /* Include files */
 #include "rtwtypes.h"
+#include "lapacke.h"
 
 /* Type Definitions */
 #ifndef typedef_struct_T
@@ -105,21 +106,21 @@ typedef struct {
 } cell_wrap_3;
 #endif /* typedef_cell_wrap_3 */
 
-#ifndef typedef_emxArray_cell_wrap_3_100
-#define typedef_emxArray_cell_wrap_3_100
+#ifndef typedef_emxArray_cell_wrap_3_1x19
+#define typedef_emxArray_cell_wrap_3_1x19
 typedef struct {
-  cell_wrap_3 data[100];
-  int size[1];
-} emxArray_cell_wrap_3_100;
-#endif /* typedef_emxArray_cell_wrap_3_100 */
-
-#ifndef typedef_emxArray_cell_wrap_3_1x99
-#define typedef_emxArray_cell_wrap_3_1x99
-typedef struct {
-  cell_wrap_3 data[99];
+  cell_wrap_3 data[19];
   int size[2];
-} emxArray_cell_wrap_3_1x99;
-#endif /* typedef_emxArray_cell_wrap_3_1x99 */
+} emxArray_cell_wrap_3_1x19;
+#endif /* typedef_emxArray_cell_wrap_3_1x19 */
+
+#ifndef typedef_emxArray_cell_wrap_3_20
+#define typedef_emxArray_cell_wrap_3_20
+typedef struct {
+  cell_wrap_3 data[20];
+  int size[1];
+} emxArray_cell_wrap_3_20;
+#endif /* typedef_emxArray_cell_wrap_3_20 */
 
 #ifndef struct_emxArray_int32_T
 #define struct_emxArray_int32_T
@@ -236,6 +237,21 @@ typedef struct {
 } coder_internal_list;
 #endif /* typedef_coder_internal_list */
 
+#ifndef struct_emxArray_lapack_int
+#define struct_emxArray_lapack_int
+struct emxArray_lapack_int {
+  lapack_int *data;
+  int *size;
+  int allocatedSize;
+  int numDimensions;
+  bool canFreeData;
+};
+#endif /* struct_emxArray_lapack_int */
+#ifndef typedef_emxArray_lapack_int
+#define typedef_emxArray_lapack_int
+typedef struct emxArray_lapack_int emxArray_lapack_int;
+#endif /* typedef_emxArray_lapack_int */
+
 #ifndef typedef_emxArray_cell_wrap_8
 #define typedef_emxArray_cell_wrap_8
 typedef struct {
@@ -248,4 +264,4 @@ typedef struct {
 #endif /* typedef_emxArray_cell_wrap_8 */
 
 #endif
-/* End of code generation (gkmPWMlasso3_types.h) */
+/* End of code generation (gkmPWMlasso4_types.h) */

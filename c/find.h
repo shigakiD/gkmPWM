@@ -13,7 +13,7 @@
 #define FIND_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,14 +24,17 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i);
+void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *negvec,
+                        const emxArray_real_T *BY);
 
-void c_binary_expand_op(emxArray_int32_T *iidx, const emxArray_real_T *loc,
-                        const emxArray_real_T *f, double varargin_4);
+void b_eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i);
 
 void c_eml_find(const bool x[209], int i_data[], int i_size[2]);
 
 void d_eml_find(const bool x[210], int i_data[], int *i_size);
+
+void e_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *loc,
+                        const emxArray_real_T *Z, double varargin_4);
 
 void eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i);
 

@@ -13,7 +13,7 @@
 #define LASSO_CVMAT_H
 
 /* Include files */
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,6 +24,13 @@ extern "C" {
 #endif
 
 /* Function Declarations */
+void b_lasso_cvmat(emxArray_real_T *X, emxArray_real_T *Y, double dfMax,
+                   emxArray_real_T *B, double stats_Intercept_data[],
+                   int stats_Intercept_size[2], double stats_Lambda_data[],
+                   int stats_Lambda_size[2], double *stats_Alpha,
+                   double stats_DF_data[], int stats_DF_size[2],
+                   double stats_MSE_data[], int stats_MSE_size[2]);
+
 void lasso_cvmat(emxArray_real_T *X, emxArray_real_T *Y, double dfMax,
                  emxArray_real_T *B, double stats_Intercept_data[],
                  int stats_Intercept_size[2], double stats_Lambda_data[],

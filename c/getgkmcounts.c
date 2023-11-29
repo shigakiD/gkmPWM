@@ -20,8 +20,8 @@
 #include "fseek.h"
 #include "ftell.h"
 #include "genIndex.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include "mtimes.h"
 #include "nchoosek.h"
 #include "repmat.h"
@@ -41,13 +41,13 @@ static void encodekmers(double l, double k, emxArray_real_T *mat);
 
 static void encodekmers_norc(double l, double k, emxArray_real_T *mat);
 
-static void h_binary_expand_op(emxArray_real_T *gkmc, double a,
+static void j_binary_expand_op(emxArray_real_T *gkmc, double a,
                                const emxArray_real_T *temp);
 
-static void i_binary_expand_op(emxArray_real_T *y, const emxArray_real_T *r3,
+static void k_binary_expand_op(emxArray_real_T *y, const emxArray_real_T *r3,
                                const emxArray_real_T *a__2);
 
-static void j_binary_expand_op(emxArray_real_T *temp, int i1, int i2, int i3);
+static void l_binary_expand_op(emxArray_real_T *temp, int i1, int i2, int i3);
 
 static void letterconvert(const emxArray_char_T *s, emxArray_real_T *en);
 
@@ -522,7 +522,7 @@ static void encodekmers_norc(double l, double k, emxArray_real_T *mat)
   emxFree_real_T(&c);
 }
 
-static void h_binary_expand_op(emxArray_real_T *gkmc, double a,
+static void j_binary_expand_op(emxArray_real_T *gkmc, double a,
                                const emxArray_real_T *temp)
 {
   emxArray_real_T *b_gkmc;
@@ -565,7 +565,7 @@ static void h_binary_expand_op(emxArray_real_T *gkmc, double a,
   emxFree_real_T(&b_gkmc);
 }
 
-static void i_binary_expand_op(emxArray_real_T *y, const emxArray_real_T *r3,
+static void k_binary_expand_op(emxArray_real_T *y, const emxArray_real_T *r3,
                                const emxArray_real_T *a__2)
 {
   emxArray_real_T *r1;
@@ -627,7 +627,7 @@ static void i_binary_expand_op(emxArray_real_T *y, const emxArray_real_T *r3,
   emxFree_real_T(&r1);
 }
 
-static void j_binary_expand_op(emxArray_real_T *temp, int i1, int i2, int i3)
+static void l_binary_expand_op(emxArray_real_T *temp, int i1, int i2, int i3)
 {
   emxArray_real_T *b_temp;
   double *b_temp_data;
@@ -884,7 +884,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
    * number of ungapped positions (k) */
   /*  Alternative to isfile */
   /*  if isfile([filename '_svseq.fa']) && isfile([filename '_svalpha.out']) */
-  /* 'getgkmcounts:8' if fopen([filename '_svseq.fa']) ~= -1 && fopen([filename
+  /* 'getgkmcounts:7' if fopen([filename '_svseq.fa']) ~= -1 && fopen([filename
    * '_svalpha.out']) ~= -1 */
   i = filename_tmp->size[0] * filename_tmp->size[1];
   filename_tmp->size[0] = 1;
@@ -935,28 +935,28 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       vlen = fileid;
     }
     if (vlen != -1) {
-      /* 'getgkmcounts:9' filenameseq = [filename '_svseq.fa']; */
-      /* 'getgkmcounts:10' filenamealpha = [filename '_svalpha.out']; */
+      /* 'getgkmcounts:8' filenameseq = [filename '_svseq.fa']; */
+      /* 'getgkmcounts:9' filenamealpha = [filename '_svalpha.out']; */
       /*  Alternative to dlmread */
       /*  alpha = dlmread([filename '_svalpha.out'],'\t',0,1); */
-      /* 'getgkmcounts:14' fp = fopen(filenamealpha, 'r'); */
+      /* 'getgkmcounts:13' fp = fopen(filenamealpha, 'r'); */
       fileid = cfopen(line, "rb");
-      /* 'getgkmcounts:15' idx=0; */
+      /* 'getgkmcounts:14' idx=0; */
       idx = 0.0;
-      /* 'getgkmcounts:16' while ~feof(fp) */
+      /* 'getgkmcounts:15' while ~feof(fp) */
       do {
         exitg1 = 0;
         d = b_feof(fileid);
         if (d == 0.0) {
-          /* 'getgkmcounts:17' idx=idx+1; */
+          /* 'getgkmcounts:16' idx=idx+1; */
           idx++;
-          /* 'getgkmcounts:18' fgetl(fp); */
+          /* 'getgkmcounts:17' fgetl(fp); */
           b_fgets(fileid, b_fileid);
         } else {
           exitg1 = 1;
         }
       } while (exitg1 == 0);
-      /* 'getgkmcounts:20' alpha = zeros(idx, 1); */
+      /* 'getgkmcounts:19' alpha = zeros(idx, 1); */
       loop_ub_tmp = (int)idx;
       i = alpha->size[0];
       alpha->size[0] = (int)idx;
@@ -966,51 +966,51 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         alpha_data[i] = 0.0;
       }
       /*  pre-allocate alpha vector */
-      /* 'getgkmcounts:21' frewind(fp); */
+      /* 'getgkmcounts:20' frewind(fp); */
       frewind(fileid);
       /*  Back to the start */
-      /* 'getgkmcounts:22' idx=0; */
+      /* 'getgkmcounts:21' idx=0; */
       idx = 0.0;
-      /* 'getgkmcounts:23' while ~feof(fp) */
+      /* 'getgkmcounts:22' while ~feof(fp) */
       do {
         exitg1 = 0;
         d = b_feof(fileid);
         if (d == 0.0) {
-          /* 'getgkmcounts:24' idx = idx+1; */
+          /* 'getgkmcounts:23' idx = idx+1; */
           idx++;
-          /* 'getgkmcounts:25' cur_line = fgetl(fp); */
+          /* 'getgkmcounts:24' cur_line = fgetl(fp); */
           fgetl(fileid, cur_line);
-          /* 'getgkmcounts:26' [~, cur_alpha] = strtok(cur_line, char(9)); */
+          /* 'getgkmcounts:25' [~, cur_alpha] = strtok(cur_line, char(9)); */
           b_strtok(cur_line, line, cur_alpha);
-          /* 'getgkmcounts:27' alpha(idx, 1) = real(str2double(cur_alpha)); */
+          /* 'getgkmcounts:26' alpha(idx, 1) = real(str2double(cur_alpha)); */
           dc = str2double(cur_alpha);
           alpha_data[(int)idx - 1] = dc.re;
         } else {
           exitg1 = 1;
         }
       } while (exitg1 == 0);
-      /* 'getgkmcounts:29' fclose(fp); */
+      /* 'getgkmcounts:28' fclose(fp); */
       cfclose(fileid);
       /*  Alternative to importdata */
       /*  sequences = importdata([filename '_svseq.fa']); */
-      /* 'getgkmcounts:33' fp = fopen(filenameseq, 'r'); */
+      /* 'getgkmcounts:32' fp = fopen(filenameseq, 'r'); */
       fileid = cfopen(filename_tmp, "rb");
-      /* 'getgkmcounts:34' idx=0; */
+      /* 'getgkmcounts:33' idx=0; */
       idx = 0.0;
-      /* 'getgkmcounts:35' while ~feof(fp) */
+      /* 'getgkmcounts:34' while ~feof(fp) */
       do {
         exitg1 = 0;
         d = b_feof(fileid);
         if (d == 0.0) {
-          /* 'getgkmcounts:36' idx=idx+1; */
+          /* 'getgkmcounts:35' idx=idx+1; */
           idx++;
-          /* 'getgkmcounts:37' fgetl(fp); */
+          /* 'getgkmcounts:36' fgetl(fp); */
           b_fgets(fileid, d_fileid);
         } else {
           exitg1 = 1;
         }
       } while (exitg1 == 0);
-      /* 'getgkmcounts:39' sequences = cell(idx,1); */
+      /* 'getgkmcounts:38' sequences = cell(idx,1); */
       vlen = (int)idx;
       i = sequences->size[0];
       sequences->size[0] = (int)idx;
@@ -1020,28 +1020,28 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         sequences_data[i].f1[0].f1->size[1] = 0;
         sequences_data[i].f1[0].f1->size[0] = 1;
       }
-      /* 'getgkmcounts:40' sequences = coder.nullcopy(sequences); */
-      /* 'getgkmcounts:41' for cur_idx=1:idx */
+      /* 'getgkmcounts:39' sequences = coder.nullcopy(sequences); */
+      /* 'getgkmcounts:40' for cur_idx=1:idx */
       if (0 <= (int)idx - 1) {
         b_r.f1->size[0] = 1;
         b_r.f1->size[1] = 0;
       }
       for (loop_ub = 0; loop_ub < vlen; loop_ub++) {
-        /* 'getgkmcounts:42' sequences{cur_idx} = cellstr(""); */
+        /* 'getgkmcounts:41' sequences{cur_idx} = cellstr(""); */
         emxCopyStruct_cell_wrap_8(&sequences_data[loop_ub].f1[0], &b_r);
       }
-      /* 'getgkmcounts:44' frewind(fp); */
+      /* 'getgkmcounts:43' frewind(fp); */
       frewind(fileid);
-      /* 'getgkmcounts:45' for cur_idx=1:idx */
+      /* 'getgkmcounts:44' for cur_idx=1:idx */
       for (loop_ub = 0; loop_ub < vlen; loop_ub++) {
-        /* 'getgkmcounts:46' sequences{cur_idx,1} = cellstr(string(fgetl(fp)));
+        /* 'getgkmcounts:45' sequences{cur_idx,1} = cellstr(string(fgetl(fp)));
          */
         fgetl(fileid, r1.f1);
         emxCopyStruct_cell_wrap_8(&sequences_data[loop_ub].f1[0], &r1);
       }
-      /* 'getgkmcounts:48' fclose(fp); */
+      /* 'getgkmcounts:47' fclose(fp); */
       cfclose(fileid);
-      /* 'getgkmcounts:50' ver = 0; */
+      /* 'getgkmcounts:49' ver = 0; */
       ver = 0;
       /*  Alternative to isfile */
       /*  elseif isfile([filename '.model.txt']) */
@@ -1071,41 +1071,41 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       vlen = fileid;
     }
     if (vlen != -1) {
-      /* 'getgkmcounts:54' elseif fopen([filename '.model.txt']) ~= -1 */
-      /* 'getgkmcounts:55' fid = fopen([filename '.model.txt'], 'r'); */
+      /* 'getgkmcounts:53' elseif fopen([filename '.model.txt']) ~= -1 */
+      /* 'getgkmcounts:54' fid = fopen([filename '.model.txt'], 'r'); */
       fileid = cfopen(filename_tmp, "rb");
-      /* 'getgkmcounts:56' a = 1; */
-      /* 'getgkmcounts:57' while a == 1 */
+      /* 'getgkmcounts:55' a = 1; */
+      /* 'getgkmcounts:56' while a == 1 */
       do {
-        /* 'getgkmcounts:58' line = fgetl(fid); */
+        /* 'getgkmcounts:57' line = fgetl(fid); */
         fgetl(fileid, line);
-        /* 'getgkmcounts:59' if strcmp('SV', line) */
+        /* 'getgkmcounts:58' if strcmp('SV', line) */
       } while (!c_strcmp(line));
-      /* 'getgkmcounts:60' a = 0; */
+      /* 'getgkmcounts:59' a = 0; */
       /*  Alternative to textscan */
       /*  X = textscan(fid,'%f %s\n'); */
       /*  sequences = X{2}; */
       /*  alpha = X{1}; */
-      /* 'getgkmcounts:68' curr_pos = ftell(fid); */
+      /* 'getgkmcounts:67' curr_pos = ftell(fid); */
       curr_pos = b_ftell(fileid);
-      /* 'getgkmcounts:69' idx=0; */
+      /* 'getgkmcounts:68' idx=0; */
       idx = 0.0;
-      /* 'getgkmcounts:70' while ~feof(fid) */
+      /* 'getgkmcounts:69' while ~feof(fid) */
       do {
         exitg1 = 0;
         d = b_feof(fileid);
         if (d == 0.0) {
-          /* 'getgkmcounts:71' idx=idx+1; */
+          /* 'getgkmcounts:70' idx=idx+1; */
           idx++;
-          /* 'getgkmcounts:72' fgetl(fid); */
+          /* 'getgkmcounts:71' fgetl(fid); */
           b_fgets(fileid, c_fileid);
         } else {
           exitg1 = 1;
         }
       } while (exitg1 == 0);
-      /* 'getgkmcounts:74' fseek(fid, curr_pos, 'bof'); */
+      /* 'getgkmcounts:73' fseek(fid, curr_pos, 'bof'); */
       b_fseek(fileid, curr_pos);
-      /* 'getgkmcounts:76' alpha = zeros(idx, 1); */
+      /* 'getgkmcounts:75' alpha = zeros(idx, 1); */
       loop_ub_tmp = (int)idx;
       i = alpha->size[0];
       alpha->size[0] = (int)idx;
@@ -1115,7 +1115,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         alpha_data[i] = 0.0;
       }
       /*  pre-allocate alpha vector */
-      /* 'getgkmcounts:77' sequences = cell(idx,1); */
+      /* 'getgkmcounts:76' sequences = cell(idx,1); */
       i = sequences->size[0];
       sequences->size[0] = (int)idx;
       emxEnsureCapacity_cell_wrap_9(sequences, i);
@@ -1125,14 +1125,14 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         sequences_data[i].f1[0].f1->size[0] = 1;
       }
       /*  pre-allocate seq cell arr */
-      /* 'getgkmcounts:78' sequences = coder.nullcopy(sequences); */
-      /* 'getgkmcounts:79' for cur_idx=1:idx */
+      /* 'getgkmcounts:77' sequences = coder.nullcopy(sequences); */
+      /* 'getgkmcounts:78' for cur_idx=1:idx */
       loop_ub = 0;
       exitg2 = false;
       while ((!exitg2) && (loop_ub <= (int)idx - 1)) {
-        /* 'getgkmcounts:80' cur_line = fgetl(fid); */
+        /* 'getgkmcounts:79' cur_line = fgetl(fid); */
         fgetl(fileid, cur_line);
-        /* 'getgkmcounts:81' if cur_line == -1 */
+        /* 'getgkmcounts:80' if cur_line == -1 */
         y = (cur_line->size[1] != 0);
         if (y) {
           y = (0 > cur_line->size[1] - 1);
@@ -1140,47 +1140,47 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         if (y) {
           exitg2 = true;
         } else {
-          /* 'getgkmcounts:84' [cur_alpha, cur_seq] = strtok(cur_line, ' '); */
+          /* 'getgkmcounts:83' [cur_alpha, cur_seq] = strtok(cur_line, ' '); */
           c_strtok(cur_line, cur_alpha, filename_tmp);
-          /* 'getgkmcounts:85' alpha(cur_idx,1) = real(str2double(cur_alpha));
+          /* 'getgkmcounts:84' alpha(cur_idx,1) = real(str2double(cur_alpha));
            */
           dc = str2double(cur_alpha);
           alpha_data[loop_ub] = dc.re;
-          /* 'getgkmcounts:86' sequences{cur_idx} =
+          /* 'getgkmcounts:85' sequences{cur_idx} =
            * cellstr(string(strip(cur_seq))); */
           strip(filename_tmp, b_r.f1);
           emxCopyStruct_cell_wrap_8(&sequences_data[loop_ub].f1[0], &b_r);
           loop_ub++;
         }
       }
-      /* 'getgkmcounts:88' fclose(fid); */
+      /* 'getgkmcounts:87' fclose(fid); */
       cfclose(fileid);
-      /* 'getgkmcounts:90' ver = 1; */
+      /* 'getgkmcounts:89' ver = 1; */
       ver = 1;
     } else {
-      /* 'getgkmcounts:91' else */
-      /* 'getgkmcounts:92' error(['Needs ' filename '_svseq.fa and ' filename
+      /* 'getgkmcounts:90' else */
+      /* 'getgkmcounts:91' error(['Needs ' filename '_svseq.fa and ' filename
        * '_svalpha.out or ' filename '.model.txt']); */
       /*  Dummy Initialization to Appease Matlab Coder */
-      /* 'getgkmcounts:94' idx = 1; */
-      /* 'getgkmcounts:95' alpha = zeros(idx,1); */
+      /* 'getgkmcounts:93' idx = 1; */
+      /* 'getgkmcounts:94' alpha = zeros(idx,1); */
       i = alpha->size[0];
       alpha->size[0] = 1;
       emxEnsureCapacity_real_T(alpha, i);
       alpha_data = alpha->data;
       alpha_data[0] = 0.0;
-      /* 'getgkmcounts:96' sequences = cell(idx,1); */
-      /* 'getgkmcounts:97' sequences = coder.nullcopy(sequences); */
+      /* 'getgkmcounts:95' sequences = cell(idx,1); */
+      /* 'getgkmcounts:96' sequences = coder.nullcopy(sequences); */
       i = sequences->size[0];
       sequences->size[0] = 1;
       emxEnsureCapacity_cell_wrap_9(sequences, i);
       sequences_data = sequences->data;
-      /* 'getgkmcounts:98' for cur_idx=1:idx */
-      /* 'getgkmcounts:99' sequences{cur_idx} = cellstr(""); */
+      /* 'getgkmcounts:97' for cur_idx=1:idx */
+      /* 'getgkmcounts:98' sequences{cur_idx} = cellstr(""); */
       b_r.f1->size[0] = 1;
       b_r.f1->size[1] = 0;
       emxCopyStruct_cell_wrap_8(&sequences_data[0].f1[0], &b_r);
-      /* 'getgkmcounts:101' ver = 0; */
+      /* 'getgkmcounts:100' ver = 0; */
       ver = 0;
     }
   }
@@ -1191,26 +1191,26 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   emxFreeStruct_cell_wrap_8(&b_r);
   emxFree_char_T(&cur_alpha);
   emxFree_char_T(&cur_line);
-  /* 'getgkmcounts:104' if RC */
+  /* 'getgkmcounts:103' if RC */
   emxInit_real_T(&x, 2);
   if (RC) {
-    /* 'getgkmcounts:105' x = encodekmers(l, k); */
+    /* 'getgkmcounts:104' x = encodekmers(l, k); */
     encodekmers(l, k, x);
     x_data = x->data;
   } else {
-    /* 'getgkmcounts:106' else */
-    /* 'getgkmcounts:107' x = encodekmers_norc(l, k); */
+    /* 'getgkmcounts:105' else */
+    /* 'getgkmcounts:106' x = encodekmers_norc(l, k); */
     encodekmers_norc(l, k, x);
     x_data = x->data;
   }
   emxInit_real_T(&a__2, 2);
   emxInit_real_T(&len, 1);
-  emxInit_real_T(&M2, 2);
   emxInit_real_T(&Ker, 1);
+  emxInit_real_T(&M2, 2);
   emxInit_real_T(&M, 2);
-  /* 'getgkmcounts:110' [comb,~,~,~,~,rcnum] = genIndex(l,k); */
+  /* 'getgkmcounts:109' [comb,~,~,~,~,rcnum] = genIndex(l,k); */
   genIndex(l, k, M, a__2, len, Ker, M2, &rcnum);
-  /* 'getgkmcounts:111' lcnum = length(comb); */
+  /* 'getgkmcounts:110' lcnum = length(comb); */
   if ((M->size[0] == 0) || (M->size[1] == 0)) {
     u1 = 0;
   } else {
@@ -1220,12 +1220,12 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       u1 = vlen;
     }
   }
-  /* 'getgkmcounts:112' n = length(alpha); */
+  /* 'getgkmcounts:111' n = length(alpha); */
   /*  disp(['# of support vectors: ' num2str(n)]) */
-  /* 'getgkmcounts:115' fprintf("# of support vectors: %d\n", int32(n)); */
+  /* 'getgkmcounts:113' fprintf("# of support vectors: %d\n", int32(n)); */
   printf("# of support vectors: %d\n", alpha->size[0]);
   fflush(stdout);
-  /* 'getgkmcounts:117' alphasum = sum(alpha(alpha>0)); */
+  /* 'getgkmcounts:115' alphasum = sum(alpha(alpha>0)); */
   loop_ub = alpha->size[0] - 1;
   vlen = 0;
   for (b_i = 0; b_i <= loop_ub; b_i++) {
@@ -1254,7 +1254,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
     Ker_data[i] = alpha_data[r3[i] - 1];
   }
   alphasum = blockedSummation(Ker, r2->size[0]);
-  /* 'getgkmcounts:118' gkmc = zeros(4^k*lcnum,1); */
+  /* 'getgkmcounts:116' gkmc = zeros(4^k*lcnum,1); */
   c_tmp = pow(4.0, k);
   loop_ub_tmp_tmp = c_tmp * (double)u1;
   loop_ub_tmp = (int)loop_ub_tmp_tmp;
@@ -1267,11 +1267,11 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
     gkmc_data[i] = 0.0;
   }
   emxInit_boolean_T(&b_x, 1);
-  /* 'getgkmcounts:119' GCpos = 0; */
+  /* 'getgkmcounts:117' GCpos = 0; */
   *GCpos = 0.0;
-  /* 'getgkmcounts:120' GCneg = 0; */
+  /* 'getgkmcounts:118' GCneg = 0; */
   *GCneg = 0.0;
-  /* 'getgkmcounts:121' np = sum(alpha>0); */
+  /* 'getgkmcounts:119' np = sum(alpha>0); */
   i = b_x->size[0];
   b_x->size[0] = alpha->size[0];
   emxEnsureCapacity_boolean_T(b_x, i);
@@ -1299,8 +1299,8 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
     }
   }
   emxFree_boolean_T(&b_x);
-  /* 'getgkmcounts:122' nn = sum(alpha<0); */
-  /* 'getgkmcounts:123' len = zeros(n,1); */
+  /* 'getgkmcounts:120' nn = sum(alpha<0); */
+  /* 'getgkmcounts:121' len = zeros(n,1); */
   i = len->size[0];
   len->size[0] = alpha->size[0];
   emxEnsureCapacity_real_T(len, i);
@@ -1309,11 +1309,11 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   for (i = 0; i < loop_ub; i++) {
     len_data[i] = 0.0;
   }
-  /* 'getgkmcounts:124' mat = zeros(4); */
-  /* 'getgkmcounts:125' mat2 = zeros(4); */
+  /* 'getgkmcounts:122' mat = zeros(4); */
+  /* 'getgkmcounts:123' mat2 = zeros(4); */
   memset(&mat[0], 0, 16U * sizeof(double));
   memset(&mat2[0], 0, 16U * sizeof(double));
-  /* 'getgkmcounts:126' pow = 4.^(0:l-1).'; */
+  /* 'getgkmcounts:124' pow = 4.^(0:l-1).'; */
   emxInit_real_T(&c_y, 2);
   M_data = c_y->data;
   if (l - 1.0 < 0.0) {
@@ -1341,27 +1341,20 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
     curr_pos = M_data[i];
     r5[i] = pow(4.0, curr_pos);
   }
-  /* 'getgkmcounts:127' n4 = 4^(l-1); */
+  /* 'getgkmcounts:125' n4 = 4^(l-1); */
   idx = pow(4.0, l - 1.0);
-  /* 'getgkmcounts:128' slen = numel(sequences); */
-  /* 'getgkmcounts:129' per = 10; */
+  /* 'getgkmcounts:126' slen = numel(sequences); */
+  /* 'getgkmcounts:127' per = 10; */
   per = 10.0;
-  /* 'getgkmcounts:130' a = 2; */
+  /* 'getgkmcounts:128' a = 2; */
   a = 2.0;
-  /* 'getgkmcounts:131' s = ''; */
+  /* 'getgkmcounts:129' s = ''; */
   line->size[0] = 1;
   line->size[1] = 0;
-  /* 'getgkmcounts:132' l2 = l-1; */
-  /* 'getgkmcounts:133' lcnum2 = lcnum-rcnum; */
+  /* 'getgkmcounts:130' l2 = l-1; */
+  /* 'getgkmcounts:131' lcnum2 = lcnum-rcnum; */
   lcnum2 = (double)u1 - rcnum;
-  /* 'getgkmcounts:134' M2 = 0; */
-  i = M2->size[0] * M2->size[1];
-  M2->size[0] = 1;
-  M2->size[1] = 1;
-  emxEnsureCapacity_real_T(M2, i);
-  M2_data = M2->data;
-  M2_data[0] = 0.0;
-  /* 'getgkmcounts:135' Ker = zeros(l+1,1); */
+  /* 'getgkmcounts:132' Ker = zeros(l+1,1); */
   vlen = (int)(l + 1.0);
   i = Ker->size[0];
   Ker->size[0] = (int)(l + 1.0);
@@ -1370,15 +1363,22 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   for (i = 0; i < vlen; i++) {
     Ker_data[i] = 0.0;
   }
-  /* 'getgkmcounts:136' for i = 0:(l-k) */
+  /* 'getgkmcounts:133' M2 = 0; */
+  i = M2->size[0] * M2->size[1];
+  M2->size[0] = 1;
+  M2->size[1] = 1;
+  emxEnsureCapacity_real_T(M2, i);
+  M2_data = M2->data;
+  M2_data[0] = 0.0;
+  /* 'getgkmcounts:134' for i = 0:(l-k) */
   d = l - k;
   i = (int)(d + 1.0);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'getgkmcounts:137' Ker(l-i+1) = nchoosek(l-i,l-k-i); */
+    /* 'getgkmcounts:135' Ker(l-i+1) = nchoosek(l-i,l-k-i); */
     curr_pos = l - (double)b_i;
     Ker_data[(int)(curr_pos + 1.0) - 1] = b_nchoosek(curr_pos, d - (double)b_i);
   }
-  /* 'getgkmcounts:139' for i = 1:n */
+  /* 'getgkmcounts:137' for i = 1:n */
   i = alpha->size[0];
   if (0 <= alpha->size[0] - 1) {
     d_y = (int)floor((double)alpha->size[0] / 10.0);
@@ -1398,21 +1398,21 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   emxInit_boolean_T(&c_x, 2);
   emxInit_real_T(&b_Ker, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'getgkmcounts:140' if mod(i, floor(n/10))==0 */
+    /* 'getgkmcounts:138' if mod(i, floor(n/10))==0 */
     vlen = b_i + 1;
     if (d_y != 0) {
       vlen = (int)fmod((double)b_i + 1.0, d_y);
     }
     if (vlen == 0) {
-      /* 'getgkmcounts:141' fprintf('%d...', int32(per)); */
+      /* 'getgkmcounts:139' fprintf('%d...', int32(per)); */
       printf("%d...", (int)per);
       fflush(stdout);
-      /* 'getgkmcounts:142' per = per+10; */
+      /* 'getgkmcounts:140' per = per+10; */
       per += 10.0;
     }
-    /* 'getgkmcounts:144' if ver == 0 */
+    /* 'getgkmcounts:142' if ver == 0 */
     if (ver == 0) {
-      /* 'getgkmcounts:145' cur_seq = char(string(sequences{a})); */
+      /* 'getgkmcounts:143' cur_seq = char(string(sequences{a})); */
       i2 = filename_tmp->size[0] * filename_tmp->size[1];
       filename_tmp->size[0] = 1;
       filename_tmp->size[1] = sequences_data[(int)a - 1].f1[0].f1->size[1];
@@ -1422,10 +1422,10 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       for (i2 = 0; i2 < loop_ub; i2++) {
         filename_tmp_data[i2] = sequences_data[(int)a - 1].f1[0].f1->data[i2];
       }
-      /* 'getgkmcounts:146' while ~strcmp('>', cur_seq(1)) */
+      /* 'getgkmcounts:144' while ~strcmp('>', cur_seq(1)) */
       exitg2 = false;
       while ((!exitg2) && ('>' != filename_tmp_data[0])) {
-        /* 'getgkmcounts:147' s = [s cur_seq]; */
+        /* 'getgkmcounts:145' s = [s cur_seq]; */
         i2 = line->size[1];
         loop_ub = filename_tmp->size[1];
         b_k = line->size[0] * line->size[1];
@@ -1435,13 +1435,13 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         for (b_k = 0; b_k < loop_ub; b_k++) {
           line_data[i2 + b_k] = filename_tmp_data[b_k];
         }
-        /* 'getgkmcounts:148' a = a+1; */
+        /* 'getgkmcounts:146' a = a+1; */
         a++;
-        /* 'getgkmcounts:149' if a > slen */
+        /* 'getgkmcounts:147' if a > slen */
         if (a > sequences->size[0]) {
           exitg2 = true;
         } else {
-          /* 'getgkmcounts:152' cur_seq = char(string(sequences{a})); */
+          /* 'getgkmcounts:150' cur_seq = char(string(sequences{a})); */
           i2 = filename_tmp->size[0] * filename_tmp->size[1];
           filename_tmp->size[0] = 1;
           b_k = (int)a - 1;
@@ -1455,9 +1455,9 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         }
       }
     } else {
-      /* 'getgkmcounts:154' else */
-      /* 'getgkmcounts:155' if ~isempty(sequences{i}) */
-      /* 'getgkmcounts:156' s = char(string(sequences{i})); */
+      /* 'getgkmcounts:152' else */
+      /* 'getgkmcounts:153' if ~isempty(sequences{i}) */
+      /* 'getgkmcounts:154' s = char(string(sequences{i})); */
       i2 = line->size[0] * line->size[1];
       line->size[0] = 1;
       line->size[1] = sequences_data[b_i].f1[0].f1->size[1];
@@ -1468,12 +1468,12 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         line_data[i2] = sequences_data[b_i].f1[0].f1->data[i2];
       }
     }
-    /* 'getgkmcounts:159' ss = letterconvert(s); */
+    /* 'getgkmcounts:158' ss = letterconvert(s); */
     letterconvert(line, ss);
     ss_data = ss->data;
-    /* 'getgkmcounts:160' if RC */
+    /* 'getgkmcounts:159' if RC */
     if (RC) {
-      /* 'getgkmcounts:161' temp = zeros(4^k*(lcnum*2), 1); */
+      /* 'getgkmcounts:160' temp = zeros(4^k*(lcnum*2), 1); */
       loop_ub = (int)(c_tmp * ((double)u1 * 2.0));
       i2 = temp->size[0];
       temp->size[0] = loop_ub;
@@ -1483,8 +1483,8 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         temp_data[i2] = 0.0;
       }
     } else {
-      /* 'getgkmcounts:162' else */
-      /* 'getgkmcounts:163' temp = zeros(4^k*(lcnum), 1); */
+      /* 'getgkmcounts:161' else */
+      /* 'getgkmcounts:162' temp = zeros(4^k*(lcnum), 1); */
       i2 = temp->size[0];
       temp->size[0] = (int)loop_ub_tmp_tmp;
       emxEnsureCapacity_real_T(temp, i2);
@@ -1493,7 +1493,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         temp_data[i2] = 0.0;
       }
     }
-    /* 'getgkmcounts:165' vec = ss(1:l)*pow; */
+    /* 'getgkmcounts:164' vec = ss(1:l)*pow; */
     i2 = c_y->size[0] * c_y->size[1];
     c_y->size[0] = 1;
     c_y->size[1] = b_loop_ub;
@@ -1508,8 +1508,8 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       curr_pos = cblas_ddot((blasint)b_loop_ub, &M_data[0], (blasint)1, &r5[0],
                             (blasint)1);
     }
-    /* 'getgkmcounts:166' en = x(vec+1, :); */
-    /* 'getgkmcounts:167' temp(en) = temp(en) + 1; */
+    /* 'getgkmcounts:165' en = x(vec+1, :); */
+    /* 'getgkmcounts:166' temp(en) = temp(en) + 1; */
     i2 = r6->size[0] * r6->size[1];
     r6->size[0] = 1;
     r6->size[1] = i1;
@@ -1531,14 +1531,14 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
     for (i2 = 0; i2 < loop_ub; i2++) {
       temp_data[r3[i2] - 1] = 1.0;
     }
-    /* 'getgkmcounts:168' for j = 2:length(ss)-l2 */
+    /* 'getgkmcounts:167' for j = 2:length(ss)-l2 */
     i2 = (int)(((double)ss->size[1] - (l - 1.0)) + -1.0);
     for (j = 0; j < i2; j++) {
-      /* 'getgkmcounts:169' vec = (vec-ss(j-1))/4+n4*ss(j+l2); */
+      /* 'getgkmcounts:168' vec = (vec-ss(j-1))/4+n4*ss(j+l2); */
       curr_pos = (curr_pos - ss_data[j]) / 4.0 +
                  idx * ss_data[(int)(((double)j + 2.0) + (l - 1.0)) - 1];
-      /* 'getgkmcounts:170' en = x(vec+1, :); */
-      /* 'getgkmcounts:171' temp(en) = temp(en) + 1; */
+      /* 'getgkmcounts:169' en = x(vec+1, :); */
+      /* 'getgkmcounts:170' temp(en) = temp(en) + 1; */
       loop_ub = x->size[1];
       b_k = r6->size[0] * r6->size[1];
       r6->size[0] = 1;
@@ -1566,9 +1566,9 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         temp_data[r3[b_k] - 1] = M_data[b_k];
       }
     }
-    /* 'getgkmcounts:173' if RC */
+    /* 'getgkmcounts:172' if RC */
     if (RC) {
-      /* 'getgkmcounts:174' temp =
+      /* 'getgkmcounts:173' temp =
        * temp(1:4^k*lcnum)+temp(4^k*lcnum+1:4^k*2*lcnum); */
       if (1.0 > loop_ub_tmp_tmp) {
         loop_ub = 0;
@@ -1593,9 +1593,10 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         emxEnsureCapacity_real_T(temp, i2);
         temp_data = temp->data;
       } else {
-        j_binary_expand_op(temp, loop_ub - 1, i2, b_k - 1);
+        l_binary_expand_op(temp, loop_ub - 1, i2, b_k - 1);
         temp_data = temp->data;
       }
+      /*          temp = sum(reshape(temp, [], 2), 2); */
     }
     /* 'getgkmcounts:176' if rcnum > 0 && RC */
     if ((rcnum > 0.0) && RC) {
@@ -1642,7 +1643,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
           gkmc_data[i2] += curr_pos * temp_data[i2];
         }
       } else {
-        h_binary_expand_op(gkmc, curr_pos, temp);
+        j_binary_expand_op(gkmc, curr_pos, temp);
         gkmc_data = gkmc->data;
       }
       /* 'getgkmcounts:181' len(i) = length(ss); */
@@ -1837,7 +1838,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
           }
           d_sum(b_Ker, c_y);
         } else {
-          i_binary_expand_op(c_y, r7, a__2);
+          k_binary_expand_op(c_y, r7, a__2);
         }
         curr_pos = sqrt(sum(c_y));
       } else {
@@ -1863,7 +1864,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
           gkmc_data[i2] += curr_pos * temp_data[i2];
         }
       } else {
-        h_binary_expand_op(gkmc, curr_pos, temp);
+        j_binary_expand_op(gkmc, curr_pos, temp);
         gkmc_data = gkmc->data;
       }
     }

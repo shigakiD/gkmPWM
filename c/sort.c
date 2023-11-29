@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "sort.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include "sortIdx.h"
 #include <string.h>
 
@@ -278,11 +278,11 @@ void b_sort(emxArray_real_T *x, emxArray_int32_T *idx)
 void c_sort(double x_data[], const int x_size[2], int idx_data[],
             int idx_size[2])
 {
-  double xwork_data[99];
+  double xwork_data[19];
   double x4[4];
   double d;
   double d1;
-  int iwork_data[99];
+  int iwork_data[19];
   int b_n;
   int i1;
   int i3;

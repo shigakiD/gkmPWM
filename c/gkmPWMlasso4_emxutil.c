@@ -3,15 +3,16 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso3_emxutil.c
+ * gkmPWMlasso4_emxutil.c
  *
- * Code generation for function 'gkmPWMlasso3_emxutil'
+ * Code generation for function 'gkmPWMlasso4_emxutil'
  *
  */
 
 /* Include files */
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
+#include "lapacke.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -212,20 +213,19 @@ void emxEnsureCapacity_cell_wrap_12(emxArray_cell_wrap_12 *emxArray,
   }
 }
 
-void emxEnsureCapacity_cell_wrap_3(cell_wrap_3 data[100], int size,
-                                   int oldNumel)
+void emxEnsureCapacity_cell_wrap_3(cell_wrap_3 data[20], int size, int oldNumel)
 {
   if (oldNumel < 0) {
     oldNumel = 0;
   }
   if (oldNumel > size) {
-    emxTrim_cell_wrap_3_100(data, size, oldNumel);
+    emxTrim_cell_wrap_3_20(data, size, oldNumel);
   } else if (oldNumel < size) {
-    emxExpand_cell_wrap_3_100(data, oldNumel, size);
+    emxExpand_cell_wrap_3_20(data, oldNumel, size);
   }
 }
 
-void emxEnsureCapacity_cell_wrap_31(cell_wrap_3 data[99], const int size[2],
+void emxEnsureCapacity_cell_wrap_31(cell_wrap_3 data[19], const int size[2],
                                     int oldNumel)
 {
   int newNumel;
@@ -234,9 +234,9 @@ void emxEnsureCapacity_cell_wrap_31(cell_wrap_3 data[99], const int size[2],
   }
   newNumel = size[0] * size[1];
   if (oldNumel > newNumel) {
-    emxTrim_cell_wrap_3_1x99(data, newNumel, oldNumel);
+    emxTrim_cell_wrap_3_1x19(data, newNumel, oldNumel);
   } else if (oldNumel < newNumel) {
-    emxExpand_cell_wrap_3_1x99(data, oldNumel, newNumel);
+    emxExpand_cell_wrap_3_1x19(data, oldNumel, newNumel);
   }
 }
 
@@ -441,6 +441,43 @@ void emxEnsureCapacity_int32_T(emxArray_int32_T *emxArray, int oldNumel)
   }
 }
 
+void emxEnsureCapacity_lapack_int(emxArray_lapack_int *emxArray, int oldNumel)
+{
+  int i;
+  int newNumel;
+  void *newData;
+  if (oldNumel < 0) {
+    oldNumel = 0;
+  }
+  newNumel = 1;
+  for (i = 0; i < emxArray->numDimensions; i++) {
+    newNumel *= emxArray->size[i];
+  }
+  if (newNumel > emxArray->allocatedSize) {
+    i = emxArray->allocatedSize;
+    if (i < 16) {
+      i = 16;
+    }
+    while (i < newNumel) {
+      if (i > 1073741823) {
+        i = MAX_int32_T;
+      } else {
+        i *= 2;
+      }
+    }
+    newData = calloc((unsigned int)i, sizeof(lapack_int));
+    if (emxArray->data != NULL) {
+      memcpy(newData, emxArray->data, sizeof(lapack_int) * oldNumel);
+      if (emxArray->canFreeData) {
+        free(emxArray->data);
+      }
+    }
+    emxArray->data = (lapack_int *)newData;
+    emxArray->allocatedSize = i;
+    emxArray->canFreeData = true;
+  }
+}
+
 void emxEnsureCapacity_real_T(emxArray_real_T *emxArray, int oldNumel)
 {
   int i;
@@ -579,8 +616,8 @@ void emxExpand_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int fromIndex,
   }
 }
 
-void emxExpand_cell_wrap_3_100(cell_wrap_3 data[100], int fromIndex,
-                               int toIndex)
+void emxExpand_cell_wrap_3_1x19(cell_wrap_3 data[19], int fromIndex,
+                                int toIndex)
 {
   int i;
   for (i = fromIndex; i < toIndex; i++) {
@@ -588,8 +625,7 @@ void emxExpand_cell_wrap_3_100(cell_wrap_3 data[100], int fromIndex,
   }
 }
 
-void emxExpand_cell_wrap_3_1x99(cell_wrap_3 data[99], int fromIndex,
-                                int toIndex)
+void emxExpand_cell_wrap_3_20(cell_wrap_3 data[20], int fromIndex, int toIndex)
 {
   int i;
   for (i = fromIndex; i < toIndex; i++) {
@@ -747,17 +783,7 @@ void emxFree_cell_wrap_3(emxArray_cell_wrap_3 **pEmxArray)
   }
 }
 
-void emxFree_cell_wrap_3_100(emxArray_cell_wrap_3_100 *pEmxArray)
-{
-  int i;
-  int numEl;
-  numEl = pEmxArray->size[0];
-  for (i = 0; i < numEl; i++) {
-    emxFreeStruct_cell_wrap_3(&pEmxArray->data[i]);
-  }
-}
-
-void emxFree_cell_wrap_3_1x99(emxArray_cell_wrap_3_1x99 *pEmxArray)
+void emxFree_cell_wrap_3_1x19(emxArray_cell_wrap_3_1x19 *pEmxArray)
 {
   int i;
   int numEl;
@@ -765,6 +791,16 @@ void emxFree_cell_wrap_3_1x99(emxArray_cell_wrap_3_1x99 *pEmxArray)
   for (i = 0; i < 2; i++) {
     numEl *= pEmxArray->size[i];
   }
+  for (i = 0; i < numEl; i++) {
+    emxFreeStruct_cell_wrap_3(&pEmxArray->data[i]);
+  }
+}
+
+void emxFree_cell_wrap_3_20(emxArray_cell_wrap_3_20 *pEmxArray)
+{
+  int i;
+  int numEl;
+  numEl = pEmxArray->size[0];
   for (i = 0; i < numEl; i++) {
     emxFreeStruct_cell_wrap_3(&pEmxArray->data[i]);
   }
@@ -837,6 +873,19 @@ void emxFree_int32_T(emxArray_int32_T **pEmxArray)
     free((*pEmxArray)->size);
     free(*pEmxArray);
     *pEmxArray = (emxArray_int32_T *)NULL;
+  }
+}
+
+void emxFree_lapack_int(emxArray_lapack_int **pEmxArray)
+{
+  if (*pEmxArray != (emxArray_lapack_int *)NULL) {
+    if (((*pEmxArray)->data != (lapack_int *)NULL) &&
+        (*pEmxArray)->canFreeData) {
+      free((*pEmxArray)->data);
+    }
+    free((*pEmxArray)->size);
+    free(*pEmxArray);
+    *pEmxArray = (emxArray_lapack_int *)NULL;
   }
 }
 
@@ -983,17 +1032,17 @@ void emxInit_cell_wrap_3(emxArray_cell_wrap_3 **pEmxArray)
   emxArray->size[0] = 0;
 }
 
-void emxInit_cell_wrap_3_100(emxArray_cell_wrap_3_100 *pEmxArray)
-{
-  pEmxArray->size[0] = 0;
-}
-
-void emxInit_cell_wrap_3_1x99(emxArray_cell_wrap_3_1x99 *pEmxArray)
+void emxInit_cell_wrap_3_1x19(emxArray_cell_wrap_3_1x19 *pEmxArray)
 {
   int i;
   for (i = 0; i < 2; i++) {
     pEmxArray->size[i] = 0;
   }
+}
+
+void emxInit_cell_wrap_3_20(emxArray_cell_wrap_3_20 *pEmxArray)
+{
+  pEmxArray->size[0] = 0;
 }
 
 void emxInit_cell_wrap_8(emxArray_cell_wrap_8 **pEmxArray)
@@ -1052,6 +1101,19 @@ void emxInit_int32_T(emxArray_int32_T **pEmxArray, int numDimensions)
   for (i = 0; i < numDimensions; i++) {
     emxArray->size[i] = 0;
   }
+}
+
+void emxInit_lapack_int(emxArray_lapack_int **pEmxArray)
+{
+  emxArray_lapack_int *emxArray;
+  *pEmxArray = (emxArray_lapack_int *)malloc(sizeof(emxArray_lapack_int));
+  emxArray = *pEmxArray;
+  emxArray->data = (lapack_int *)NULL;
+  emxArray->numDimensions = 1;
+  emxArray->size = (int *)malloc(sizeof(int));
+  emxArray->allocatedSize = 0;
+  emxArray->canFreeData = true;
+  emxArray->size[0] = 0;
 }
 
 void emxInit_real_T(emxArray_real_T **pEmxArray, int numDimensions)
@@ -1129,7 +1191,7 @@ void emxTrim_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int fromIndex,
   }
 }
 
-void emxTrim_cell_wrap_3_100(cell_wrap_3 data[100], int fromIndex, int toIndex)
+void emxTrim_cell_wrap_3_1x19(cell_wrap_3 data[19], int fromIndex, int toIndex)
 {
   int i;
   for (i = fromIndex; i < toIndex; i++) {
@@ -1137,7 +1199,7 @@ void emxTrim_cell_wrap_3_100(cell_wrap_3 data[100], int fromIndex, int toIndex)
   }
 }
 
-void emxTrim_cell_wrap_3_1x99(cell_wrap_3 data[99], int fromIndex, int toIndex)
+void emxTrim_cell_wrap_3_20(cell_wrap_3 data[20], int fromIndex, int toIndex)
 {
   int i;
   for (i = fromIndex; i < toIndex; i++) {
@@ -1163,4 +1225,4 @@ void emxTrim_cell_wrap_9(emxArray_cell_wrap_9 *emxArray, int fromIndex,
   }
 }
 
-/* End of code generation (gkmPWMlasso3_emxutil.c) */
+/* End of code generation (gkmPWMlasso4_emxutil.c) */

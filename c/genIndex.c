@@ -14,8 +14,8 @@
 #include "find.h"
 #include "flip.h"
 #include "fliplr.h"
-#include "gkmPWMlasso3_emxutil.h"
-#include "gkmPWMlasso3_types.h"
+#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso4_types.h"
 #include "minOrMax.h"
 #include "nchoosek.h"
 #include "sort.h"
@@ -24,28 +24,28 @@
 #include <string.h>
 
 /* Function Declarations */
-static void d_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void f_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                unsigned int j, const emxArray_real_T *vec);
 
-static void e_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void g_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                int i, const emxArray_real_T *vec);
 
-static void f_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *C,
+static void h_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *C,
                                const emxArray_int32_T *f,
                                const emxArray_real_T *d, int i);
 
-static void g_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void i_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                const emxArray_int32_T *ind,
                                const emxArray_int32_T *f, int i,
                                const emxArray_real_T *C);
 
-static void k_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void m_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                const emxArray_int32_T *ind,
                                const emxArray_real_T *d, int i,
                                const emxArray_real_T *C);
 
 /* Function Definitions */
-static void d_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void f_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                unsigned int j, const emxArray_real_T *vec)
 {
   const double *c_data;
@@ -80,7 +80,7 @@ static void d_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
   }
 }
 
-static void e_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void g_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                int i, const emxArray_real_T *vec)
 {
   const double *c_data;
@@ -115,7 +115,7 @@ static void e_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
   }
 }
 
-static void f_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *C,
+static void h_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *C,
                                const emxArray_int32_T *f,
                                const emxArray_real_T *d, int i)
 {
@@ -170,7 +170,7 @@ static void f_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *C,
   emxFree_real_T(&b_C);
 }
 
-static void g_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void i_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                const emxArray_int32_T *ind,
                                const emxArray_int32_T *f, int i,
                                const emxArray_real_T *C)
@@ -215,7 +215,7 @@ static void g_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
   }
 }
 
-static void k_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
+static void m_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *c,
                                const emxArray_int32_T *ind,
                                const emxArray_real_T *d, int i,
                                const emxArray_real_T *C)
@@ -1212,7 +1212,7 @@ void c_genIndex(double l, double k, emxArray_real_T *c)
           x_data[i] = c_data[b_i + c->size[0] * i] - vec_data[i];
         }
       } else {
-        e_binary_expand_op(x, c, b_i, vec);
+        g_binary_expand_op(x, c, b_i, vec);
         x_data = x->data;
       }
       nx = x->size[1];
@@ -1250,7 +1250,7 @@ void c_genIndex(double l, double k, emxArray_real_T *c)
                   c_data[((int)b_j + c->size[0] * i1) - 1] - vec_data[i1];
             }
           } else {
-            d_binary_expand_op(x, c, b_j, vec);
+            f_binary_expand_op(x, c, b_j, vec);
             x_data = x->data;
           }
           nx = x->size[1];
@@ -1628,7 +1628,7 @@ void c_genIndex(double l, double k, emxArray_real_T *c)
               x_data[nd2];
         }
       } else {
-        f_binary_expand_op(x, C, f, d, b_i);
+        h_binary_expand_op(x, C, f, d, b_i);
         x_data = x->data;
       }
       nx = x->size[1];
@@ -1751,7 +1751,7 @@ void c_genIndex(double l, double k, emxArray_real_T *c)
             C_data[b_i + C->size[0] * i];
       }
     } else {
-      k_binary_expand_op(x, c, ind, d, b_i, C);
+      m_binary_expand_op(x, c, ind, d, b_i, C);
       x_data = x->data;
     }
     nx = x->size[1];
@@ -1931,7 +1931,7 @@ void genIndex(double l, double k, emxArray_real_T *c, emxArray_real_T *C,
           x_data[i] = c_data[b_i + c->size[0] * i] - vec_data[i];
         }
       } else {
-        e_binary_expand_op(x, c, b_i, vec);
+        g_binary_expand_op(x, c, b_i, vec);
         x_data = x->data;
       }
       nx = x->size[1];
@@ -1969,7 +1969,7 @@ void genIndex(double l, double k, emxArray_real_T *c, emxArray_real_T *C,
                   c_data[((int)b_j + c->size[0] * i1) - 1] - vec_data[i1];
             }
           } else {
-            d_binary_expand_op(x, c, b_j, vec);
+            f_binary_expand_op(x, c, b_j, vec);
             x_data = x->data;
           }
           nx = x->size[1];
@@ -2338,7 +2338,7 @@ void genIndex(double l, double k, emxArray_real_T *c, emxArray_real_T *C,
                                       x_data[input_sizes_idx_0];
         }
       } else {
-        f_binary_expand_op(x, C, f, d, b_i);
+        h_binary_expand_op(x, C, f, d, b_i);
         x_data = x->data;
       }
       nx = x->size[1];
@@ -2681,7 +2681,7 @@ void genIndex(double l, double k, emxArray_real_T *c, emxArray_real_T *C,
                     C_data[b_i + C->size[0] * i];
       }
     } else {
-      g_binary_expand_op(x, c, b_ind, f, b_i, C);
+      i_binary_expand_op(x, c, b_ind, f, b_i, C);
       x_data = x->data;
     }
     nx = x->size[1];
