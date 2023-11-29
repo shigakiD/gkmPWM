@@ -42,30 +42,30 @@ void display_arguments() {
             "\n\n"
             "Version:   1.0\n"
             "Code:      https://github.com/shigakiD/gkmPWM/tree/main\n"
-            "Contact:   dshigak1@jhmi.edu\n"
+            "Author:    Dustin Shigaki\n"
+	    "Contact:   Report issues to the Github page\n"
             "\n\n"
             "Usage:     gkmPWMlasso [options] <prefix> <database>"
             "\n"
             "Arguments:\n"
             "    prefix: prefix of a gkmSVM model, where the model files are either\n"
-            "            *_svseq.fa and *_svalpha.out or\n"
-            "            *.model.txt\n"
+            "            *_svseq.fa and *_svalpha.out OR *.model.txt\n"
             "  database: file name to a database of transcription factor binding sites\n"
             "            that is in meme format. An example file is provided.\n"
             "\n"
             "  Options:\n"
             "    -d <int>      number of position weight matrix (PWM) to extract from gkmSVM model, \n"
             "                  if set to 0, gkmPWMlasso will automatically determine the number of PWMs \n"
-            "                  that explains 90 percent of explainable variance"
+            "                  that explains 90 percent of explainable variance (default: 0)\n"
             "    -m <int>      minimum accepted length of a database PWM (default: 10)\n"
             "    -i <float>    minimum accepted information content of a database PWM (default: 0.5)\n"
             "    -c <float>    correlation cutoff for considering two PWMs to be distinct (default: 0.86)\n"
-            "    -l <int>      length of ungapped k-mer used when training gkmSVM (default: 10)\n"
-            "    -k <int>      length of   gapped k-mer used when training gkmSVM (default: 6)\n"
+            "    -l <int>      total length of the gapped k-mer. It doesn't have to be the same l from gkmSVM model (default: 10)\n"
+            "    -k <int>      the number of ungapped positions. It doesn't have to be the same k from gkmSVM model (default: 6)\n"
             "    -b            if set, background GC content equal to the average of the \n"
             "                  positive and negative set used to train gkmSVM; else, the GC content \n"
-            "                  equal to the negative set\n"
-            "    -R            if set, reverse-complement of k-mer is not considered as the same feature \n"
+            "                  equal to the negative set (default: false) \n"
+            "    -R            consider reverse-complement of k-mer to be the same (default: true) \n"
             "\n");
     exit(0);
 }
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
                 backgroundGC = 1;
                 break;
             case 'R':
-                reverseCompl = 1;
+                reverseCompl = 0;
                 break;
             case 'd':
                 numPWM = strtod(optarg, &pEnd);
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
     emxArray_char_T *motif_file = allocate_for_charArray(argv[index++]);
 
     char arr[10][30] = {"model file", "motif file", "number of PWM", "min PWM length", "min PWM info", "correlation cutoff", 
-                        "ungapped k-mer length", "gapped k-mer length", "average GC", "reverse complement"};
+                        "total gapped k-mer length", "number of ungapped positions", "average GC", "reverse complement"};
     double arr2[6] = {numPWM, minLength, minInfo, corrCut, lSVM, kSVM};
     int arr3[2] = {backgroundGC, reverseCompl};
     printf("\n----Following Are The Command Line Arguments Passed----");
