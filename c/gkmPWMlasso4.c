@@ -1349,6 +1349,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     /* error([num2str(length(comb)*4^k_svm) ' exceeds the maximum number of
      * gapped kmers allowed (10^6)']) */
     /* 'gkmPWMlasso4:66' fprintf('l = 10, k = 6\n'); */
+    printf("The choice of l and k combination exceeds the maximum number of gapped kmers allowed (10^6)\n");
     printf("l = 10, k = 6\n");
     fflush(stdout);
     /* 'gkmPWMlasso4:67' lk = 0; */
