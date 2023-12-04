@@ -3,17 +3,16 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mtimes.h
+ * xzhgeqz.h
  *
- * Code generation for function 'mtimes'
+ * Code generation for function 'xzhgeqz'
  *
  */
 
-#ifndef MTIMES_H
-#define MTIMES_H
+#ifndef XZHGEQZ_H
+#define XZHGEQZ_H
 
 /* Include files */
-#include "gkmPWM_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,14 +23,12 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_mtimes(const emxArray_real_T *A, const emxArray_real_T *B, double C[4]);
-
-void mtimes(const emxArray_real_T *A, const emxArray_real_T *B,
-            emxArray_real_T *C);
+void xzhgeqz(const creal_T A[16], int ilo, int ihi, int *info,
+             creal_T alpha1[4], creal_T beta1[4]);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (mtimes.h) */
+/* End of code generation (xzhgeqz.h) */

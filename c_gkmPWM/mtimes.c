@@ -20,47 +20,7 @@
 /*
  *
  */
-void b_mtimes(const emxArray_real_T *A, const double B[4], emxArray_real_T *C)
-{
-  const double *A_data;
-  double *C_data;
-  int i;
-  A_data = A->data;
-  if (A->size[0] == 0) {
-    C->size[0] = 0;
-  } else {
-    i = C->size[0];
-    C->size[0] = A->size[0];
-    emxEnsureCapacity_real_T(C, i);
-    C_data = C->data;
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, (blasint)A->size[0],
-                (blasint)1, (blasint)4, 1.0, &A_data[0], (blasint)A->size[0],
-                &B[0], (blasint)1, 0.0, &C_data[0], (blasint)A->size[0]);
-  }
-}
-
-/*
- *
- */
-void c_mtimes(const emxArray_real_T *A, const emxArray_real_T *B, double C[16])
-{
-  const double *A_data;
-  const double *B_data;
-  B_data = B->data;
-  A_data = A->data;
-  if ((A->size[0] == 0) || (B->size[0] == 0)) {
-    memset(&C[0], 0, 16U * sizeof(double));
-  } else {
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, (blasint)4, (blasint)4,
-                (blasint)A->size[0], 1.0, &A_data[0], (blasint)A->size[0],
-                &B_data[0], (blasint)B->size[0], 0.0, &C[0], (blasint)4);
-  }
-}
-
-/*
- *
- */
-void d_mtimes(const emxArray_real_T *A, const emxArray_real_T *B, double C[4])
+void b_mtimes(const emxArray_real_T *A, const emxArray_real_T *B, double C[4])
 {
   const double *A_data;
   const double *B_data;

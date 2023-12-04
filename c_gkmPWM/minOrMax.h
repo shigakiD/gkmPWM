@@ -30,6 +30,8 @@ double b_minimum(const double x[2]);
 
 void c_maximum(const double x[2], double *ex, int *idx);
 
+creal_T c_minimum(const creal_T x[4]);
+
 void d_maximum(const emxArray_real_T *x, double *ex, int *idx);
 
 double e_maximum(const double x[4]);
@@ -40,9 +42,9 @@ void g_maximum(const emxArray_real_T *x, emxArray_real_T *ex);
 
 double h_maximum(const emxArray_real_T *x);
 
-double i_maximum(const double x[9]);
+void i_maximum(const creal_T x[4], creal_T *ex, int *idx);
 
-void j_maximum(const creal_T x_data[], creal_T *ex, int *idx);
+double j_maximum(const double x[9]);
 
 double maximum(const emxArray_real_T *x);
 

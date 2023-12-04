@@ -66,6 +66,30 @@ void c_maximum(const double x[2], double *ex, int *idx)
 /*
  *
  */
+creal_T c_minimum(const creal_T x[4])
+{
+  creal_T ex;
+  double b_x;
+  double y;
+  ex = x[0];
+  absRelopProxies(x[0], x[1], &b_x, &y);
+  if (b_x > y) {
+    ex = x[1];
+  }
+  absRelopProxies(ex, x[2], &b_x, &y);
+  if (b_x > y) {
+    ex = x[2];
+  }
+  absRelopProxies(ex, x[3], &b_x, &y);
+  if (b_x > y) {
+    ex = x[3];
+  }
+  return ex;
+}
+
+/*
+ *
+ */
 void d_maximum(const emxArray_real_T *x, double *ex, int *idx)
 {
   const double *x_data;
@@ -223,7 +247,33 @@ double h_maximum(const emxArray_real_T *x)
 /*
  *
  */
-double i_maximum(const double x[9])
+void i_maximum(const creal_T x[4], creal_T *ex, int *idx)
+{
+  double b_x;
+  double y;
+  *idx = 1;
+  *ex = x[0];
+  absRelopProxies(x[0], x[1], &b_x, &y);
+  if (b_x < y) {
+    *ex = x[1];
+    *idx = 2;
+  }
+  absRelopProxies(*ex, x[2], &b_x, &y);
+  if (b_x < y) {
+    *ex = x[2];
+    *idx = 3;
+  }
+  absRelopProxies(*ex, x[3], &b_x, &y);
+  if (b_x < y) {
+    *ex = x[3];
+    *idx = 4;
+  }
+}
+
+/*
+ *
+ */
+double j_maximum(const double x[9])
 {
   double d;
   double ex;
@@ -236,32 +286,6 @@ double i_maximum(const double x[9])
     }
   }
   return ex;
-}
-
-/*
- *
- */
-void j_maximum(const creal_T x_data[], creal_T *ex, int *idx)
-{
-  double x;
-  double y;
-  *idx = 1;
-  *ex = x_data[0];
-  absRelopProxies(x_data[0], x_data[1], &x, &y);
-  if (x < y) {
-    *ex = x_data[1];
-    *idx = 2;
-  }
-  absRelopProxies(*ex, x_data[2], &x, &y);
-  if (x < y) {
-    *ex = x_data[2];
-    *idx = 3;
-  }
-  absRelopProxies(*ex, x_data[3], &x, &y);
-  if (x < y) {
-    *ex = x_data[3];
-    *idx = 4;
-  }
 }
 
 /*

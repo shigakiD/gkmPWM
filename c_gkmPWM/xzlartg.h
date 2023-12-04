@@ -3,17 +3,16 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mtimes.h
+ * xzlartg.h
  *
- * Code generation for function 'mtimes'
+ * Code generation for function 'xzlartg'
  *
  */
 
-#ifndef MTIMES_H
-#define MTIMES_H
+#ifndef XZLARTG_H
+#define XZLARTG_H
 
 /* Include files */
-#include "gkmPWM_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,14 +23,14 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_mtimes(const emxArray_real_T *A, const emxArray_real_T *B, double C[4]);
+void b_xzlartg(const creal_T f, const creal_T g, double *cs, creal_T *sn);
 
-void mtimes(const emxArray_real_T *A, const emxArray_real_T *B,
-            emxArray_real_T *C);
+void xzlartg(const creal_T f, const creal_T g, double *cs, creal_T *sn,
+             creal_T *r);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (mtimes.h) */
+/* End of code generation (xzlartg.h) */
