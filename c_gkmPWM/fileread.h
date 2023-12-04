@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * sprintf.h
+ * fileread.h
  *
- * Code generation for function 'sprintf'
+ * Code generation for function 'fileread'
  *
  */
 
-#ifndef SPRINTF_H
-#define SPRINTF_H
+#ifndef FILEREAD_H
+#define FILEREAD_H
 
 /* Include files */
 #include "gkmPWM_types.h"
@@ -24,13 +24,11 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_sprintf(const emxArray_char_T *varargin_1_Value, emxArray_char_T *str);
-
-void c_sprintf(const emxArray_char_T *varargin_1_Value, emxArray_char_T *str);
+void fileread(const emxArray_char_T *filename, emxArray_char_T *out);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (sprintf.h) */
+/* End of code generation (fileread.h) */

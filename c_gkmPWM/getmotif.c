@@ -14,159 +14,278 @@
 #include "diff.h"
 #include "fgetl.h"
 #include "fileManager.h"
+#include "find.h"
+#include "fseek.h"
+#include "ftell.h"
 #include "gkmPWM_data.h"
 #include "gkmPWM_emxutil.h"
 #include "gkmPWM_types.h"
 #include "sort.h"
 #include "str2double.h"
 #include "strip.h"
-#include "lapacke.h"
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
 /* Function Definitions */
 /*
- * function mat = getmotif(filename, m)
+ * function [mat, names] = getmotif(filename, m)
  */
-void getmotif(cell_wrap_3 mat[1968])
+void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
+              emxArray_cell_wrap_3 *mat, emxArray_cell_wrap_0 *names)
 {
   static const char b[5] = {'M', 'O', 'T', 'I', 'F'};
-  static const char cv[2] = {' ', '\x09'};
-  FILE *filestar;
-  int wherefrom;
-  long position_t;
-  cell_wrap_3 mat_tmp[1968];
+  static const char cv[3] = {'a', 'l', 'l'};
+  static const char cv1[2] = {' ', '\x09'};
+  cell_wrap_0 *names_data;
+  cell_wrap_3 *mat_data;
+  cell_wrap_3 *mat_tmp_data;
   emxArray_boolean_T *y;
-  emxArray_char_T *b_fileid;
-  emxArray_char_T *b_x;
-  emxArray_char_T *c_x;
+  emxArray_cell_wrap_3 *mat_tmp;
+  emxArray_char_T *b_fid;
+  emxArray_char_T *b_line_clean;
   emxArray_char_T *line;
-  emxArray_real_T *r;
+  emxArray_char_T *line_clean;
+  emxArray_int32_T *b_n;
+  emxArray_int32_T *ind2;
+  emxArray_int32_T *match_out;
+  emxArray_int32_T *matches;
+  emxArray_real_T *n;
   emxArray_real_T *tmp;
+  emxArray_real_T *zero_idx;
   creal_T dc;
-  double x[1968];
+  const double *m_data;
   double b_i;
   double col_count;
   double loc;
   double row_count;
-  double *r1;
+  double *n_data;
   double *tmp_data;
-  int unusedExpr[1968];
+  double *zero_idx_data;
   int exitg1;
+  int fid;
   int i;
   int i1;
+  int i2;
   int idx;
   int itoken;
   int j;
   int k;
   int loop_ub;
+  int match_idx;
   int nz;
   int vlen;
-  short ii_data[1968];
-  short ind2[1968];
-  char b_a[5];
+  int *match_out_data;
+  int *matches_data;
+  char a[5];
+  const char *filename_data;
   signed char fileid;
+  char *line_clean_data;
   char *line_data;
-  char *x_data;
-  bool d_x[1968];
-  bool a;
+  bool b_bool;
   bool exitg2;
   bool *y_data;
+  m_data = m->data;
+  filename_data = filename->data;
   /*  filename is the meme file that contains the motifs; */
   /*  n is the nth motif in the file */
   /* 'getmotif:4' mat = cell(length(m),1); */
-  /* 'getmotif:5' mat = coder.nullcopy(mat); */
-  /* 'getmotif:6' [n ind] = sort(m); */
-  for (i = 0; i < 1968; i++) {
-    x[i] = (double)i + 1.0;
+  vlen = m->size[1];
+  i = mat->size[0];
+  mat->size[0] = m->size[1];
+  emxEnsureCapacity_cell_wrap_3(mat, i);
+  mat_data = mat->data;
+  for (i = 0; i < vlen; i++) {
+    mat_data[i].f1->size[0] = 0;
+    mat_data[i].f1->size[1] = 0;
   }
-  e_sort(x, unusedExpr);
-  /* 'getmotif:7' fid = fopen(filename); */
-  fileid = b_cfopen("combined_db_v4.meme");
-  /* 'getmotif:8' if fid < 0 */
-  if (fileid < 0) {
-    /* 'getmotif:9' fprintf('The file cannot be opened\n') */
+  /* 'getmotif:5' mat = coder.nullcopy(mat); */
+  /* 'getmotif:6' names = cell(length(m),1); */
+  vlen = m->size[1];
+  i = names->size[0];
+  names->size[0] = m->size[1];
+  emxEnsureCapacity_cell_wrap_0(names, i);
+  names_data = names->data;
+  for (i = 0; i < vlen; i++) {
+    names_data[i].f1->size[0] = 1;
+    names_data[i].f1->size[1] = 0;
+  }
+  emxInit_real_T(&n, 2);
+  /* 'getmotif:7' names = coder.nullcopy(names); */
+  /* 'getmotif:8' [n ind] = sort(m); */
+  i = n->size[0] * n->size[1];
+  n->size[0] = 1;
+  n->size[1] = m->size[1];
+  emxEnsureCapacity_real_T(n, i);
+  n_data = n->data;
+  match_idx = m->size[1];
+  for (i = 0; i < match_idx; i++) {
+    n_data[i] = m_data[i];
+  }
+  emxInit_int32_T(&b_n, 2);
+  d_sort(n, b_n);
+  n_data = n->data;
+  /* 'getmotif:9' fid = fopen(filename); */
+  b_bool = false;
+  emxFree_int32_T(&b_n);
+  if (filename->size[1] == 3) {
+    vlen = 0;
+    do {
+      exitg1 = 0;
+      if (vlen < 3) {
+        if (filename_data[vlen] != cv[vlen]) {
+          exitg1 = 1;
+        } else {
+          vlen++;
+        }
+      } else {
+        b_bool = true;
+        exitg1 = 1;
+      }
+    } while (exitg1 == 0);
+  }
+  if (b_bool) {
+    fid = 0;
+  } else {
+    fileid = cfopen(filename, "rb");
+    fid = fileid;
+  }
+  /* 'getmotif:10' if fid < 0 */
+  emxInit_real_T(&zero_idx, 2);
+  zero_idx_data = zero_idx->data;
+  emxInit_int32_T(&match_out, 2);
+  emxInit_boolean_T(&y, 2);
+  if (fid < 0) {
+    /* 'getmotif:11' fprintf('The file cannot be opened\n') */
     printf("The file cannot be opened\n");
     fflush(stdout);
   } else {
-    /* 'getmotif:10' else */
-    /* 'getmotif:11' i=0; */
+    /* 'getmotif:12' else */
+    /* 'getmotif:13' i=0; */
     b_i = 0.0;
-    /* 'getmotif:12' for j = 1:length(n) */
+    /* 'getmotif:14' for j = 1:length(n) */
+    i = n->size[1];
     emxInit_char_T(&line, 2);
+    emxInit_char_T(&line_clean, 2);
     emxInit_real_T(&tmp, 2);
-    emxInit_char_T(&b_x, 2);
-    emxInit_boolean_T(&y, 2);
-    emxInit_real_T(&r, 2);
-    emxInit_char_T(&c_x, 2);
-    emxInit_char_T(&b_fileid, 2);
-    wherefrom = SEEK_SET;
-    for (j = 0; j < 1968; j++) {
-      /* 'getmotif:13' while i~=n(j) */
-      while (b_i != x[j]) {
-        /* 'getmotif:14' line = fgetl(fid); */
-        fgetl(fileid, line);
+    emxInit_int32_T(&matches, 2);
+    emxInit_char_T(&b_line_clean, 2);
+    emxInit_char_T(&b_fid, 2);
+    for (j = 0; j < i; j++) {
+      /* 'getmotif:15' while i~=n(j) */
+      while (b_i != n_data[j]) {
+        /* 'getmotif:16' line = fgetl(fid); */
+        fgetl(fid, line);
         line_data = line->data;
-        /* 'getmotif:15' if length(line) >= 5 */
+        /* 'getmotif:17' if length(line) >= 5 */
         if (line->size[1] >= 5) {
-          /* 'getmotif:16' if strcmp(line(1:5), 'MOTIF') */
-          for (i = 0; i < 5; i++) {
-            b_a[i] = line_data[i];
+          /* 'getmotif:18' if strcmp(line(1:5), 'MOTIF') */
+          for (i1 = 0; i1 < 5; i1++) {
+            a[i1] = line_data[i1];
           }
-          vlen = memcmp(&b_a[0], &b[0], 5);
+          vlen = memcmp(&a[0], &b[0], 5);
           if (vlen == 0) {
-            /* 'getmotif:17' i = i+1; */
+            /* 'getmotif:19' i = i+1; */
             b_i++;
+            /* 'getmotif:20' line_clean = strip(line); */
+            strip(line, line_clean);
+            line_clean_data = line_clean->data;
+            /* 'getmotif:21' zero_idx = strfind(line_clean, ' '); */
+            if (line_clean->size[1] == 0) {
+              zero_idx->size[0] = 1;
+              zero_idx->size[1] = 0;
+            } else {
+              vlen = line_clean->size[1];
+              i1 = matches->size[0] * matches->size[1];
+              matches->size[0] = 1;
+              matches->size[1] = line_clean->size[1];
+              emxEnsureCapacity_int32_T(matches, i1);
+              matches_data = matches->data;
+              match_idx = 0;
+              for (itoken = 0; itoken < vlen; itoken++) {
+                if (line_clean_data[itoken] == ' ') {
+                  matches_data[match_idx] = itoken + 1;
+                  match_idx++;
+                }
+              }
+              i1 = match_out->size[0] * match_out->size[1];
+              match_out->size[0] = 1;
+              match_out->size[1] = match_idx;
+              emxEnsureCapacity_int32_T(match_out, i1);
+              match_out_data = match_out->data;
+              for (itoken = 0; itoken < match_idx; itoken++) {
+                match_out_data[itoken] = matches_data[itoken];
+              }
+              i1 = zero_idx->size[0] * zero_idx->size[1];
+              zero_idx->size[0] = 1;
+              zero_idx->size[1] = match_out->size[1];
+              emxEnsureCapacity_real_T(zero_idx, i1);
+              zero_idx_data = zero_idx->data;
+              match_idx = match_out->size[1];
+              for (i1 = 0; i1 < match_idx; i1++) {
+                zero_idx_data[i1] = match_out_data[i1];
+              }
+            }
+            /* 'getmotif:22' target_zero = zero_idx(end); */
+            /* 'getmotif:23' names{i} = line_clean(target_zero+1:end); */
+            if ((unsigned int)zero_idx_data[zero_idx->size[1] - 1] + 1U >
+                (unsigned int)line_clean->size[1]) {
+              i1 = 0;
+              i2 = 0;
+            } else {
+              i1 = (int)(unsigned int)zero_idx_data[zero_idx->size[1] - 1];
+              i2 = line_clean->size[1];
+            }
+            vlen = names_data[(int)b_i - 1].f1->size[0] *
+                   names_data[(int)b_i - 1].f1->size[1];
+            names_data[(int)b_i - 1].f1->size[0] = 1;
+            match_idx = i2 - i1;
+            names_data[(int)b_i - 1].f1->size[1] = match_idx;
+            emxEnsureCapacity_char_T(names_data[(int)b_i - 1].f1, vlen);
+            for (i2 = 0; i2 < match_idx; i2++) {
+              names_data[(int)b_i - 1].f1->data[i2] = line_clean_data[i1 + i2];
+            }
+            /*  a = strsplit(line, ' '); */
+            /*  names{i} = a{end}; */
           }
         }
       }
-      /* 'getmotif:21' line = fgetl(fid); */
-      fgetl(fileid, b_fileid);
-      /* 'getmotif:23' loc = ftell(fid); */
-      getfilestar(fileid, &filestar, &a);
-      if ((fileid == 0) || (fileid == 1) || (fileid == 2)) {
-        filestar = NULL;
-      }
-      if (filestar == NULL) {
-        loc = -1.0;
-      } else {
-        position_t = ftell(filestar);
-        loc = (double)position_t;
-      }
-      /* 'getmotif:24' line = fgetl(fid); */
-      fgetl(fileid, line);
+      /* 'getmotif:29' line = fgetl(fid); */
+      fgetl(fid, b_fid);
+      /* 'getmotif:31' loc = ftell(fid); */
+      loc = b_ftell(fid);
+      /* 'getmotif:32' line = fgetl(fid); */
+      fgetl(fid, line);
       line_data = line->data;
-      /* 'getmotif:26' row_count = 0; */
+      /* 'getmotif:34' row_count = 0; */
       row_count = 0.0;
-      /* 'getmotif:27' col_count = 0; */
+      /* 'getmotif:35' col_count = 0; */
       col_count = 0.0;
-      /* 'getmotif:28' while ~isempty(line) */
+      /* 'getmotif:36' while ~isempty(line) */
       while (line->size[1] != 0) {
-        /* 'getmotif:29' row_count = row_count + 1; */
+        /* 'getmotif:37' row_count = row_count + 1; */
         row_count++;
-        /* 'getmotif:30' number_whitespace = isstrprop(line, 'wspace'); */
-        /* 'getmotif:31' col_count         = sum(diff(number_whitespace)==1) +
+        /* 'getmotif:38' number_whitespace = isstrprop(line, 'wspace'); */
+        /* 'getmotif:39' col_count         = sum(diff(number_whitespace)==1) +
          * 1; */
-        i = y->size[0] * y->size[1];
+        i1 = y->size[0] * y->size[1];
         y->size[0] = 1;
         y->size[1] = line->size[1];
-        emxEnsureCapacity_boolean_T(y, i);
+        emxEnsureCapacity_boolean_T(y, i1);
         y_data = y->data;
-        i = line->size[1];
-        for (k = 0; k < i; k++) {
+        i1 = line->size[1];
+        for (k = 0; k < i1; k++) {
           y_data[k] = bv[(unsigned char)line_data[k] & 127];
         }
-        d_diff(y, r);
-        r1 = r->data;
-        i = y->size[0] * y->size[1];
+        d_diff(y, zero_idx);
+        zero_idx_data = zero_idx->data;
+        i1 = y->size[0] * y->size[1];
         y->size[0] = 1;
-        y->size[1] = r->size[1];
-        emxEnsureCapacity_boolean_T(y, i);
+        y->size[1] = zero_idx->size[1];
+        emxEnsureCapacity_boolean_T(y, i1);
         y_data = y->data;
-        loop_ub = r->size[1];
-        for (i = 0; i < loop_ub; i++) {
-          y_data[i] = (r1[i] == 1.0);
+        match_idx = zero_idx->size[1];
+        for (i1 = 0; i1 < match_idx; i1++) {
+          y_data[i1] = (zero_idx_data[i1] == 1.0);
         }
         vlen = y->size[1];
         if (y->size[1] == 0) {
@@ -178,61 +297,53 @@ void getmotif(cell_wrap_3 mat[1968])
           }
         }
         col_count = (double)nz + 1.0;
-        /* 'getmotif:32' line = fgetl(fid); */
-        fgetl(fileid, line);
+        /* 'getmotif:40' line = fgetl(fid); */
+        fgetl(fid, line);
         line_data = line->data;
       }
-      /* 'getmotif:34' fseek(fid, loc, "bof"); */
-      if (floor(loc) == loc) {
-        getfilestar(fileid, &filestar, &a);
-        if ((fileid == 0) || (fileid == 1) || (fileid == 2)) {
-          filestar = NULL;
-        }
-        if (!(filestar == NULL)) {
-          fseek(filestar, (long int)loc, wherefrom);
-        }
-      }
-      /* 'getmotif:35' line = fgetl(fid); */
-      fgetl(fileid, line);
+      /* 'getmotif:42' fseek(fid, loc, "bof"); */
+      b_fseek(fid, loc);
+      /* 'getmotif:43' line = fgetl(fid); */
+      fgetl(fid, line);
       line_data = line->data;
-      /* 'getmotif:37' tmp = zeros(row_count, col_count); */
-      i = tmp->size[0] * tmp->size[1];
+      /* 'getmotif:45' tmp = zeros(row_count, col_count); */
+      i1 = tmp->size[0] * tmp->size[1];
       tmp->size[0] = (int)row_count;
       tmp->size[1] = (int)col_count;
-      emxEnsureCapacity_real_T(tmp, i);
+      emxEnsureCapacity_real_T(tmp, i1);
       tmp_data = tmp->data;
-      loop_ub = (int)row_count * (int)col_count;
-      for (i = 0; i < loop_ub; i++) {
-        tmp_data[i] = 0.0;
+      match_idx = (int)row_count * (int)col_count;
+      for (i1 = 0; i1 < match_idx; i1++) {
+        tmp_data[i1] = 0.0;
       }
-      /* 'getmotif:38' curr_row = 1; */
+      /* 'getmotif:46' curr_row = 1; */
       loc = 1.0;
-      /* 'getmotif:39' while ~isempty(line) */
+      /* 'getmotif:47' while ~isempty(line) */
       while (line->size[1] != 0) {
         /*  Alternative to str2num */
         /*  mat{j} = [mat{j}; str2num(line)]; */
-        /* 'getmotif:42' number_whitespace = isstrprop(line, 'wspace'); */
-        /* 'getmotif:43' number_element    = sum(diff(number_whitespace)==1) +
+        /* 'getmotif:50' number_whitespace = isstrprop(line, 'wspace'); */
+        /* 'getmotif:51' number_element    = sum(diff(number_whitespace)==1) +
          * 1; */
-        i = y->size[0] * y->size[1];
+        i1 = y->size[0] * y->size[1];
         y->size[0] = 1;
         y->size[1] = line->size[1];
-        emxEnsureCapacity_boolean_T(y, i);
+        emxEnsureCapacity_boolean_T(y, i1);
         y_data = y->data;
-        i = line->size[1];
-        for (k = 0; k < i; k++) {
+        i1 = line->size[1];
+        for (k = 0; k < i1; k++) {
           y_data[k] = bv[(unsigned char)line_data[k] & 127];
         }
-        d_diff(y, r);
-        r1 = r->data;
-        i = y->size[0] * y->size[1];
+        d_diff(y, zero_idx);
+        zero_idx_data = zero_idx->data;
+        i1 = y->size[0] * y->size[1];
         y->size[0] = 1;
-        y->size[1] = r->size[1];
-        emxEnsureCapacity_boolean_T(y, i);
+        y->size[1] = zero_idx->size[1];
+        emxEnsureCapacity_boolean_T(y, i1);
         y_data = y->data;
-        loop_ub = r->size[1];
-        for (i = 0; i < loop_ub; i++) {
-          y_data[i] = (r1[i] == 1.0);
+        match_idx = zero_idx->size[1];
+        for (i1 = 0; i1 < match_idx; i1++) {
+          y_data[i1] = (zero_idx_data[i1] == 1.0);
         }
         vlen = y->size[1];
         if (y->size[1] == 0) {
@@ -243,26 +354,26 @@ void getmotif(cell_wrap_3 mat[1968])
             nz += y_data[k - 1];
           }
         }
-        /* 'getmotif:44' remain  = line; */
-        /* 'getmotif:45' for idx=1:number_element */
+        /* 'getmotif:52' remain  = line; */
+        /* 'getmotif:53' for idx=1:number_element */
         for (idx = 0; idx <= nz; idx++) {
-          /* 'getmotif:46' [tok, remain] = strtok(strip(remain), [char(32),
+          /* 'getmotif:54' [tok, remain] = strtok(strip(remain), [char(32),
            * char(9)]); */
-          strip(line, b_x);
-          x_data = b_x->data;
-          vlen = b_x->size[1];
+          strip(line, line_clean);
+          line_clean_data = line_clean->data;
+          vlen = line_clean->size[1];
           k = 0;
           exitg2 = false;
           while ((!exitg2) && (k + 1 <= vlen)) {
-            loop_ub = 0;
+            match_idx = 0;
             do {
               exitg1 = 0;
-              if (loop_ub < 2) {
-                if (x_data[k] == cv[loop_ub]) {
+              if (match_idx < 2) {
+                if (line_clean_data[k] == cv1[match_idx]) {
                   k++;
                   exitg1 = 1;
                 } else {
-                  loop_ub++;
+                  match_idx++;
                 }
               } else {
                 exitg1 = 2;
@@ -275,14 +386,14 @@ void getmotif(cell_wrap_3 mat[1968])
           itoken = k + 1;
           exitg2 = false;
           while ((!exitg2) && (k + 1 <= vlen)) {
-            loop_ub = 0;
+            match_idx = 0;
             do {
               exitg1 = 0;
-              if (loop_ub < 2) {
-                if (x_data[k] == cv[loop_ub]) {
+              if (match_idx < 2) {
+                if (line_clean_data[k] == cv1[match_idx]) {
                   exitg1 = 1;
                 } else {
-                  loop_ub++;
+                  match_idx++;
                 }
               } else {
                 k++;
@@ -293,124 +404,164 @@ void getmotif(cell_wrap_3 mat[1968])
               exitg2 = true;
             }
           }
-          if (k + 1 > b_x->size[1]) {
-            i = 0;
+          if (k + 1 > line_clean->size[1]) {
             i1 = 0;
+            i2 = 0;
           } else {
-            i = k;
-            i1 = b_x->size[1];
+            i1 = k;
+            i2 = line_clean->size[1];
           }
           vlen = line->size[0] * line->size[1];
           line->size[0] = 1;
-          loop_ub = i1 - i;
-          line->size[1] = loop_ub;
+          match_idx = i2 - i1;
+          line->size[1] = match_idx;
           emxEnsureCapacity_char_T(line, vlen);
           line_data = line->data;
-          for (i1 = 0; i1 < loop_ub; i1++) {
-            line_data[i1] = x_data[i + i1];
+          for (i2 = 0; i2 < match_idx; i2++) {
+            line_data[i2] = line_clean_data[i1 + i2];
           }
           if (itoken > k) {
-            i = 0;
+            i1 = 0;
             k = 0;
           } else {
-            i = itoken - 1;
+            i1 = itoken - 1;
           }
-          /* 'getmotif:47' tmp(curr_row, idx)  = real(str2double(tok)); */
-          i1 = c_x->size[0] * c_x->size[1];
-          c_x->size[0] = 1;
-          loop_ub = k - i;
-          c_x->size[1] = loop_ub;
-          emxEnsureCapacity_char_T(c_x, i1);
-          line_data = c_x->data;
-          for (i1 = 0; i1 < loop_ub; i1++) {
-            line_data[i1] = x_data[i + i1];
+          /* 'getmotif:55' tmp(curr_row, idx)  = real(str2double(tok)); */
+          i2 = b_line_clean->size[0] * b_line_clean->size[1];
+          b_line_clean->size[0] = 1;
+          match_idx = k - i1;
+          b_line_clean->size[1] = match_idx;
+          emxEnsureCapacity_char_T(b_line_clean, i2);
+          line_data = b_line_clean->data;
+          for (i2 = 0; i2 < match_idx; i2++) {
+            line_data[i2] = line_clean_data[i1 + i2];
           }
-          dc = str2double(c_x);
+          dc = str2double(b_line_clean);
           tmp_data[((int)loc + tmp->size[0] * idx) - 1] = dc.re;
         }
-        /* 'getmotif:49' line = fgetl(fid); */
-        fgetl(fileid, line);
+        /* 'getmotif:57' line = fgetl(fid); */
+        fgetl(fid, line);
         line_data = line->data;
-        /* 'getmotif:50' curr_row = curr_row + 1; */
+        /* 'getmotif:58' curr_row = curr_row + 1; */
         loc++;
       }
-      /* 'getmotif:52' mat{j} = tmp; */
-      i = mat[j].f1->size[0] * mat[j].f1->size[1];
-      mat[j].f1->size[0] = tmp->size[0];
-      mat[j].f1->size[1] = tmp->size[1];
-      emxEnsureCapacity_real_T(mat[j].f1, i);
-      loop_ub = tmp->size[0] * tmp->size[1];
-      for (i = 0; i < loop_ub; i++) {
-        mat[j].f1->data[i] = tmp_data[i];
+      /* 'getmotif:60' mat{j} = tmp; */
+      i1 = mat_data[j].f1->size[0] * mat_data[j].f1->size[1];
+      mat_data[j].f1->size[0] = tmp->size[0];
+      mat_data[j].f1->size[1] = tmp->size[1];
+      emxEnsureCapacity_real_T(mat_data[j].f1, i1);
+      match_idx = tmp->size[0] * tmp->size[1];
+      for (i1 = 0; i1 < match_idx; i1++) {
+        mat_data[j].f1->data[i1] = tmp_data[i1];
       }
     }
-    emxFree_char_T(&b_fileid);
-    emxFree_char_T(&c_x);
-    emxFree_real_T(&r);
-    emxFree_boolean_T(&y);
-    emxFree_char_T(&b_x);
+    emxFree_char_T(&b_fid);
+    emxFree_char_T(&b_line_clean);
+    emxFree_int32_T(&matches);
     emxFree_real_T(&tmp);
+    emxFree_char_T(&line_clean);
     emxFree_char_T(&line);
   }
-  emxInitMatrix_cell_wrap_3(mat_tmp);
-  /* 'getmotif:55' fclose(fid); */
-  cfclose(fileid);
-  /* 'getmotif:56' if length(n)==1 */
-  /* 'getmotif:59' else */
-  /* 'getmotif:60' mylength = length(n); */
-  /* 'getmotif:61' ind2 = zeros(mylength,1); */
-  /* 'getmotif:62' for i = 1:mylength */
-  /* 'getmotif:65' [a, b] = size(ind2); */
-  /* 'getmotif:66' for i = 1:length(n) */
-  /* 'getmotif:69' mat_tmp = cell(mylength,1); */
-  /* 'getmotif:70' for i = 1:mylength */
-  for (itoken = 0; itoken < 1968; itoken++) {
-    /* 'getmotif:67' ind2(i,1) = find(n==m(i)); */
-    for (i = 0; i < 1968; i++) {
-      d_x[i] = (x[i] == (double)itoken + 1.0);
+  /* 'getmotif:63' fclose(fid); */
+  cfclose(fid);
+  /* 'getmotif:64' if length(n)==1 */
+  if (n->size[1] != 1) {
+    emxInit_int32_T(&ind2, 1);
+    /* 'getmotif:67' else */
+    /* 'getmotif:68' mylength = length(n); */
+    /* 'getmotif:69' ind2 = zeros(mylength,1); */
+    i = ind2->size[0];
+    ind2->size[0] = n->size[1];
+    emxEnsureCapacity_int32_T(ind2, i);
+    matches_data = ind2->data;
+    match_idx = n->size[1];
+    for (i = 0; i < match_idx; i++) {
+      matches_data[i] = 0;
     }
-    idx = 0;
-    vlen = 0;
-    exitg2 = false;
-    while ((!exitg2) && (vlen < 1968)) {
-      if (d_x[vlen]) {
-        idx++;
-        ii_data[idx - 1] = (short)(vlen + 1);
-        if (idx >= 1968) {
-          exitg2 = true;
-        } else {
-          vlen++;
-        }
-      } else {
-        vlen++;
+    /* 'getmotif:70' for i = 1:mylength */
+    i = n->size[1];
+    for (itoken = 0; itoken < i; itoken++) {
+      /* 'getmotif:71' ind2(i,1) = i; */
+      matches_data[itoken] = itoken + 1;
+    }
+    /* 'getmotif:73' [a, b] = size(ind2); */
+    /* 'getmotif:74' for i = 1:length(n) */
+    i = n->size[1];
+    if (0 <= n->size[1] - 1) {
+      loop_ub = n->size[1];
+    }
+    for (itoken = 0; itoken < i; itoken++) {
+      /* 'getmotif:75' ind2(i,1) = find(n==m(i)); */
+      loc = m_data[itoken];
+      i1 = y->size[0] * y->size[1];
+      y->size[0] = 1;
+      y->size[1] = n->size[1];
+      emxEnsureCapacity_boolean_T(y, i1);
+      y_data = y->data;
+      for (i1 = 0; i1 < loop_ub; i1++) {
+        y_data[i1] = (n_data[i1] == loc);
+      }
+      eml_find(y, match_out);
+      match_out_data = match_out->data;
+      i1 = zero_idx->size[0] * zero_idx->size[1];
+      zero_idx->size[0] = 1;
+      zero_idx->size[1] = match_out->size[1];
+      emxEnsureCapacity_real_T(zero_idx, i1);
+      zero_idx_data = zero_idx->data;
+      match_idx = match_out->size[1];
+      for (i1 = 0; i1 < match_idx; i1++) {
+        zero_idx_data[i1] = match_out_data[i1];
+      }
+      matches_data[itoken] = (int)zero_idx_data[0];
+    }
+    emxInit_cell_wrap_3(&mat_tmp);
+    /* 'getmotif:77' mat_tmp = cell(mylength,1); */
+    /* 'getmotif:78' for i = 1:mylength */
+    i = n->size[1];
+    i1 = mat_tmp->size[0];
+    mat_tmp->size[0] = n->size[1];
+    emxEnsureCapacity_cell_wrap_3(mat_tmp, i1);
+    mat_tmp_data = mat_tmp->data;
+    for (itoken = 0; itoken < i; itoken++) {
+      /* 'getmotif:79' mat_tmp{i} = mat{ind2(i)}; */
+      i1 = mat_tmp_data[itoken].f1->size[0] * mat_tmp_data[itoken].f1->size[1];
+      mat_tmp_data[itoken].f1->size[0] =
+          mat_data[matches_data[itoken] - 1].f1->size[0];
+      mat_tmp_data[itoken].f1->size[1] =
+          mat_data[matches_data[itoken] - 1].f1->size[1];
+      emxEnsureCapacity_real_T(mat_tmp_data[itoken].f1, i1);
+      match_idx = mat_data[matches_data[itoken] - 1].f1->size[0] *
+                  mat_data[matches_data[itoken] - 1].f1->size[1];
+      for (i1 = 0; i1 < match_idx; i1++) {
+        mat_tmp_data[itoken].f1->data[i1] =
+            mat_data[matches_data[itoken] - 1].f1->data[i1];
       }
     }
-    ind2[itoken] = ii_data[0];
-    /* 'getmotif:71' mat_tmp{i} = mat{ind2(i)}; */
-    i = mat_tmp[itoken].f1->size[0] * mat_tmp[itoken].f1->size[1];
-    i1 = ind2[itoken] - 1;
-    mat_tmp[itoken].f1->size[0] = mat[i1].f1->size[0];
-    mat_tmp[itoken].f1->size[1] = mat[i1].f1->size[1];
-    emxEnsureCapacity_real_T(mat_tmp[itoken].f1, i);
-    loop_ub = mat[i1].f1->size[0] * mat[i1].f1->size[1];
-    for (i = 0; i < loop_ub; i++) {
-      mat_tmp[itoken].f1->data[i] = mat[i1].f1->data[i];
+    emxFree_int32_T(&ind2);
+    /* 'getmotif:81' [a, b] = size(mat_tmp{1}); */
+    /* 'getmotif:82' for i = 1:length(n) */
+    i = n->size[1];
+    for (itoken = 0; itoken < i; itoken++) {
+      /* 'getmotif:83' mat{i} = mat_tmp{i}; */
+      i1 = mat_data[itoken].f1->size[0] * mat_data[itoken].f1->size[1];
+      mat_data[itoken].f1->size[0] = mat_tmp_data[itoken].f1->size[0];
+      mat_data[itoken].f1->size[1] = mat_tmp_data[itoken].f1->size[1];
+      emxEnsureCapacity_real_T(mat_data[itoken].f1, i1);
+      match_idx =
+          mat_tmp_data[itoken].f1->size[0] * mat_tmp_data[itoken].f1->size[1];
+      for (i1 = 0; i1 < match_idx; i1++) {
+        mat_data[itoken].f1->data[i1] = mat_tmp_data[itoken].f1->data[i1];
+      }
     }
+    emxFree_cell_wrap_3(&mat_tmp);
+  } else {
+    /*  Alternative to cell2mat */
+    /*  mat = cell2mat(mat); */
   }
-  /* 'getmotif:73' [a, b] = size(mat_tmp{1}); */
-  /* 'getmotif:74' for i = 1:length(n) */
-  for (itoken = 0; itoken < 1968; itoken++) {
-    /* 'getmotif:75' mat{i} = mat_tmp{i}; */
-    i = mat[itoken].f1->size[0] * mat[itoken].f1->size[1];
-    mat[itoken].f1->size[0] = mat_tmp[itoken].f1->size[0];
-    mat[itoken].f1->size[1] = mat_tmp[itoken].f1->size[1];
-    emxEnsureCapacity_real_T(mat[itoken].f1, i);
-    loop_ub = mat_tmp[itoken].f1->size[0] * mat_tmp[itoken].f1->size[1];
-    for (i = 0; i < loop_ub; i++) {
-      mat[itoken].f1->data[i] = mat_tmp[itoken].f1->data[i];
-    }
-  }
-  emxFreeMatrix_cell_wrap_3(mat_tmp);
+  emxFree_boolean_T(&y);
+  emxFree_int32_T(&match_out);
+  emxFree_real_T(&n);
+  emxFree_real_T(&zero_idx);
 }
 
 /* End of code generation (getmotif.c) */

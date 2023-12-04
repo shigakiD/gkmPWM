@@ -25,10 +25,11 @@ extern "C" {
 
 /* Function Declarations */
 extern void gkmPWM(const emxArray_char_T *varargin_1,
-                   const emxArray_char_T *varargin_2, double varargin_3,
-                   double varargin_4, double varargin_5, double varargin_6,
-                   double varargin_7, double varargin_8, double varargin_9,
-                   double varargin_10, double varargin_11);
+                   const emxArray_char_T *varargin_2,
+                   const emxArray_char_T *varargin_3, double varargin_4,
+                   double varargin_5, double varargin_6, double varargin_7,
+                   double varargin_8, double varargin_9, double varargin_10,
+                   double varargin_11, double varargin_12);
 
 #ifdef __cplusplus
 }

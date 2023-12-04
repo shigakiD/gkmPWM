@@ -25,8 +25,6 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-signed char b_cfopen(const char *cfilename);
-
 int cfclose(double fid);
 
 signed char cfopen(const emxArray_char_T *cfilename, const char *cpermission);

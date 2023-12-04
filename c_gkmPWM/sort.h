@@ -30,8 +30,6 @@ void c_sort(emxArray_real_T *x);
 
 void d_sort(emxArray_real_T *x, emxArray_int32_T *idx);
 
-void e_sort(double x[1968], int idx[1968]);
-
 void sort(emxArray_real_T *x, emxArray_int32_T *idx);
 
 #ifdef __cplusplus

@@ -23,6 +23,7 @@
 #include "fgetl.h"
 #include "fgets.h"
 #include "fileManager.h"
+#include "fileread.h"
 #include "find.h"
 #include "fliplr.h"
 #include "fseek.h"
@@ -55,7 +56,6 @@
 #include "tic.h"
 #include "toc.h"
 #include "cblas.h"
-#include "lapacke.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -77,9 +77,9 @@ static void binary_expand_op(emxArray_real_T *cfile, const emxArray_real_T
   *negvec, double y, double b);
 static void cb_binary_expand_op(emxArray_real_T *mat, const emxArray_real_T *x);
 static void createMEME(const emxArray_char_T *fileh_Value, const
-  emxArray_cell_wrap_2 *PWM, double GC, const emxArray_real_T *C, double r,
-  const emxArray_real_T *R, double rcorr, const emxArray_real_T *E, const
-  emxArray_real_T *Rd);
+  emxArray_cell_wrap_2 *PWM, const emxArray_char_T *memefile, double GC, const
+  emxArray_real_T *C, double r, const emxArray_real_T *R, double rcorr, const
+  emxArray_real_T *E, const emxArray_real_T *Rd);
 static void db_binary_expand_op(emxArray_real_T *mat, const emxArray_cell_wrap_2
   *p, int i, int i2, int i3, int i4, int i5);
 static void eb_binary_expand_op(emxArray_real_T *kmat, int i, const
@@ -220,16 +220,16 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
   emxInit_real_T(&mat, 2);
 
   /* extends or truncates the PWM based on information.  I try to do it intelligently, so you may disagree on the condition required for adjustment. */
-  /* 'gkmPWM:945' [len,~] = size(p); */
+  /* 'gkmPWM:955' [len,~] = size(p); */
   len = p->size[0];
 
-  /* 'gkmPWM:946' info = zeros(len, 1); */
-  /* 'gkmPWM:947' cut = 0.2; */
+  /* 'gkmPWM:956' info = zeros(len, 1); */
+  /* 'gkmPWM:957' cut = 0.2; */
   /* maximum information of a column to truncate */
-  /* 'gkmPWM:948' ext = 0.7; */
+  /* 'gkmPWM:958' ext = 0.7; */
   /* minimum information needed to extend */
   /* The rest of the code is easy enough to read through quickly */
-  /* 'gkmPWM:950' mat = p+(p==0); */
+  /* 'gkmPWM:960' mat = p+(p==0); */
   xj = mat->size[0] * mat->size[1];
   mat->size[0] = p->size[0];
   mat->size[1] = 4;
@@ -242,7 +242,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
 
   emxInit_real_T(&x, 2);
 
-  /* 'gkmPWM:951' vec = 2+sum(mat.*log(mat)/log(2),2); */
+  /* 'gkmPWM:961' vec = 2+sum(mat.*log(mat)/log(2),2); */
   xj = x->size[0] * x->size[1];
   x->size[0] = mat->size[0];
   x->size[1] = 4;
@@ -300,13 +300,13 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
     vec_data[xj] += 2.0;
   }
 
-  /* 'gkmPWM:952' b = true; */
+  /* 'gkmPWM:962' b = true; */
   b = true;
 
-  /* 'gkmPWM:953' b2 = true; */
+  /* 'gkmPWM:963' b2 = true; */
   b2 = true;
 
-  /* 'gkmPWM:954' while ((vec(1) < cut && max(vec(2:3)) <= ext) || mean(vec(1:3) < cut)) && len > 12 */
+  /* 'gkmPWM:964' while ((vec(1) < cut && max(vec(2:3)) <= ext) || mean(vec(1:3) < cut)) && len > 12 */
   do {
     exitg1 = 0;
     guard1 = false;
@@ -340,7 +340,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
 
     if (guard3) {
       if (len > 12.0) {
-        /* 'gkmPWM:955' p(1,:) = []; */
+        /* 'gkmPWM:965' p(1,:) = []; */
         nx = p->size[0] - 2;
         vstride = p->size[0] - 1;
         for (k = 0; k < 4; k++) {
@@ -367,7 +367,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
         emxEnsureCapacity_real_T(p, xj);
         p_data = p->data;
 
-        /* 'gkmPWM:956' vec(1) = []; */
+        /* 'gkmPWM:966' vec(1) = []; */
         nx = vec->size[0];
         vstride = vec->size[0] - 1;
         for (k = 0; k < vstride; k++) {
@@ -384,13 +384,13 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
         emxEnsureCapacity_real_T(vec, xj);
         vec_data = vec->data;
 
-        /* 'gkmPWM:957' len = len-1; */
+        /* 'gkmPWM:967' len = len-1; */
         len--;
 
-        /* 'gkmPWM:958' b = false; */
+        /* 'gkmPWM:968' b = false; */
         b = false;
 
-        /* 'gkmPWM:959' if ((vec(end) < cut && max(vec(end-2:end-1)) <= ext) || mean(vec(end-2:end) < cut)) && len > 12 */
+        /* 'gkmPWM:969' if ((vec(end) < cut && max(vec(end-2:end-1)) <= ext) || mean(vec(end-2:end) < cut)) && len > 12 */
         if (vec_data[vec->size[0] - 1] < 0.2) {
           if (vec_data[vec->size[0] - 3] < vec_data[vec->size[0] - 2]) {
             b_vec_data = vec_data[vec->size[0] - 2];
@@ -418,7 +418,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
     }
 
     if (guard1 && (len > 12.0)) {
-      /* 'gkmPWM:960' vec(end) = []; */
+      /* 'gkmPWM:970' vec(end) = []; */
       xj = vec->size[0];
       nx = vec->size[0];
       vstride = vec->size[0] - 1;
@@ -436,7 +436,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
       emxEnsureCapacity_real_T(vec, xj);
       vec_data = vec->data;
 
-      /* 'gkmPWM:961' p(end,:) = []; */
+      /* 'gkmPWM:971' p(end,:) = []; */
       xj = p->size[0];
       nx = p->size[0] - 2;
       vstride = p->size[0] - 1;
@@ -464,15 +464,15 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
       emxEnsureCapacity_real_T(p, xj);
       p_data = p->data;
 
-      /* 'gkmPWM:962' len = len-1; */
+      /* 'gkmPWM:972' len = len-1; */
       len--;
 
-      /* 'gkmPWM:963' b2 = false; */
+      /* 'gkmPWM:973' b2 = false; */
       b2 = false;
     }
   } while (exitg1 == 0);
 
-  /* 'gkmPWM:966' if b && min(vec(1:2)) > ext && len < 20 */
+  /* 'gkmPWM:976' if b && min(vec(1:2)) > ext && len < 20 */
   if (b) {
     if (vec_data[0] > vec_data[1]) {
       b_vec_data = vec_data[1];
@@ -481,8 +481,8 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
     }
 
     if ((b_vec_data > 0.7) && (len < 20.0)) {
-      /* 'gkmPWM:967' mat = [GC ; mat]; */
-      /* 'gkmPWM:968' p = [GC;p]; */
+      /* 'gkmPWM:977' mat = [GC ; mat]; */
+      /* 'gkmPWM:978' p = [GC;p]; */
       xj = mat->size[0] * mat->size[1];
       mat->size[0] = p->size[0] + 1;
       mat->size[1] = 4;
@@ -510,12 +510,12 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
         }
       }
 
-      /* 'gkmPWM:969' len = len+1; */
+      /* 'gkmPWM:979' len = len+1; */
       len++;
     }
   }
 
-  /* 'gkmPWM:971' while ((vec(end) < cut && max(vec(end-2:end-1)) <= ext) || mean(vec(end-2:end) < cut)) && len > 12 */
+  /* 'gkmPWM:981' while ((vec(end) < cut && max(vec(end-2:end-1)) <= ext) || mean(vec(end-2:end) < cut)) && len > 12 */
   do {
     exitg1 = 0;
     guard1 = false;
@@ -547,7 +547,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
 
     if (guard1) {
       if (len > 12.0) {
-        /* 'gkmPWM:972' vec(end) = []; */
+        /* 'gkmPWM:982' vec(end) = []; */
         xj = vec->size[0];
         nx = vec->size[0];
         vstride = vec->size[0] - 1;
@@ -565,7 +565,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
         emxEnsureCapacity_real_T(vec, xj);
         vec_data = vec->data;
 
-        /* 'gkmPWM:973' p(end,:) = []; */
+        /* 'gkmPWM:983' p(end,:) = []; */
         xj = p->size[0];
         nx = p->size[0] - 2;
         vstride = p->size[0] - 1;
@@ -593,10 +593,10 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
         emxEnsureCapacity_real_T(p, xj);
         p_data = p->data;
 
-        /* 'gkmPWM:974' len = len-1; */
+        /* 'gkmPWM:984' len = len-1; */
         len--;
 
-        /* 'gkmPWM:975' b2 = false; */
+        /* 'gkmPWM:985' b2 = false; */
         b2 = false;
       } else {
         exitg1 = 1;
@@ -604,7 +604,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
     }
   } while (exitg1 == 0);
 
-  /* 'gkmPWM:977' if b2 && min(vec(end-1:end)) > ext && len < 20 */
+  /* 'gkmPWM:987' if b2 && min(vec(end-1:end)) > ext && len < 20 */
   if (b2) {
     if (vec_data[vec->size[0] - 2] > vec_data[vec->size[0] - 1]) {
       b_vec_data = vec_data[vec->size[0] - 1];
@@ -613,7 +613,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
     }
 
     if ((b_vec_data > 0.7) && (len < 20.0)) {
-      /* 'gkmPWM:978' p = [p;GC]; */
+      /* 'gkmPWM:988' p = [p;GC]; */
       xj = mat->size[0] * mat->size[1];
       mat->size[0] = p->size[0] + 1;
       mat->size[1] = 4;
@@ -644,7 +644,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
         }
       }
 
-      /* 'gkmPWM:979' len = len+1; */
+      /* 'gkmPWM:989' len = len+1; */
       len++;
     }
   }
@@ -652,7 +652,7 @@ static double adjust_PWM(emxArray_real_T *p, const double GC[4])
   emxFree_real_T(&vec);
   emxFree_real_T(&mat);
 
-  /* 'gkmPWM:981' pp = p; */
+  /* 'gkmPWM:991' pp = p; */
   return len;
 }
 
@@ -680,7 +680,7 @@ static void avg_info(const emxArray_cell_wrap_2 *p, double l_svm,
   int xj;
   p_data = p->data;
 
-  /* 'gkmPWM:984' info = zeros(length(p),1); */
+  /* 'gkmPWM:994' info = zeros(length(p),1); */
   i = info->size[0];
   info->size[0] = p->size[0];
   emxEnsureCapacity_real_T(info, i);
@@ -690,15 +690,15 @@ static void avg_info(const emxArray_cell_wrap_2 *p, double l_svm,
     info_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:985' for i = 1:length(p) */
+  /* 'gkmPWM:995' for i = 1:length(p) */
   i = p->size[0];
   emxInit_real_T(&mat, 2);
   emxInit_real_T(&x, 2);
   emxInit_real_T(&y, 1);
   y_data = y->data;
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:986' [l,~] = size(p{i}); */
-    /* 'gkmPWM:987' mat = p{i}(l_svm:end-l_svm+1,:)+(p{i}(l_svm:end-l_svm+1,:)==0); */
+    /* 'gkmPWM:996' [l,~] = size(p{i}); */
+    /* 'gkmPWM:997' mat = p{i}(l_svm:end-l_svm+1,:)+(p{i}(l_svm:end-l_svm+1,:)==0); */
     varargin_1 = ((double)p_data[b_i].f1->size[0] - l_svm) + 1.0;
     if (l_svm > varargin_1) {
       i1 = 0;
@@ -736,7 +736,7 @@ static void avg_info(const emxArray_cell_wrap_2 *p, double l_svm,
       mat_data = mat->data;
     }
 
-    /* 'gkmPWM:988' info(i) = sum(2+sum(mat.*log(max(mat,0))/log(2),2)); */
+    /* 'gkmPWM:998' info(i) = sum(2+sum(mat.*log(max(mat,0))/log(2),2)); */
     i1 = x->size[0] * x->size[1];
     x->size[0] = mat->size[0];
     x->size[1] = 4;
@@ -967,26 +967,26 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
   bool *x_data;
   ik_data = ik->data;
 
-  /* 'gkmPWM:198' fid = fopen(fn, 'r'); */
+  /* 'gkmPWM:208' fid = fopen(fn, 'r'); */
   fileid = cfopen(fn, "rb");
 
   /*  a = textscan(fid, '%s\t%f\n'); */
-  /* 'gkmPWM:201' curr_pos = ftell(fid); */
+  /* 'gkmPWM:211' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
 
-  /* 'gkmPWM:202' idx=0; */
+  /* 'gkmPWM:212' idx=0; */
   idx = 0.0;
 
-  /* 'gkmPWM:203' while ~feof(fid) */
+  /* 'gkmPWM:213' while ~feof(fid) */
   emxInit_char_T(&b_fileid, 2);
   do {
     exitg1 = 0;
     d = b_feof(fileid);
     if (d == 0.0) {
-      /* 'gkmPWM:204' idx=idx+1; */
+      /* 'gkmPWM:214' idx=idx+1; */
       idx++;
 
-      /* 'gkmPWM:205' fgetl(fid); */
+      /* 'gkmPWM:215' fgetl(fid); */
       b_fgets(fileid, b_fileid);
     } else {
       exitg1 = 1;
@@ -996,10 +996,10 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
   emxFree_char_T(&b_fileid);
   emxInit_cell_wrap_0(&sequences, 1);
 
-  /* 'gkmPWM:207' fseek(fid, curr_pos, 'bof'); */
+  /* 'gkmPWM:217' fseek(fid, curr_pos, 'bof'); */
   b_fseek(fileid, curr_pos);
 
-  /* 'gkmPWM:208' sequences = cell(idx, 1); */
+  /* 'gkmPWM:218' sequences = cell(idx, 1); */
   unnamed_idx_0_tmp_tmp = (int)idx;
   i = sequences->size[0];
   sequences->size[0] = (int)idx;
@@ -1012,8 +1012,8 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxInit_real_T(&alpha, 1);
 
-  /* 'gkmPWM:209' sequences = coder.nullcopy(sequences); */
-  /* 'gkmPWM:210' alpha = zeros(idx, 1); */
+  /* 'gkmPWM:219' sequences = coder.nullcopy(sequences); */
+  /* 'gkmPWM:220' alpha = zeros(idx, 1); */
   i = alpha->size[0];
   alpha->size[0] = (int)idx;
   emxEnsureCapacity_real_T(alpha, i);
@@ -1022,17 +1022,17 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     alpha_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:211' for cur_idx=1:idx */
+  /* 'gkmPWM:221' for cur_idx=1:idx */
   b_d = 0;
   emxInit_char_T(&cur_line, 2);
   emxInit_char_T(&cur_seq, 2);
   emxInit_char_T(&cur_alpha, 2);
   exitg2 = false;
   while ((!exitg2) && (b_d <= (int)idx - 1)) {
-    /* 'gkmPWM:212' cur_line = fgetl(fid); */
+    /* 'gkmPWM:222' cur_line = fgetl(fid); */
     fgetl(fileid, cur_line);
 
-    /* 'gkmPWM:213' if cur_line == -1 */
+    /* 'gkmPWM:223' if cur_line == -1 */
     y = (cur_line->size[1] != 0);
     if (y) {
       y = (0 > cur_line->size[1] - 1);
@@ -1041,14 +1041,14 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     if (y) {
       exitg2 = true;
     } else {
-      /* 'gkmPWM:216' [cur_seq, cur_alpha] = strtok(cur_line, char(9)); */
+      /* 'gkmPWM:226' [cur_seq, cur_alpha] = strtok(cur_line, char(9)); */
       b_strtok(cur_line, cur_seq, cur_alpha);
 
-      /* 'gkmPWM:217' alpha(cur_idx,1) = real(str2double(cur_alpha)); */
+      /* 'gkmPWM:227' alpha(cur_idx,1) = real(str2double(cur_alpha)); */
       dc = str2double(cur_alpha);
       alpha_data[b_d] = dc.re;
 
-      /* 'gkmPWM:218' sequences{cur_idx} = (strip(cur_seq)); */
+      /* 'gkmPWM:228' sequences{cur_idx} = (strip(cur_seq)); */
       strip(cur_seq, sequences_data[b_d].f1);
       b_d++;
     }
@@ -1060,12 +1060,12 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
   emxInit_real_T(&M, 1);
   emxInit_int32_T(&D, 1);
 
-  /* 'gkmPWM:220' fclose(fid); */
+  /* 'gkmPWM:230' fclose(fid); */
   cfclose(fileid);
 
   /*  [w, ind] = sort(a{2}, pn); */
   /*  s = a{1}(ind(1:min([100000 length(a{1})]))); */
-  /* 'gkmPWM:225' [w, ind] = sort(alpha, pn); */
+  /* 'gkmPWM:235' [w, ind] = sort(alpha, pn); */
   b_sort(alpha, D);
   D_data = D->data;
   alpha_data = alpha->data;
@@ -1080,11 +1080,11 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxInit_cell_wrap_0(&s, 1);
 
-  /* 'gkmPWM:226' s_len = min([100000 length(sequences)]); */
+  /* 'gkmPWM:236' s_len = min([100000 length(sequences)]); */
   m[0] = 100000.0;
   m[1] = sequences->size[0];
 
-  /* 'gkmPWM:227' s = cell(s_len, 1); */
+  /* 'gkmPWM:237' s = cell(s_len, 1); */
   unnamed_idx_0_tmp_tmp = (int)b_minimum(m);
   i = s->size[0];
   s->size[0] = unnamed_idx_0_tmp_tmp;
@@ -1095,10 +1095,10 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     s_data[i].f1->size[1] = 0;
   }
 
-  /* 'gkmPWM:228' s = coder.nullcopy(s); */
-  /* 'gkmPWM:229' for cur_idx=1:s_len */
+  /* 'gkmPWM:238' s = coder.nullcopy(s); */
+  /* 'gkmPWM:239' for cur_idx=1:s_len */
   for (b_d = 0; b_d < unnamed_idx_0_tmp_tmp; b_d++) {
-    /* 'gkmPWM:230' s{cur_idx} = sequences{ind(cur_idx)}; */
+    /* 'gkmPWM:240' s{cur_idx} = sequences{ind(cur_idx)}; */
     i = s_data[b_d].f1->size[0] * s_data[b_d].f1->size[1];
     s_data[b_d].f1->size[0] = 1;
     s_data[b_d].f1->size[1] = sequences_data[(int)M_data[b_d] - 1].f1->size[1];
@@ -1109,17 +1109,17 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     }
   }
 
-  /* 'gkmPWM:234' l = length(s{1}); */
+  /* 'gkmPWM:244' l = length(s{1}); */
   varargin_2 = s_data[0].f1->size[1] - 1;
   l = s_data[0].f1->size[1] - 4;
 
-  /* 'gkmPWM:235' k = round(l/2)+1; */
+  /* 'gkmPWM:245' k = round(l/2)+1; */
   x = (int)rt_roundd((double)s_data[0].f1->size[1] / 2.0);
 
-  /* 'gkmPWM:236' ikl = length(ik); */
+  /* 'gkmPWM:246' ikl = length(ik); */
   b_varargin_2 = ik->size[0];
 
-  /* 'gkmPWM:237' p = cell(num,1); */
+  /* 'gkmPWM:247' p = cell(num,1); */
   unnamed_idx_0_tmp_tmp = (int)num;
   i = p->size[0];
   p->size[0] = (int)num;
@@ -1130,16 +1130,16 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     p_data[i].f1->size[1] = 0;
   }
 
-  /* 'gkmPWM:238' p = coder.nullcopy(p); */
+  /* 'gkmPWM:248' p = coder.nullcopy(p); */
   i = sequences->size[0];
   sequences->size[0] = p->size[0];
   emxEnsureCapacity_cell_wrap_0(sequences, i);
   sequences_data = sequences->data;
 
-  /* 'gkmPWM:239' c = ikl+1; */
+  /* 'gkmPWM:249' c = ikl+1; */
   *c = (double)ik->size[0] + 1.0;
 
-  /* 'gkmPWM:240' p{1} = s{1}; */
+  /* 'gkmPWM:250' p{1} = s{1}; */
   i = sequences_data[0].f1->size[0] * sequences_data[0].f1->size[1];
   sequences_data[0].f1->size[0] = 1;
   sequences_data[0].f1->size[1] = s_data[0].f1->size[1];
@@ -1151,7 +1151,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxInit_cell_wrap_1(&b_mat);
 
-  /* 'gkmPWM:241' mat = cell(ikl+num,1); */
+  /* 'gkmPWM:251' mat = cell(ikl+num,1); */
   b_d = (int)((double)ik->size[0] + num);
   i = b_mat->size[0];
   b_mat->size[0] = (int)((double)ik->size[0] + num);
@@ -1162,12 +1162,12 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     mat_data[i].f1->size[1] = 0;
   }
 
-  /* 'gkmPWM:242' mat = coder.nullcopy(mat); */
+  /* 'gkmPWM:252' mat = coder.nullcopy(mat); */
   /*  mat(1:ikl) = ik; */
-  /* 'gkmPWM:244' for cur_idx=1:length(ik) */
+  /* 'gkmPWM:254' for cur_idx=1:length(ik) */
   i = ik->size[0];
   for (b_d = 0; b_d < i; b_d++) {
-    /* 'gkmPWM:245' mat{cur_idx} = ik{cur_idx}; */
+    /* 'gkmPWM:255' mat{cur_idx} = ik{cur_idx}; */
     b_y = mat_data[b_d].f1->size[0] * mat_data[b_d].f1->size[1];
     mat_data[b_d].f1->size[0] = 1;
     mat_data[b_d].f1->size[1] = ik_data[b_d].f1->size[1];
@@ -1180,10 +1180,10 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxInit_cell_wrap_2(&b_pwms);
 
-  /* 'gkmPWM:247' mat{c} = letterconvert(s{1}); */
+  /* 'gkmPWM:257' mat{c} = letterconvert(s{1}); */
   letterconvert(s_data[0].f1, mat_data[ik->size[0]].f1);
 
-  /* 'gkmPWM:248' pwms = cell(num,1); */
+  /* 'gkmPWM:258' pwms = cell(num,1); */
   i = b_pwms->size[0];
   b_pwms->size[0] = (int)num;
   emxEnsureCapacity_cell_wrap_2(b_pwms, i);
@@ -1193,10 +1193,10 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     pwms_data[i].f1->size[1] = 4;
   }
 
-  /* 'gkmPWM:249' pwms = coder.nullcopy(pwms); */
-  /* 'gkmPWM:250' for i = 1:num */
+  /* 'gkmPWM:259' pwms = coder.nullcopy(pwms); */
+  /* 'gkmPWM:260' for i = 1:num */
   for (b_i = 0; b_i < unnamed_idx_0_tmp_tmp; b_i++) {
-    /* 'gkmPWM:251' pwms{i} = zeros(l,4); */
+    /* 'gkmPWM:261' pwms{i} = zeros(l,4); */
     i = pwms_data[b_i].f1->size[0] * pwms_data[b_i].f1->size[1];
     pwms_data[b_i].f1->size[0] = varargin_2 + 1;
     pwms_data[b_i].f1->size[1] = 4;
@@ -1207,42 +1207,42 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     }
   }
 
-  /* 'gkmPWM:253' for i = 1:l */
+  /* 'gkmPWM:263' for i = 1:l */
   i = s_data[0].f1->size[1];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:254' pwms{1}(i,mat{c}(i)+1) = pwms{1}(i,mat{c}(i)+1)+w(i); */
+    /* 'gkmPWM:264' pwms{1}(i,mat{c}(i)+1) = pwms{1}(i,mat{c}(i)+1)+w(i); */
     d = mat_data[b_varargin_2].f1->data[b_i];
     pwms_data[0].f1->data[b_i + pwms_data[0].f1->size[0] * ((int)(d + 1.0) - 1)]
       += alpha_data[b_i];
   }
 
-  /* 'gkmPWM:256' B = zeros(9,1); */
-  /* 'gkmPWM:257' BB = zeros(9,1); */
+  /* 'gkmPWM:266' B = zeros(9,1); */
+  /* 'gkmPWM:267' BB = zeros(9,1); */
   for (b_i = 0; b_i < 9; b_i++) {
     B[b_i] = 0;
     BB[b_i] = 0;
   }
 
-  /* 'gkmPWM:258' B(1:5) = (0:4)'; */
-  /* 'gkmPWM:259' B(6:9) = 0; */
+  /* 'gkmPWM:268' B(1:5) = (0:4)'; */
+  /* 'gkmPWM:269' B(6:9) = 0; */
   B[5] = 0;
   B[6] = 0;
   B[7] = 0;
   B[8] = 0;
 
-  /* 'gkmPWM:260' BB(1:5) = 0; */
+  /* 'gkmPWM:270' BB(1:5) = 0; */
   for (b_i = 0; b_i < 5; b_i++) {
     B[b_i] = (signed char)b_i;
     BB[b_i] = 0;
   }
 
-  /* 'gkmPWM:261' BB(6:9) = (1:4)'; */
+  /* 'gkmPWM:271' BB(6:9) = (1:4)'; */
   BB[5] = 1;
   BB[6] = 2;
   BB[7] = 3;
   BB[8] = 4;
 
-  /* 'gkmPWM:262' CC = [l l-1 l-2 l-3 l-4 l-1 l-2 l-3 l-4]; */
+  /* 'gkmPWM:272' CC = [l l-1 l-2 l-3 l-4 l-1 l-2 l-3 l-4]; */
   CC[0] = s_data[0].f1->size[1];
   CC[1] = s_data[0].f1->size[1] - 1;
   CC[2] = s_data[0].f1->size[1] - 2;
@@ -1254,7 +1254,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
   CC[8] = s_data[0].f1->size[1] - 4;
 
   /* this process picks kmers to seed the PWMs.  kmers that match one of the seeds by round(l/2)+1 or more are added that particular seed.  Otherwise, it becomes another seed. */
-  /* 'gkmPWM:264' for i = 2:100000 */
+  /* 'gkmPWM:274' for i = 2:100000 */
   b_i = 1;
   emxInit_real_T(&ss, 2);
   emxInit_real_T(&rs, 2);
@@ -1262,11 +1262,11 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
   emxInit_boolean_T(&b_x, 2);
   exitg2 = false;
   while ((!exitg2) && (b_i - 1 < 99999)) {
-    /* 'gkmPWM:265' ss = letterconvert(s{i}); */
+    /* 'gkmPWM:275' ss = letterconvert(s{i}); */
     letterconvert(s_data[b_i].f1, ss);
     ss_data = ss->data;
 
-    /* 'gkmPWM:266' rs = 3-fliplr(ss); */
+    /* 'gkmPWM:276' rs = 3-fliplr(ss); */
     i = rs->size[0] * rs->size[1];
     rs->size[0] = 1;
     rs->size[1] = ss->size[1];
@@ -1287,7 +1287,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       rs_data[i] = 3.0 - rs_data[i];
     }
 
-    /* 'gkmPWM:267' M = zeros(c,1); */
+    /* 'gkmPWM:277' M = zeros(c,1); */
     loop_ub_tmp = (int)*c;
     i = M->size[0];
     M->size[0] = (int)*c;
@@ -1297,7 +1297,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       M_data[i] = 0.0;
     }
 
-    /* 'gkmPWM:268' D = zeros(c,1); */
+    /* 'gkmPWM:278' D = zeros(c,1); */
     i = D->size[0];
     D->size[0] = (int)*c;
     emxEnsureCapacity_int32_T(D, i);
@@ -1306,7 +1306,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       D_data[i] = 0;
     }
 
-    /* 'gkmPWM:269' DD = zeros(c,1); */
+    /* 'gkmPWM:279' DD = zeros(c,1); */
     i = DD->size[0];
     DD->size[0] = (int)*c;
     emxEnsureCapacity_real_T(DD, i);
@@ -1315,9 +1315,9 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       DD_data[i] = 0.0;
     }
 
-    /* 'gkmPWM:270' for j = 1:c */
+    /* 'gkmPWM:280' for j = 1:c */
     for (j = 0; j < loop_ub_tmp; j++) {
-      /* 'gkmPWM:271' [m,d] = max([sum(mat{j}==ss) sum(mat{j}(2:end)==ss(1:l-1)) sum(mat{j}(3:end)==ss(1:l-2)) sum(mat{j}(4:end)==ss(1:l-3)) sum(mat{j}(5:end)==ss(1:l-4)) sum(mat{j}(1:l-1)==ss(2:end)) sum(mat{j}(1:l-2)==ss(3:end)) sum(mat{j}(1:l-3)==ss(4:end)) sum(mat{j}(1:l-4)==ss(5:end))]); */
+      /* 'gkmPWM:281' [m,d] = max([sum(mat{j}==ss) sum(mat{j}(2:end)==ss(1:l-1)) sum(mat{j}(3:end)==ss(1:l-2)) sum(mat{j}(4:end)==ss(1:l-3)) sum(mat{j}(5:end)==ss(1:l-4)) sum(mat{j}(1:l-1)==ss(2:end)) sum(mat{j}(1:l-2)==ss(3:end)) sum(mat{j}(1:l-3)==ss(4:end)) sum(mat{j}(1:l-4)==ss(5:end))]); */
       if (2 > mat_data[j].f1->size[1]) {
         i = 0;
         b_y = 0;
@@ -1663,7 +1663,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       h_y[8] = b_d;
       b_maximum(h_y, &curr_pos, &iindx);
 
-      /* 'gkmPWM:272' [mm,dd] = max([sum(mat{j}==rs) sum(mat{j}(2:end)==rs(1:l-1)) sum(mat{j}(3:end)==rs(1:l-2)) sum(mat{j}(4:end)==rs(1:l-3)) sum(mat{j}(5:end)==rs(1:l-4)) sum(mat{j}(1:l-1)==rs(2:end)) sum(mat{j}(1:l-2)==rs(3:end)) sum(mat{j}(1:l-3)==rs(4:end)) sum(mat{j}(1:l-4)==rs(5:end))]); */
+      /* 'gkmPWM:282' [mm,dd] = max([sum(mat{j}==rs) sum(mat{j}(2:end)==rs(1:l-1)) sum(mat{j}(3:end)==rs(1:l-2)) sum(mat{j}(4:end)==rs(1:l-3)) sum(mat{j}(5:end)==rs(1:l-4)) sum(mat{j}(1:l-1)==rs(2:end)) sum(mat{j}(1:l-2)==rs(3:end)) sum(mat{j}(1:l-3)==rs(4:end)) sum(mat{j}(1:l-4)==rs(5:end))]); */
       if (2 > mat_data[j].f1->size[1]) {
         i = 0;
         b_y = 0;
@@ -2009,34 +2009,34 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       h_y[8] = b_d;
       b_maximum(h_y, &idx, &b_d);
 
-      /* 'gkmPWM:273' [M(j),ddd] = max([m mm]); */
+      /* 'gkmPWM:283' [M(j),ddd] = max([m mm]); */
       m[0] = curr_pos;
       m[1] = idx;
       c_maximum(m, &M_data[j], &unnamed_idx_0_tmp_tmp);
 
-      /* 'gkmPWM:274' if ddd == 1 */
+      /* 'gkmPWM:284' if ddd == 1 */
       if (unnamed_idx_0_tmp_tmp == 1) {
-        /* 'gkmPWM:275' D(j) = d; */
+        /* 'gkmPWM:285' D(j) = d; */
         D_data[j] = iindx;
 
-        /* 'gkmPWM:276' DD(j) = 1; */
+        /* 'gkmPWM:286' DD(j) = 1; */
         DD_data[j] = 1.0;
       } else {
-        /* 'gkmPWM:277' else */
-        /* 'gkmPWM:278' D(j) = dd; */
+        /* 'gkmPWM:287' else */
+        /* 'gkmPWM:288' D(j) = dd; */
         D_data[j] = b_d;
 
-        /* 'gkmPWM:279' DD(j) = 2; */
+        /* 'gkmPWM:289' DD(j) = 2; */
         DD_data[j] = 2.0;
       }
     }
 
-    /* 'gkmPWM:282' if max(M) < k */
+    /* 'gkmPWM:292' if max(M) < k */
     if (maximum(M) < (double)x + 1.0) {
-      /* 'gkmPWM:283' c = c+1; */
+      /* 'gkmPWM:293' c = c+1; */
       (*c)++;
 
-      /* 'gkmPWM:284' p{c-ikl} = s{i}; */
+      /* 'gkmPWM:294' p{c-ikl} = s{i}; */
       i = (int)(*c - (double)b_varargin_2) - 1;
       i = sequences_data[i].f1->size[0] * sequences_data[i].f1->size[1];
       sequences_data[(int)(*c - (double)b_varargin_2) - 1].f1->size[0] = 1;
@@ -2050,7 +2050,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
           s_data[b_i].f1->data[i];
       }
 
-      /* 'gkmPWM:285' mat{c} = ss; */
+      /* 'gkmPWM:295' mat{c} = ss; */
       i = mat_data[(int)*c - 1].f1->size[0] * mat_data[(int)*c - 1].f1->size[1];
       mat_data[(int)*c - 1].f1->size[0] = 1;
       mat_data[(int)*c - 1].f1->size[1] = ss->size[1];
@@ -2060,7 +2060,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
         mat_data[(int)*c - 1].f1->data[i] = ss_data[i];
       }
 
-      /* 'gkmPWM:286' ss = ss+1; */
+      /* 'gkmPWM:296' ss = ss+1; */
       i = ss->size[0] * ss->size[1];
       ss->size[0] = 1;
       emxEnsureCapacity_real_T(ss, i);
@@ -2070,9 +2070,9 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
         ss_data[i]++;
       }
 
-      /* 'gkmPWM:287' for j = 1:l */
+      /* 'gkmPWM:297' for j = 1:l */
       for (j = 0; j <= varargin_2; j++) {
-        /* 'gkmPWM:288' pwms{c-ikl}(j,ss(j)) = pwms{c-ikl}(j,ss(j))+w(i); */
+        /* 'gkmPWM:298' pwms{c-ikl}(j,ss(j)) = pwms{c-ikl}(j,ss(j))+w(i); */
         i = (int)ss_data[j] - 1;
         pwms_data[(int)(*c - (double)b_varargin_2) - 1].f1->data[j + pwms_data
           [(int)(*c - (double)b_varargin_2) - 1].f1->size[0] * i] = pwms_data
@@ -2080,14 +2080,14 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
           - (double)ik->size[0]) - 1].f1->size[0] * i] + alpha_data[b_i];
       }
     } else {
-      /* 'gkmPWM:290' else */
-      /* 'gkmPWM:291' [~,d] = max(M); */
+      /* 'gkmPWM:300' else */
+      /* 'gkmPWM:301' [~,d] = max(M); */
       d_maximum(M, &curr_pos, &iindx);
 
-      /* 'gkmPWM:292' if DD(d) == 1 && d > ikl */
+      /* 'gkmPWM:302' if DD(d) == 1 && d > ikl */
       d = DD_data[iindx - 1];
       if ((d == 1.0) && (iindx > b_varargin_2)) {
-        /* 'gkmPWM:293' ss = ss+1; */
+        /* 'gkmPWM:303' ss = ss+1; */
         i = ss->size[0] * ss->size[1];
         ss->size[0] = 1;
         emxEnsureCapacity_real_T(ss, i);
@@ -2097,13 +2097,13 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
           ss_data[i]++;
         }
 
-        /* 'gkmPWM:294' d = d-ikl; */
+        /* 'gkmPWM:304' d = d-ikl; */
         b_d = (iindx - b_varargin_2) - 1;
 
-        /* 'gkmPWM:295' for j = 1:CC(D(d)) */
+        /* 'gkmPWM:305' for j = 1:CC(D(d)) */
         i = CC[D_data[b_d] - 1];
         for (j = 0; j < i; j++) {
-          /* 'gkmPWM:296' pwms{d}(j+B(D(d)),ss(j+BB(D(d)))) = pwms{d}(j+B(D(d)),ss(j+BB(D(d))))+w(i); */
+          /* 'gkmPWM:306' pwms{d}(j+B(D(d)),ss(j+BB(D(d)))) = pwms{d}(j+B(D(d)),ss(j+BB(D(d))))+w(i); */
           b_y = (int)((unsigned int)j + B[D_data[b_d] - 1]);
           unnamed_idx_0_tmp_tmp = (int)ss_data[(int)((unsigned int)j +
             BB[D_data[b_d] - 1])] - 1;
@@ -2111,8 +2111,8 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
             unnamed_idx_0_tmp_tmp] += alpha_data[b_i];
         }
       } else if ((d == 2.0) && (iindx > b_varargin_2)) {
-        /* 'gkmPWM:298' elseif DD(d) == 2 && d > ikl */
-        /* 'gkmPWM:299' rs = rs+1; */
+        /* 'gkmPWM:308' elseif DD(d) == 2 && d > ikl */
+        /* 'gkmPWM:309' rs = rs+1; */
         i = rs->size[0] * rs->size[1];
         rs->size[0] = 1;
         emxEnsureCapacity_real_T(rs, i);
@@ -2122,13 +2122,13 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
           rs_data[i]++;
         }
 
-        /* 'gkmPWM:300' d = d-ikl; */
+        /* 'gkmPWM:310' d = d-ikl; */
         b_d = (iindx - b_varargin_2) - 1;
 
-        /* 'gkmPWM:301' for j = 1:CC(D(d)) */
+        /* 'gkmPWM:311' for j = 1:CC(D(d)) */
         i = CC[D_data[b_d] - 1];
         for (j = 0; j < i; j++) {
-          /* 'gkmPWM:302' pwms{d}(j+B(D(d)),rs(j+BB(D(d)))) = pwms{d}(j+B(D(d)),rs(j+BB(D(d))))+w(i); */
+          /* 'gkmPWM:312' pwms{d}(j+B(D(d)),rs(j+BB(D(d)))) = pwms{d}(j+B(D(d)),rs(j+BB(D(d))))+w(i); */
           b_y = (int)((unsigned int)j + B[D_data[b_d] - 1]);
           unnamed_idx_0_tmp_tmp = (int)rs_data[(int)((unsigned int)j +
             BB[D_data[b_d] - 1])] - 1;
@@ -2138,7 +2138,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
       }
     }
 
-    /* 'gkmPWM:306' if c == num+ikl */
+    /* 'gkmPWM:316' if c == num+ikl */
     if (*c == num + (double)b_varargin_2) {
       exitg2 = true;
     } else {
@@ -2156,15 +2156,15 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
   emxFree_real_T(&alpha);
 
   /*  mat = mat(1:c); */
-  /* 'gkmPWM:311' new_mat = cell(c, 1); */
-  /* 'gkmPWM:312' for cur_idx=1:c */
+  /* 'gkmPWM:321' new_mat = cell(c, 1); */
+  /* 'gkmPWM:322' for cur_idx=1:c */
   i = (int)*c;
   b_y = mat->size[0];
   mat->size[0] = (int)*c;
   emxEnsureCapacity_cell_wrap_1(mat, b_y);
   b_mat_data = mat->data;
   for (b_d = 0; b_d < i; b_d++) {
-    /* 'gkmPWM:313' new_mat{cur_idx} = mat{cur_idx}; */
+    /* 'gkmPWM:323' new_mat{cur_idx} = mat{cur_idx}; */
     b_y = b_mat_data[b_d].f1->size[0] * b_mat_data[b_d].f1->size[1];
     b_mat_data[b_d].f1->size[0] = 1;
     b_mat_data[b_d].f1->size[1] = mat_data[b_d].f1->size[1];
@@ -2177,18 +2177,18 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxFree_cell_wrap_1(&b_mat);
 
-  /* 'gkmPWM:315' mat = new_mat; */
+  /* 'gkmPWM:325' mat = new_mat; */
   /*  p = p(1:c-ikl); */
-  /* 'gkmPWM:318' p_len = c-ikl; */
-  /* 'gkmPWM:319' new_p = cell(p_len, 1); */
-  /* 'gkmPWM:320' for cur_idx=1:p_len */
+  /* 'gkmPWM:328' p_len = c-ikl; */
+  /* 'gkmPWM:329' new_p = cell(p_len, 1); */
+  /* 'gkmPWM:330' for cur_idx=1:p_len */
   i = (int)(*c - (double)ik->size[0]);
   b_y = p->size[0];
   p->size[0] = (int)(*c - (double)ik->size[0]);
   emxEnsureCapacity_cell_wrap_0(p, b_y);
   p_data = p->data;
   for (b_d = 0; b_d < i; b_d++) {
-    /* 'gkmPWM:321' new_p{cur_idx} = p{cur_idx}; */
+    /* 'gkmPWM:331' new_p{cur_idx} = p{cur_idx}; */
     b_y = p_data[b_d].f1->size[0] * p_data[b_d].f1->size[1];
     p_data[b_d].f1->size[0] = 1;
     p_data[b_d].f1->size[1] = sequences_data[b_d].f1->size[1];
@@ -2201,18 +2201,18 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxFree_cell_wrap_0(&sequences);
 
-  /* 'gkmPWM:323' p = new_p; */
+  /* 'gkmPWM:333' p = new_p; */
   /*  pwms = pwms(1:c-ikl); */
-  /* 'gkmPWM:326' pwms_len = c-ikl; */
-  /* 'gkmPWM:327' new_pwms = cell(pwms_len, 1); */
-  /* 'gkmPWM:328' for cur_idx=1:pwms_len */
+  /* 'gkmPWM:336' pwms_len = c-ikl; */
+  /* 'gkmPWM:337' new_pwms = cell(pwms_len, 1); */
+  /* 'gkmPWM:338' for cur_idx=1:pwms_len */
   i = (int)(*c - (double)ik->size[0]);
   b_y = pwms->size[0];
   pwms->size[0] = (int)(*c - (double)ik->size[0]);
   emxEnsureCapacity_cell_wrap_2(pwms, b_y);
   b_pwms_data = pwms->data;
   for (b_d = 0; b_d < i; b_d++) {
-    /* 'gkmPWM:329' new_pwms{cur_idx} = pwms{cur_idx}; */
+    /* 'gkmPWM:339' new_pwms{cur_idx} = pwms{cur_idx}; */
     b_y = b_pwms_data[b_d].f1->size[0] * b_pwms_data[b_d].f1->size[1];
     b_pwms_data[b_d].f1->size[0] = pwms_data[b_d].f1->size[0];
     b_pwms_data[b_d].f1->size[1] = 4;
@@ -2225,13 +2225,13 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
 
   emxFree_cell_wrap_2(&b_pwms);
 
-  /* 'gkmPWM:331' pwms = new_pwms; */
-  /* 'gkmPWM:333' for i = 1:c-ikl */
+  /* 'gkmPWM:341' pwms = new_pwms; */
+  /* 'gkmPWM:343' for i = 1:c-ikl */
   i = (int)(*c - (double)ik->size[0]);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:334' for j = 1:l */
+    /* 'gkmPWM:344' for j = 1:l */
     for (j = 0; j <= varargin_2; j++) {
-      /* 'gkmPWM:335' pwms{i}(j,:) = pwms{i}(j,:)/sum(pwms{i}(j,:)); */
+      /* 'gkmPWM:345' pwms{i}(j,:) = pwms{i}(j,:)/sum(pwms{i}(j,:)); */
       curr_pos = ((b_pwms_data[b_i].f1->data[j] + b_pwms_data[b_i].f1->data[j +
                    b_pwms_data[b_i].f1->size[0]]) + b_pwms_data[b_i].f1->data[j
                   + b_pwms_data[b_i].f1->size[0] * 2]) + b_pwms_data[b_i]
@@ -2398,594 +2398,593 @@ static void cb_binary_expand_op(emxArray_real_T *mat, const emxArray_real_T *x)
 }
 
 /*
- * function createMEME(fileh,PWM, GC, C, r, R, rcorr, E, Rd)
+ * function createMEME(fileh,PWM, memefile, GC, C, r, R, rcorr, E, Rd)
  */
 static void createMEME(const emxArray_char_T *fileh_Value, const
-  emxArray_cell_wrap_2 *PWM, double GC, const emxArray_real_T *C, double r,
-  const emxArray_real_T *R, double rcorr, const emxArray_real_T *E, const
-  emxArray_real_T *Rd)
+  emxArray_cell_wrap_2 *PWM, const emxArray_char_T *memefile, double GC, const
+  emxArray_real_T *C, double r, const emxArray_real_T *R, double rcorr, const
+  emxArray_real_T *E, const emxArray_real_T *Rd)
 {
+  static const char cv[5] = { 'M', 'O', 'T', 'I', 'F' };
+
   FILE* b_NULL;
   FILE* filestar;
-  int st;
+  cell_wrap_0 *names_data;
   const cell_wrap_2 *PWM_data;
-  cell_wrap_3 cur_PWM[1969];
-  cell_wrap_3 p[1968];
-  emxArray_char_T *cur_line;
-  emxArray_char_T *cur_names;
-  emxArray_char_T *d_fileid;
-  emxArray_char_T *filename;
-  emxArray_char_T *varargin_1;
+  cell_wrap_3 *cur_PWM_data;
+  cell_wrap_3 *p_data;
+  emxArray_cell_wrap_0 *names;
+  emxArray_cell_wrap_3 *b_cur_PWM;
+  emxArray_cell_wrap_3 *cur_PWM;
+  emxArray_cell_wrap_3 *p;
+  emxArray_char_T *b_memefile;
+  emxArray_char_T *text;
+  emxArray_int32_T *match_out;
+  emxArray_int32_T *matches;
   emxArray_real_T *A;
   emxArray_real_T *b_r;
-  emxArray_real_T *b_varargin_1;
   emxArray_real_T *mat;
-  emxArray_real_T *r1;
   emxArray_real_T *rmat;
-  emxArray_rtString *names;
-  rtString *names_data;
+  emxArray_real_T *varargin_1;
+  emxArray_real_T *y;
+  emxArray_uint32_T *lenvec;
   const double *C_data;
   const double *E_data;
   const double *R_data;
   const double *Rd_data;
-  double MM;
-  double b_a;
-  double curr_pos;
-  double idx;
-  double *b_varargin_1_data;
+  double a;
+  double b_MM;
+  double b_varargin_1;
+  double d;
   double *mat_data;
   double *rmat_data;
+  double *varargin_1_data;
+  int MM;
   int b_i;
-  int cur_idx;
-  int exitg1;
   int i;
+  int i1;
+  int i2;
   int j;
-  int k;
-  int nbytes;
-  const char *fileh_Value_data;
+  int loop_ub;
+  int match_idx;
+  unsigned int *lenvec_data;
+  int *match_out_data;
+  int *matches_data;
   signed char b_fileid;
-  signed char c_fileid;
   signed char fileid;
-  char *cur_line_data;
-  char *varargin_1_data;
-  bool a;
-  bool exitg2;
+  char *text_data;
+  bool autoflush;
   Rd_data = Rd->data;
   E_data = E->data;
   R_data = R->data;
   C_data = C->data;
   PWM_data = PWM->data;
-  fileh_Value_data = fileh_Value->data;
-  emxInitMatrix_cell_wrap_3(p);
-  emxInit_char_T(&cur_line, 2);
+  emxInit_char_T(&text, 2);
+  emxInit_char_T(&b_memefile, 2);
 
-  /* 'gkmPWM:127' num = numel(C); */
-  /* 'gkmPWM:128' GC = round(GC*100)/100; */
+  /* 'gkmPWM:133' num = numel(C); */
+  /* 'gkmPWM:134' GC = round(GC*100)/100; */
   GC = rt_roundd(GC * 100.0) / 100.0;
 
-  /* 'gkmPWM:129' GCvec = [0.5-GC/2 GC/2 GC/2 0.5-GC/2]; */
-  /* 'gkmPWM:130' [p] = getmotif('combined_db_v4.meme',1:1968); */
-  getmotif(p);
+  /* 'gkmPWM:135' GCvec = [0.5-GC/2 GC/2 GC/2 0.5-GC/2]; */
+  /* 'gkmPWM:137' f = strfind(fileread(memefile),'MOTIF'); */
+  fileread(memefile, b_memefile);
 
-  /* 'gkmPWM:131' fid = fopen(sprintf('%s_denovo.meme', fileh), 'w'); */
-  i = cur_line->size[0] * cur_line->size[1];
-  cur_line->size[0] = 1;
-  cur_line->size[1] = fileh_Value->size[1] + 1;
-  emxEnsureCapacity_char_T(cur_line, i);
-  cur_line_data = cur_line->data;
-  nbytes = fileh_Value->size[1];
-  for (i = 0; i < nbytes; i++) {
-    cur_line_data[i] = fileh_Value_data[i];
-  }
-
-  emxInit_char_T(&varargin_1, 2);
-  cur_line_data[fileh_Value->size[1]] = '\x00';
-  i = varargin_1->size[0] * varargin_1->size[1];
-  varargin_1->size[0] = 1;
-  varargin_1->size[1] = fileh_Value->size[1] + 1;
-  emxEnsureCapacity_char_T(varargin_1, i);
-  varargin_1_data = varargin_1->data;
-  nbytes = fileh_Value->size[1];
-  for (i = 0; i < nbytes; i++) {
-    varargin_1_data[i] = fileh_Value_data[i];
-  }
-
-  emxInit_char_T(&filename, 2);
-  varargin_1_data[fileh_Value->size[1]] = '\x00';
-  nbytes = snprintf(NULL, 0, "%s_denovo.meme", &varargin_1_data[0]);
-  i = filename->size[0] * filename->size[1];
-  filename->size[0] = 1;
-  filename->size[1] = nbytes + 1;
-  emxEnsureCapacity_char_T(filename, i);
-  varargin_1_data = filename->data;
-  snprintf(&varargin_1_data[0], (size_t)(nbytes + 1), "%s_denovo.meme",
-           &cur_line_data[0]);
-  i = filename->size[0] * filename->size[1];
-  if (1 > nbytes) {
-    filename->size[1] = 0;
+  /* 'gkmPWM:138' num2 = length(strfind(fileread(memefile),'MOTIF')); */
+  fileread(memefile, text);
+  text_data = text->data;
+  emxFree_char_T(&b_memefile);
+  if (text->size[1] == 0) {
+    match_idx = 0;
   } else {
-    filename->size[1] = nbytes;
+    emxInit_int32_T(&match_out, 2);
+    emxInit_int32_T(&matches, 2);
+    i = matches->size[0] * matches->size[1];
+    matches->size[0] = 1;
+    matches->size[1] = text->size[1];
+    emxEnsureCapacity_int32_T(matches, i);
+    matches_data = matches->data;
+    match_idx = 0;
+    i = text->size[1];
+    for (b_i = 0; b_i <= i - 5; b_i++) {
+      j = 1;
+      while ((j <= 5) && (text_data[(b_i + j) - 1] == cv[j - 1])) {
+        j++;
+      }
+
+      if (j > 5) {
+        matches_data[match_idx] = b_i + 1;
+        match_idx++;
+      }
+    }
+
+    i = match_out->size[0] * match_out->size[1];
+    match_out->size[0] = 1;
+    match_out->size[1] = match_idx;
+    emxEnsureCapacity_int32_T(match_out, i);
+    match_out_data = match_out->data;
+    for (b_i = 0; b_i < match_idx; b_i++) {
+      match_out_data[b_i] = matches_data[b_i];
+    }
+
+    emxFree_int32_T(&matches);
+    match_idx = match_out->size[1];
+    emxFree_int32_T(&match_out);
   }
 
-  emxEnsureCapacity_char_T(filename, i);
-  fileid = cfopen(filename, "wb");
-
-  /* 'gkmPWM:132' fid2 = fopen(sprintf('%s_gkmPWM.out', fileh), 'w'); */
-  b_sprintf(fileh_Value, filename);
-  b_fileid = cfopen(filename, "wb");
-
-  /* 'gkmPWM:133' lenvec = zeros(1968,1); */
-  /* 'gkmPWM:134' for i = 1:1968 */
-  /* 'gkmPWM:137' mf = fopen('motif_logos/short_name', 'r'); */
-  c_fileid = b_cfopen("motif_logos/short_name");
-
-  /*  names = textscan(mf,'%*d\t%s\t%*s\n'); */
-  /* 'gkmPWM:140' curr_pos = ftell(mf); */
-  curr_pos = b_ftell(c_fileid);
-
-  /* 'gkmPWM:141' idx=0; */
-  idx = 0.0;
-
-  /* 'gkmPWM:142' while ~feof(mf) */
-  b_NULL = NULL;
-  emxInit_char_T(&d_fileid, 2);
-  do {
-    exitg1 = 0;
-    getfilestar(c_fileid, &filestar, &a);
-    if (filestar == b_NULL) {
-      i = 0;
-    } else {
-      st = feof(filestar);
-      i = ((int)st != 0);
+  /* 'gkmPWM:139' [p,names] = getmotif(memefile,1:num2); */
+  emxInit_real_T(&y, 2);
+  if (match_idx < 1) {
+    y->size[0] = 1;
+    y->size[1] = 0;
+  } else {
+    i = y->size[0] * y->size[1];
+    y->size[0] = 1;
+    y->size[1] = match_idx;
+    emxEnsureCapacity_real_T(y, i);
+    mat_data = y->data;
+    loop_ub = match_idx - 1;
+    for (i = 0; i <= loop_ub; i++) {
+      mat_data[i] = (double)i + 1.0;
     }
+  }
 
-    if (i == 0) {
-      /* 'gkmPWM:143' idx=idx+1; */
-      idx++;
-
-      /* 'gkmPWM:144' fgetl(mf); */
-      b_fgets(c_fileid, d_fileid);
-    } else {
-      exitg1 = 1;
-    }
-  } while (exitg1 == 0);
-
-  emxFree_char_T(&d_fileid);
-  emxInit_rtString(&names);
-
-  /* 'gkmPWM:146' fseek(mf, curr_pos, 'bof'); */
-  b_fseek(c_fileid, curr_pos);
-
-  /* 'gkmPWM:147' names = cell(idx, 1); */
-  nbytes = (int)idx;
-  i = names->size[0];
-  names->size[0] = (int)idx;
-  emxEnsureCapacity_rtString(names, i);
+  emxInit_uint32_T(&lenvec);
+  emxInit_cell_wrap_3(&p);
+  emxInit_cell_wrap_0(&names, 1);
+  getmotif(memefile, y, p, names);
   names_data = names->data;
-  for (i = 0; i < nbytes; i++) {
-    names_data[i].Value->size[0] = 1;
-    names_data[i].Value->size[1] = 0;
+  p_data = p->data;
+
+  /* 'gkmPWM:141' fid = fopen(sprintf('%s_denovo.meme', fileh), 'w'); */
+  b_sprintf(fileh_Value, text);
+  fileid = cfopen(text, "wb");
+
+  /* 'gkmPWM:142' fid2 = fopen(sprintf('%s_gkmPWM.out', fileh), 'w'); */
+  c_sprintf(fileh_Value, text);
+  b_fileid = cfopen(text, "wb");
+
+  /* 'gkmPWM:143' lenvec = zeros(num2,1); */
+  i = lenvec->size[0];
+  lenvec->size[0] = match_idx;
+  emxEnsureCapacity_uint32_T(lenvec, i);
+  lenvec_data = lenvec->data;
+
+  /* 'gkmPWM:144' for i = 1:num2 */
+  for (b_i = 0; b_i < match_idx; b_i++) {
+    /* 'gkmPWM:145' [lenvec(i),~] = size(p{i}); */
+    lenvec_data[b_i] = (unsigned int)p_data[b_i].f1->size[0];
   }
 
-  /* 'gkmPWM:148' names = coder.nullcopy(names); */
-  /* 'gkmPWM:149' for cur_idx=1:idx */
-  cur_idx = 0;
-  emxInit_char_T(&cur_names, 2);
-  exitg2 = false;
-  while ((!exitg2) && (cur_idx <= (int)idx - 1)) {
-    /* 'gkmPWM:150' cur_line = fgetl(mf); */
-    fgetl(c_fileid, cur_line);
-
-    /* 'gkmPWM:151' if cur_line == -1 */
-    a = (cur_line->size[1] != 0);
-    if (a) {
-      a = (0 > cur_line->size[1] - 1);
-    }
-
-    if (a) {
-      exitg2 = true;
-    } else {
-      /* 'gkmPWM:154' [~, cur_names] = strtok(cur_line, char(9)); */
-      b_strtok(cur_line, varargin_1, cur_names);
-
-      /* 'gkmPWM:155' [cur_short_name, ~] = strtok(cur_names, char(9)); */
-      b_strtok(cur_names, varargin_1, filename);
-
-      /* 'gkmPWM:156' names{cur_idx} = string(strip(cur_short_name)); */
-      strip(varargin_1, names_data[cur_idx].Value);
-      cur_idx++;
-    }
-  }
-
-  emxFree_char_T(&varargin_1);
-  emxFree_char_T(&filename);
-  emxFree_char_T(&cur_names);
-
-  /* 'gkmPWM:158' fclose(mf); */
-  cfclose(c_fileid);
-
+  /*  mf = fopen('motif_logos/short_name', 'r'); */
+  /*  % names = textscan(mf,'%*d\t%s\t%*s\n'); */
+  /*   */
+  /*  curr_pos = ftell(mf); */
+  /*  idx=0; */
+  /*  while ~feof(mf) */
+  /*      idx=idx+1; */
+  /*      fgetl(mf); */
+  /*  end */
+  /*  fseek(mf, curr_pos, 'bof'); */
+  /*  names = cell(idx, 1); */
+  /*  names = coder.nullcopy(names); */
+  /*  for cur_idx=1:idx */
+  /*      cur_line = fgetl(mf); */
+  /*      if cur_line == -1 */
+  /*          break */
+  /*      end */
+  /*      [~, cur_names] = strtok(cur_line, char(9)); */
+  /*      [cur_short_name, ~] = strtok(cur_names, char(9)); */
+  /*      names{cur_idx} = string(strip(cur_short_name)); */
+  /*  end */
+  /*  fclose(mf); */
   /*  names = names{1}; */
-  /* 'gkmPWM:161' fprintf(fid, 'MEME\n\n'); */
+  /* 'gkmPWM:171' fprintf(fid, 'MEME\n\n'); */
   b_NULL = NULL;
-  getfilestar(fileid, &filestar, &a);
+  getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "MEME\n\n");
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:162' fprintf(fid, 'ALPHABET= ACGT\n\n'); */
+  /* 'gkmPWM:172' fprintf(fid, 'ALPHABET= ACGT\n\n'); */
   b_NULL = NULL;
-  getfilestar(fileid, &filestar, &a);
+  getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "ALPHABET= ACGT\n\n");
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:163' fprintf(fid, 'Correlation with SVM weight vector: %0.3f\n\n', r); */
+  /* 'gkmPWM:173' fprintf(fid, 'Correlation with SVM weight vector: %0.3f\n\n', r); */
   b_NULL = NULL;
-  getfilestar(fileid, &filestar, &a);
+  getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "Correlation with SVM weight vector: %0.3f\n\n", r);
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:164' fprintf(fid, 'Max PWM Correlation: %0.3f\n\n', rcorr); */
+  /* 'gkmPWM:174' fprintf(fid, 'Max PWM Correlation: %0.3f\n\n', rcorr); */
   b_NULL = NULL;
-  getfilestar(fileid, &filestar, &a);
+  getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "Max PWM Correlation: %0.3f\n\n", rcorr);
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:165' fprintf(fid, 'Background letter frequencies (from negative set)\n'); */
+  /* 'gkmPWM:175' fprintf(fid, 'Background letter frequencies (from negative set)\n'); */
   b_NULL = NULL;
-  getfilestar(fileid, &filestar, &a);
+  getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "Background letter frequencies (from negative set)\n");
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:166' fprintf(fid, 'A %0.2f C %0.2f G %0.2f T %0.2f\n\n', GCvec(1), GCvec(2), GCvec(3), GCvec(4)); */
+  /* 'gkmPWM:176' fprintf(fid, 'A %0.2f C %0.2f G %0.2f T %0.2f\n\n', GCvec(1), GCvec(2), GCvec(3), GCvec(4)); */
   b_NULL = NULL;
-  getfilestar(fileid, &filestar, &a);
+  getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "A %0.2f C %0.2f G %0.2f T %0.2f\n\n", 0.5 - GC / 2.0, GC /
             2.0, GC / 2.0, 0.5 - GC / 2.0);
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:167' fprintf(fid2, 'Correlation with SVM weight vector:\t%0.3f\n', r); */
+  /* 'gkmPWM:177' fprintf(fid2, 'Correlation with SVM weight vector:\t%0.3f\n', r); */
   b_NULL = NULL;
-  getfilestar(b_fileid, &filestar, &a);
+  getfilestar(b_fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "Correlation with SVM weight vector:\t%0.3f\n", r);
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:168' fprintf(fid2, 'Max PWM Correlation:\t%0.3f\n', rcorr); */
+  /* 'gkmPWM:178' fprintf(fid2, 'Max PWM Correlation:\t%0.3f\n', rcorr); */
   b_NULL = NULL;
-  getfilestar(b_fileid, &filestar, &a);
+  getfilestar(b_fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "Max PWM Correlation:\t%0.3f\n", rcorr);
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:169' fprintf(fid2, 'MOTIF\tID\tSimilarity\tRedundancy\tWeight\tZ\tError\n'); */
+  /* 'gkmPWM:179' fprintf(fid2, 'MOTIF\tID\tSimilarity\tRedundancy\tWeight\tZ\tError\n'); */
   b_NULL = NULL;
-  getfilestar(b_fileid, &filestar, &a);
+  getfilestar(b_fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "MOTIF\tID\tSimilarity\tRedundancy\tWeight\tZ\tError\n");
-    if (a) {
+    if (autoflush) {
       fflush(filestar);
     }
   }
 
-  /* 'gkmPWM:170' a = 1; */
-  b_a = 1.0;
+  /* 'gkmPWM:180' a = 1; */
+  a = 1.0;
 
-  /* 'gkmPWM:171' b = 1; */
-  /* 'gkmPWM:172' for i = 1:num */
+  /* 'gkmPWM:181' b = 1; */
+  /* 'gkmPWM:182' for i = 1:num */
   i = C->size[0];
-  emxInitMatrix_cell_wrap_31(cur_PWM);
+  emxInit_cell_wrap_3(&cur_PWM);
+  emxInit_cell_wrap_3(&b_cur_PWM);
   emxInit_real_T(&mat, 2);
   emxInit_real_T(&rmat, 2);
-  emxInit_real_T(&b_varargin_1, 2);
+  emxInit_real_T(&varargin_1, 2);
   emxInit_real_T(&A, 2);
   emxInit_real_T(&b_r, 2);
-  emxInit_real_T(&r1, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:173' [len,~] = size(PWM{i}); */
-    /* 'gkmPWM:174' p_len = length(p); */
-    /* 'gkmPWM:175' cur_PWM = cell(p_len+1,1); */
-    /* 'gkmPWM:176' cur_PWM = coder.nullcopy(cur_PWM); */
-    /* 'gkmPWM:177' cur_PWM{1} = PWM{i}; */
-    k = cur_PWM[0].f1->size[0] * cur_PWM[0].f1->size[1];
-    cur_PWM[0].f1->size[0] = PWM_data[b_i].f1->size[0];
-    cur_PWM[0].f1->size[1] = 4;
-    emxEnsureCapacity_real_T(cur_PWM[0].f1, k);
-    nbytes = PWM_data[b_i].f1->size[0] * 4;
-    for (k = 0; k < nbytes; k++) {
-      cur_PWM[0].f1->data[k] = PWM_data[b_i].f1->data[k];
+    /* 'gkmPWM:183' [len,~] = size(PWM{i}); */
+    /* 'gkmPWM:184' p_len = length(p); */
+    /* 'gkmPWM:185' cur_PWM = cell(p_len+1,1); */
+    match_idx = p->size[0] + 1;
+    i1 = cur_PWM->size[0];
+    cur_PWM->size[0] = p->size[0] + 1;
+    emxEnsureCapacity_cell_wrap_3(cur_PWM, i1);
+    cur_PWM_data = cur_PWM->data;
+    for (i1 = 0; i1 < match_idx; i1++) {
+      cur_PWM_data[i1].f1->size[0] = 0;
+      cur_PWM_data[i1].f1->size[1] = 0;
     }
 
-    /* 'gkmPWM:178' for cur_idx=1:p_len */
-    for (cur_idx = 0; cur_idx < 1968; cur_idx++) {
-      /* 'gkmPWM:179' cur_PWM{cur_idx+1} = p{cur_idx}; */
-      k = cur_PWM[cur_idx + 1].f1->size[0] * cur_PWM[cur_idx + 1].f1->size[1];
-      cur_PWM[cur_idx + 1].f1->size[0] = p[cur_idx].f1->size[0];
-      cur_PWM[cur_idx + 1].f1->size[1] = p[cur_idx].f1->size[1];
-      emxEnsureCapacity_real_T(cur_PWM[cur_idx + 1].f1, k);
-      nbytes = p[cur_idx].f1->size[0] * p[cur_idx].f1->size[1];
-      for (k = 0; k < nbytes; k++) {
-        cur_PWM[cur_idx + 1].f1->data[k] = p[cur_idx].f1->data[k];
+    /* 'gkmPWM:186' cur_PWM = coder.nullcopy(cur_PWM); */
+    i1 = b_cur_PWM->size[0];
+    b_cur_PWM->size[0] = cur_PWM->size[0];
+    emxEnsureCapacity_cell_wrap_3(b_cur_PWM, i1);
+    cur_PWM_data = b_cur_PWM->data;
+
+    /* 'gkmPWM:187' cur_PWM{1} = PWM{i}; */
+    i1 = cur_PWM_data[0].f1->size[0] * cur_PWM_data[0].f1->size[1];
+    cur_PWM_data[0].f1->size[0] = PWM_data[b_i].f1->size[0];
+    cur_PWM_data[0].f1->size[1] = 4;
+    emxEnsureCapacity_real_T(cur_PWM_data[0].f1, i1);
+    loop_ub = PWM_data[b_i].f1->size[0] * 4;
+    for (i1 = 0; i1 < loop_ub; i1++) {
+      cur_PWM_data[0].f1->data[i1] = PWM_data[b_i].f1->data[i1];
+    }
+
+    /* 'gkmPWM:188' for cur_idx=1:p_len */
+    i1 = p->size[0];
+    for (match_idx = 0; match_idx < i1; match_idx++) {
+      /* 'gkmPWM:189' cur_PWM{cur_idx+1} = p{cur_idx}; */
+      i2 = cur_PWM_data[match_idx + 1].f1->size[0] * cur_PWM_data[match_idx + 1]
+        .f1->size[1];
+      cur_PWM_data[match_idx + 1].f1->size[0] = p_data[match_idx].f1->size[0];
+      cur_PWM_data[match_idx + 1].f1->size[1] = p_data[match_idx].f1->size[1];
+      emxEnsureCapacity_real_T(cur_PWM_data[match_idx + 1].f1, i2);
+      loop_ub = p_data[match_idx].f1->size[0] * p_data[match_idx].f1->size[1];
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        cur_PWM_data[match_idx + 1].f1->data[i2] = p_data[match_idx].f1->data[i2];
       }
     }
 
-    /* 'gkmPWM:181' [M, MM] = matchMotif(cur_PWM, [len;lenvec]); */
-    /* 'gkmPWM:357' n = length(lenvec)-1; */
-    /* 'gkmPWM:358' simmat = ones(n-1,1); */
-    /* 'gkmPWM:359' for i = 1:n+1 */
-    for (cur_idx = 0; cur_idx < 1969; cur_idx++) {
-      /* 'gkmPWM:360' mot{i} = mot{i}-1/4; */
-      nbytes = cur_PWM[cur_idx].f1->size[0] * cur_PWM[cur_idx].f1->size[1];
-      for (k = 0; k < nbytes; k++) {
-        cur_PWM[cur_idx].f1->data[k] -= 0.25;
+    /* 'gkmPWM:191' [M, MM] = matchMotif(cur_PWM, [len;lenvec]); */
+    /* 'gkmPWM:367' n = length(lenvec)-1; */
+    /* 'gkmPWM:368' simmat = ones(n-1,1); */
+    /* 'gkmPWM:369' for i = 1:n+1 */
+    i1 = lenvec->size[0] + 1;
+    for (match_idx = 0; match_idx < i1; match_idx++) {
+      /* 'gkmPWM:370' mot{i} = mot{i}-1/4; */
+      loop_ub = cur_PWM_data[match_idx].f1->size[0] * cur_PWM_data[match_idx].
+        f1->size[1];
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        cur_PWM_data[match_idx].f1->data[i2] -= 0.25;
       }
 
-      /* 'gkmPWM:361' mot{i} = mot{i}/sqrt(sum(sum(mot{i}.^2))); */
-      k = A->size[0] * A->size[1];
-      A->size[0] = cur_PWM[cur_idx].f1->size[0];
-      A->size[1] = cur_PWM[cur_idx].f1->size[1];
-      emxEnsureCapacity_real_T(A, k);
+      /* 'gkmPWM:371' mot{i} = mot{i}/sqrt(sum(sum(mot{i}.^2))); */
+      i2 = A->size[0] * A->size[1];
+      A->size[0] = cur_PWM_data[match_idx].f1->size[0];
+      A->size[1] = cur_PWM_data[match_idx].f1->size[1];
+      emxEnsureCapacity_real_T(A, i2);
       mat_data = A->data;
-      nbytes = cur_PWM[cur_idx].f1->size[0] * cur_PWM[cur_idx].f1->size[1];
-      for (k = 0; k < nbytes; k++) {
-        curr_pos = cur_PWM[cur_idx].f1->data[k];
-        mat_data[k] = pow(curr_pos, 2.0);
+      loop_ub = cur_PWM_data[match_idx].f1->size[0] * cur_PWM_data[match_idx].
+        f1->size[1];
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        b_varargin_1 = cur_PWM_data[match_idx].f1->data[i2];
+        mat_data[i2] = pow(b_varargin_1, 2.0);
       }
 
-      f_sum(A, r1);
-      curr_pos = sqrt(sum(r1));
-      nbytes = cur_PWM[cur_idx].f1->size[0] * cur_PWM[cur_idx].f1->size[1];
-      for (k = 0; k < nbytes; k++) {
-        cur_PWM[cur_idx].f1->data[k] /= curr_pos;
+      f_sum(A, b_r);
+      b_varargin_1 = sqrt(sum(b_r));
+      loop_ub = cur_PWM_data[match_idx].f1->size[0] * cur_PWM_data[match_idx].
+        f1->size[1];
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        cur_PWM_data[match_idx].f1->data[i2] /= b_varargin_1;
       }
     }
 
-    /* 'gkmPWM:363' M = 0; */
-    curr_pos = 0.0;
+    /* 'gkmPWM:373' M = 0; */
+    b_varargin_1 = 0.0;
 
-    /* 'gkmPWM:364' ind = 1; */
-    cur_idx = 0;
+    /* 'gkmPWM:374' ind = 1; */
+    MM = 0;
 
-    /* 'gkmPWM:365' for j = 2:n+1 */
-    for (j = 0; j < 1968; j++) {
-      /* 'gkmPWM:366' mat = mot{1}*mot{j}'; */
-      if ((cur_PWM[0].f1->size[0] == 0) || (cur_PWM[0].f1->size[1] == 0) ||
-          (cur_PWM[j + 1].f1->size[0] == 0) || (cur_PWM[j + 1].f1->size[1] == 0))
-      {
-        k = mat->size[0] * mat->size[1];
-        mat->size[0] = cur_PWM[0].f1->size[0];
-        mat->size[1] = cur_PWM[j + 1].f1->size[0];
-        emxEnsureCapacity_real_T(mat, k);
+    /* 'gkmPWM:375' for j = 2:n+1 */
+    i1 = lenvec->size[0] + 1;
+    for (j = 0; j <= i1 - 2; j++) {
+      /* 'gkmPWM:376' mat = mot{1}*mot{j}'; */
+      if ((cur_PWM_data[0].f1->size[0] == 0) || (cur_PWM_data[0].f1->size[1] ==
+           0) || (cur_PWM_data[j + 1].f1->size[0] == 0) || (cur_PWM_data[j + 1].
+           f1->size[1] == 0)) {
+        i2 = mat->size[0] * mat->size[1];
+        mat->size[0] = cur_PWM_data[0].f1->size[0];
+        mat->size[1] = cur_PWM_data[j + 1].f1->size[0];
+        emxEnsureCapacity_real_T(mat, i2);
         mat_data = mat->data;
-        nbytes = cur_PWM[0].f1->size[0] * cur_PWM[j + 1].f1->size[0];
-        for (k = 0; k < nbytes; k++) {
-          mat_data[k] = 0.0;
+        loop_ub = cur_PWM_data[0].f1->size[0] * cur_PWM_data[j + 1].f1->size[0];
+        for (i2 = 0; i2 < loop_ub; i2++) {
+          mat_data[i2] = 0.0;
         }
       } else {
-        k = mat->size[0] * mat->size[1];
-        mat->size[0] = cur_PWM[0].f1->size[0];
-        mat->size[1] = cur_PWM[j + 1].f1->size[0];
-        emxEnsureCapacity_real_T(mat, k);
+        i2 = mat->size[0] * mat->size[1];
+        mat->size[0] = cur_PWM_data[0].f1->size[0];
+        mat->size[1] = cur_PWM_data[j + 1].f1->size[0];
+        emxEnsureCapacity_real_T(mat, i2);
         mat_data = mat->data;
-        cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, (blasint)cur_PWM[0]
-                    .f1->size[0], (blasint)cur_PWM[j + 1].f1->size[0], (blasint)
-                    cur_PWM[0].f1->size[1], 1.0, &cur_PWM[0].f1->data[0],
-                    (blasint)cur_PWM[0].f1->size[0], &cur_PWM[j + 1].f1->data[0],
-                    (blasint)cur_PWM[j + 1].f1->size[0], 0.0, &mat_data[0],
-                    (blasint)cur_PWM[0].f1->size[0]);
+        cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, (blasint)
+                    cur_PWM_data[0].f1->size[0], (blasint)cur_PWM_data[j + 1].
+                    f1->size[0], (blasint)cur_PWM_data[0].f1->size[1], 1.0,
+                    &cur_PWM_data[0].f1->data[0], (blasint)cur_PWM_data[0]
+                    .f1->size[0], &cur_PWM_data[j + 1].f1->data[0], (blasint)
+                    cur_PWM_data[j + 1].f1->size[0], 0.0, &mat_data[0], (blasint)
+                    cur_PWM_data[0].f1->size[0]);
       }
 
-      /* 'gkmPWM:367' rmat = rot90(mot{1},2)*mot{j}'; */
-      d_rot90(cur_PWM[0].f1, A);
+      /* 'gkmPWM:377' rmat = rot90(mot{1},2)*mot{j}'; */
+      d_rot90(cur_PWM_data[0].f1, A);
       mat_data = A->data;
-      if ((A->size[0] == 0) || (A->size[1] == 0) || (cur_PWM[j + 1].f1->size[0] ==
-           0) || (cur_PWM[j + 1].f1->size[1] == 0)) {
-        k = rmat->size[0] * rmat->size[1];
+      if ((A->size[0] == 0) || (A->size[1] == 0) || (cur_PWM_data[j + 1]
+           .f1->size[0] == 0) || (cur_PWM_data[j + 1].f1->size[1] == 0)) {
+        i2 = rmat->size[0] * rmat->size[1];
         rmat->size[0] = A->size[0];
-        rmat->size[1] = cur_PWM[j + 1].f1->size[0];
-        emxEnsureCapacity_real_T(rmat, k);
+        rmat->size[1] = cur_PWM_data[j + 1].f1->size[0];
+        emxEnsureCapacity_real_T(rmat, i2);
         rmat_data = rmat->data;
-        nbytes = A->size[0] * cur_PWM[j + 1].f1->size[0];
-        for (k = 0; k < nbytes; k++) {
-          rmat_data[k] = 0.0;
+        loop_ub = A->size[0] * cur_PWM_data[j + 1].f1->size[0];
+        for (i2 = 0; i2 < loop_ub; i2++) {
+          rmat_data[i2] = 0.0;
         }
       } else {
-        k = rmat->size[0] * rmat->size[1];
+        i2 = rmat->size[0] * rmat->size[1];
         rmat->size[0] = A->size[0];
-        rmat->size[1] = cur_PWM[j + 1].f1->size[0];
-        emxEnsureCapacity_real_T(rmat, k);
+        rmat->size[1] = cur_PWM_data[j + 1].f1->size[0];
+        emxEnsureCapacity_real_T(rmat, i2);
         rmat_data = rmat->data;
         cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, (blasint)A->size[0],
-                    (blasint)cur_PWM[j + 1].f1->size[0], (blasint)A->size[1],
-                    1.0, &mat_data[0], (blasint)A->size[0], &cur_PWM[j + 1]
-                    .f1->data[0], (blasint)cur_PWM[j + 1].f1->size[0], 0.0,
+                    (blasint)cur_PWM_data[j + 1].f1->size[0], (blasint)A->size[1],
+                    1.0, &mat_data[0], (blasint)A->size[0], &cur_PWM_data[j + 1]
+                    .f1->data[0], (blasint)cur_PWM_data[j + 1].f1->size[0], 0.0,
                     &rmat_data[0], (blasint)A->size[0]);
       }
 
-      /* 'gkmPWM:368' MM = max([sum(spdiags(mat)) sum(spdiags(rmat))]); */
+      /* 'gkmPWM:378' MM = max([sum(spdiags(mat)) sum(spdiags(rmat))]); */
       spdiags(mat, A);
-      f_sum(A, r1);
-      mat_data = r1->data;
+      f_sum(A, y);
+      mat_data = y->data;
       spdiags(rmat, A);
       f_sum(A, b_r);
       rmat_data = b_r->data;
-      k = b_varargin_1->size[0] * b_varargin_1->size[1];
-      b_varargin_1->size[0] = 1;
-      b_varargin_1->size[1] = r1->size[1] + b_r->size[1];
-      emxEnsureCapacity_real_T(b_varargin_1, k);
-      b_varargin_1_data = b_varargin_1->data;
-      nbytes = r1->size[1];
-      for (k = 0; k < nbytes; k++) {
-        b_varargin_1_data[k] = mat_data[k];
+      i2 = varargin_1->size[0] * varargin_1->size[1];
+      varargin_1->size[0] = 1;
+      varargin_1->size[1] = y->size[1] + b_r->size[1];
+      emxEnsureCapacity_real_T(varargin_1, i2);
+      varargin_1_data = varargin_1->data;
+      loop_ub = y->size[1];
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        varargin_1_data[i2] = mat_data[i2];
       }
 
-      nbytes = b_r->size[1];
-      for (k = 0; k < nbytes; k++) {
-        b_varargin_1_data[k + r1->size[1]] = rmat_data[k];
+      loop_ub = b_r->size[1];
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        varargin_1_data[i2 + y->size[1]] = rmat_data[i2];
       }
 
-      nbytes = b_varargin_1->size[1];
-      if (b_varargin_1->size[1] <= 2) {
-        if (b_varargin_1->size[1] == 1) {
-          MM = b_varargin_1_data[0];
-        } else if (b_varargin_1_data[0] < b_varargin_1_data[b_varargin_1->size[1]
-                   - 1]) {
-          MM = b_varargin_1_data[b_varargin_1->size[1] - 1];
+      match_idx = varargin_1->size[1];
+      if (varargin_1->size[1] <= 2) {
+        if (varargin_1->size[1] == 1) {
+          b_MM = varargin_1_data[0];
+        } else if (varargin_1_data[0] < varargin_1_data[varargin_1->size[1] - 1])
+        {
+          b_MM = varargin_1_data[varargin_1->size[1] - 1];
         } else {
-          MM = b_varargin_1_data[0];
+          b_MM = varargin_1_data[0];
         }
       } else {
-        MM = b_varargin_1_data[0];
-        for (k = 2; k <= nbytes; k++) {
-          idx = b_varargin_1_data[k - 1];
-          if (MM < idx) {
-            MM = idx;
+        b_MM = varargin_1_data[0];
+        for (loop_ub = 2; loop_ub <= match_idx; loop_ub++) {
+          d = varargin_1_data[loop_ub - 1];
+          if (b_MM < d) {
+            b_MM = d;
           }
         }
       }
 
-      /* 'gkmPWM:369' if MM > M */
-      if (MM > curr_pos) {
-        /* 'gkmPWM:370' M = MM; */
-        curr_pos = MM;
+      /* 'gkmPWM:379' if MM > M */
+      if (b_MM > b_varargin_1) {
+        /* 'gkmPWM:380' M = MM; */
+        b_varargin_1 = b_MM;
 
-        /* 'gkmPWM:371' ind = j-1; */
-        cur_idx = j;
+        /* 'gkmPWM:381' ind = j-1; */
+        MM = j;
       }
     }
 
     /*  matches motifs to the best motif in our database */
     /*  [M, MM] = matchMotif([PWM{i}; p], [len;lenvec]);% matches motifs to the best motif in our database */
-    /* 'gkmPWM:185' fprintf(fid, 'MOTIF %d %s\n', int32(a), names{MM}); */
-    k = cur_line->size[0] * cur_line->size[1];
-    cur_line->size[0] = 1;
-    cur_line->size[1] = names_data[cur_idx].Value->size[1] + 1;
-    emxEnsureCapacity_char_T(cur_line, k);
-    cur_line_data = cur_line->data;
-    nbytes = names_data[cur_idx].Value->size[1];
-    for (k = 0; k < nbytes; k++) {
-      cur_line_data[k] = names_data[cur_idx].Value->data[k];
+    /* 'gkmPWM:195' fprintf(fid, 'MOTIF %d %s\n', int32(a), names{MM}); */
+    i1 = text->size[0] * text->size[1];
+    text->size[0] = 1;
+    text->size[1] = names_data[MM].f1->size[1] + 1;
+    emxEnsureCapacity_char_T(text, i1);
+    text_data = text->data;
+    loop_ub = names_data[MM].f1->size[1];
+    for (i1 = 0; i1 < loop_ub; i1++) {
+      text_data[i1] = names_data[MM].f1->data[i1];
     }
 
-    cur_line_data[names_data[cur_idx].Value->size[1]] = '\x00';
+    text_data[names_data[MM].f1->size[1]] = '\x00';
     b_NULL = NULL;
-    getfilestar(fileid, &filestar, &a);
+    getfilestar(fileid, &filestar, &autoflush);
     if (!(filestar == b_NULL)) {
-      fprintf(filestar, "MOTIF %d %s\n", (int)b_a, &cur_line_data[0]);
-      if (a) {
+      fprintf(filestar, "MOTIF %d %s\n", (int)a, &text_data[0]);
+      if (autoflush) {
         fflush(filestar);
       }
     }
 
-    /* 'gkmPWM:186' fprintf(fid2,'%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n',names{MM},int32(MM),M,Rd(i),C(i),R(i),E(i)); */
-    k = cur_line->size[0] * cur_line->size[1];
-    cur_line->size[0] = 1;
-    cur_line->size[1] = names_data[cur_idx].Value->size[1] + 1;
-    emxEnsureCapacity_char_T(cur_line, k);
-    cur_line_data = cur_line->data;
-    nbytes = names_data[cur_idx].Value->size[1];
-    for (k = 0; k < nbytes; k++) {
-      cur_line_data[k] = names_data[cur_idx].Value->data[k];
+    /* 'gkmPWM:196' fprintf(fid2,'%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n',names{MM},int32(MM),M,Rd(i),C(i),R(i),E(i)); */
+    i1 = text->size[0] * text->size[1];
+    text->size[0] = 1;
+    text->size[1] = names_data[MM].f1->size[1] + 1;
+    emxEnsureCapacity_char_T(text, i1);
+    text_data = text->data;
+    loop_ub = names_data[MM].f1->size[1];
+    for (i1 = 0; i1 < loop_ub; i1++) {
+      text_data[i1] = names_data[MM].f1->data[i1];
     }
 
-    cur_line_data[names_data[cur_idx].Value->size[1]] = '\x00';
+    text_data[names_data[MM].f1->size[1]] = '\x00';
     b_NULL = NULL;
-    getfilestar(b_fileid, &filestar, &a);
+    getfilestar(b_fileid, &filestar, &autoflush);
     if (!(filestar == b_NULL)) {
       fprintf(filestar, "%s\t%d\t%0.3f\t%0.3f\t%0.2f\t%0.3f\t%0.3f\n",
-              &cur_line_data[0], cur_idx + 1, curr_pos, Rd_data[b_i], C_data[b_i],
+              &text_data[0], MM + 1, b_varargin_1, Rd_data[b_i], C_data[b_i],
               R_data[b_i], E_data[b_i]);
-      if (a) {
+      if (autoflush) {
         fflush(filestar);
       }
     }
 
-    /* 'gkmPWM:187' fprintf(fid, 'weight= %0.3f l= 4 w= %d z-score= %0.2f motifsim= %0.3f\n', C(i), int32(len), R(i), M); */
+    /* 'gkmPWM:197' fprintf(fid, 'weight= %0.3f l= 4 w= %d z-score= %0.2f motifsim= %0.3f\n', C(i), int32(len), R(i), M); */
     b_NULL = NULL;
-    getfilestar(fileid, &filestar, &a);
+    getfilestar(fileid, &filestar, &autoflush);
     if (!(filestar == b_NULL)) {
       fprintf(filestar,
               "weight= %0.3f l= 4 w= %d z-score= %0.2f motifsim= %0.3f\n",
-              C_data[b_i], PWM_data[b_i].f1->size[0], R_data[b_i], curr_pos);
-      if (a) {
+              C_data[b_i], PWM_data[b_i].f1->size[0], R_data[b_i], b_varargin_1);
+      if (autoflush) {
         fflush(filestar);
       }
     }
 
-    /* 'gkmPWM:188' for j = 1:len */
-    k = PWM_data[b_i].f1->size[0];
-    for (j = 0; j < k; j++) {
-      /* 'gkmPWM:189' fprintf(fid, '%0.3f %0.3f %0.3f %0.3f\n',PWM{i}(j,1),PWM{i}(j,2),PWM{i}(j,3),PWM{i}(j,4)); */
+    /* 'gkmPWM:198' for j = 1:len */
+    i1 = PWM_data[b_i].f1->size[0];
+    for (j = 0; j < i1; j++) {
+      /* 'gkmPWM:199' fprintf(fid, '%0.3f %0.3f %0.3f %0.3f\n',PWM{i}(j,1),PWM{i}(j,2),PWM{i}(j,3),PWM{i}(j,4)); */
       b_NULL = NULL;
-      getfilestar(fileid, &filestar, &a);
+      getfilestar(fileid, &filestar, &autoflush);
       if (!(filestar == b_NULL)) {
         fprintf(filestar, "%0.3f %0.3f %0.3f %0.3f\n", PWM_data[b_i].f1->data[j],
                 PWM_data[b_i].f1->data[j + PWM_data[b_i].f1->size[0]],
                 PWM_data[b_i].f1->data[j + PWM_data[b_i].f1->size[0] * 2],
                 PWM_data[b_i].f1->data[j + PWM_data[b_i].f1->size[0] * 3]);
-        if (a) {
+        if (autoflush) {
           fflush(filestar);
         }
       }
     }
 
-    /* 'gkmPWM:191' fprintf(fid, '\n'); */
+    /* 'gkmPWM:201' fprintf(fid, '\n'); */
     b_NULL = NULL;
-    getfilestar(fileid, &filestar, &a);
+    getfilestar(fileid, &filestar, &autoflush);
     if (!(filestar == b_NULL)) {
       fprintf(filestar, "\n");
-      if (a) {
+      if (autoflush) {
         fflush(filestar);
       }
     }
 
-    /* 'gkmPWM:192' a = a+1; */
-    b_a++;
+    /* 'gkmPWM:202' a = a+1; */
+    a++;
   }
 
-  emxFree_real_T(&r1);
   emxFree_real_T(&b_r);
   emxFree_real_T(&A);
-  emxFree_real_T(&b_varargin_1);
+  emxFree_real_T(&varargin_1);
   emxFree_real_T(&rmat);
   emxFree_real_T(&mat);
-  emxFreeMatrix_cell_wrap_31(cur_PWM);
-  emxFree_char_T(&cur_line);
-  emxFree_rtString(&names);
-  emxFreeMatrix_cell_wrap_3(p);
+  emxFree_real_T(&y);
+  emxFree_char_T(&text);
+  emxFree_cell_wrap_3(&b_cur_PWM);
+  emxFree_cell_wrap_0(&names);
+  emxFree_cell_wrap_3(&p);
+  emxFree_cell_wrap_3(&cur_PWM);
+  emxFree_uint32_T(&lenvec);
 
-  /* 'gkmPWM:194' fclose(fid); */
+  /* 'gkmPWM:204' fclose(fid); */
   cfclose(fileid);
 
-  /* 'gkmPWM:195' fclose(fid2); */
+  /* 'gkmPWM:205' fclose(fid2); */
   cfclose(b_fileid);
 }
 
@@ -3246,24 +3245,24 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
   PWM_data = PWM->data;
 
   /* Lagrange optimization (see paper for derivation) */
-  /* 'gkmPWM:618' a = true; */
-  /* 'gkmPWM:619' posvec = 1:4; */
-  /* 'gkmPWM:620' if RC */
+  /* 'gkmPWM:628' a = true; */
+  /* 'gkmPWM:629' posvec = 1:4; */
+  /* 'gkmPWM:630' if RC */
   emxInit_real_T(&A, 2);
   if (RC != 0.0) {
-    /* 'gkmPWM:621' A =  ls_kweigtree(PWM,negmat,poscell,rc,diffc,indc,indloc,xc,l_svm,k_svm,rcnum); */
+    /* 'gkmPWM:631' A =  ls_kweigtree(PWM,negmat,poscell,rc,diffc,indc,indloc,xc,l_svm,k_svm,rcnum); */
     ls_kweigtree(PWM, negmat, poscell, rc, diffc, indc, indloc, xc, l_svm, k_svm,
                  rcnum, A);
     A_data = A->data;
   } else {
-    /* 'gkmPWM:622' else */
-    /* 'gkmPWM:623' A =  ls_kweigtree_norc(PWM,negmat,poscell,rc,diffc,indc,indloc,xc,l_svm,k_svm,rcnum); */
+    /* 'gkmPWM:632' else */
+    /* 'gkmPWM:633' A =  ls_kweigtree_norc(PWM,negmat,poscell,rc,diffc,indc,indloc,xc,l_svm,k_svm,rcnum); */
     ls_kweigtree_norc(PWM, negmat, poscell, rc, diffc, indc, indloc, xc, l_svm,
                       k_svm, A);
     A_data = A->data;
   }
 
-  /* 'gkmPWM:625' b = res+A*PWM(l_svm,:)'; */
+  /* 'gkmPWM:635' b = res+A*PWM(l_svm,:)'; */
   y_tmp = PWM_data[(int)l_svm - 1];
   y[0] = y_tmp;
   b_y_tmp = PWM_data[((int)l_svm + PWM->size[0]) - 1];
@@ -3299,7 +3298,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     b_data = b->data;
   }
 
-  /* 'gkmPWM:626' mat = A'*A; */
+  /* 'gkmPWM:636' mat = A'*A; */
   if (A->size[0] == 0) {
     memset(&mat[0], 0, 16U * sizeof(double));
   } else {
@@ -3308,16 +3307,16 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
                 &A_data[0], (blasint)A->size[0], 0.0, &mat[0], (blasint)4);
   }
 
-  /* 'gkmPWM:627' y = A'*b; */
+  /* 'gkmPWM:637' y = A'*b; */
   b_mtimes(A, b, y);
 
-  /* 'gkmPWM:628' if reg > 0 */
+  /* 'gkmPWM:638' if reg > 0 */
   if (reg > 0.0) {
-    /* 'gkmPWM:629' M = min(eig(mat)); */
+    /* 'gkmPWM:639' M = min(eig(mat)); */
     eig(mat, p);
     M = c_minimum(p);
 
-    /* 'gkmPWM:630' B=(mat-reg*M*eye(4))^-1; */
+    /* 'gkmPWM:640' B=(mat-reg*M*eye(4))^-1; */
     b_y.re = reg * M.re;
     b_y.im = reg * M.im;
     for (i = 0; i < 16; i++) {
@@ -3328,12 +3327,12 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
 
     b_mpower(b_mat, B);
   } else {
-    /* 'gkmPWM:631' else */
-    /* 'gkmPWM:632' M = 0; */
+    /* 'gkmPWM:641' else */
+    /* 'gkmPWM:642' M = 0; */
     M.re = 0.0;
     M.im = 0.0;
 
-    /* 'gkmPWM:633' B = mat^-1; */
+    /* 'gkmPWM:643' B = mat^-1; */
     c_mpower(mat, tmp_data);
     for (i = 0; i < 16; i++) {
       B[i].re = tmp_data[i];
@@ -3341,7 +3340,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     }
   }
 
-  /* 'gkmPWM:635' ps = B*y; */
+  /* 'gkmPWM:645' ps = B*y; */
   brm = y[0];
   E_im = y[1];
   E_re_tmp = y[2];
@@ -3354,7 +3353,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
   }
 
   /*  coder.varsize('p'); */
-  /* 'gkmPWM:637' p = ps+(1-sum(ps))*B/sum(sum(B))*ones(4,1); */
+  /* 'gkmPWM:647' p = ps+(1-sum(ps))*B/sum(sum(B))*ones(4,1); */
   E.re = 1.0 - (((ps[0].re + ps[1].re) + ps[2].re) + ps[3].re);
   E.im = 0.0 - (((ps[0].im + ps[1].im) + ps[2].im) + ps[3].im);
   d_sum(B, ps_data);
@@ -3419,7 +3418,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     }
   }
 
-  /* 'gkmPWM:638' P = zeros(4,1); */
+  /* 'gkmPWM:648' P = zeros(4,1); */
   for (b_i = 0; b_i < 4; b_i++) {
     p[b_i].re = ps[b_i].re + (((B[b_i].re + B[b_i + 4].re) + B[b_i + 8].re) +
       B[b_i + 12].re);
@@ -3429,24 +3428,24 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     ps[b_i].im = 0.0;
   }
 
-  /* 'gkmPWM:639' e = 0; */
+  /* 'gkmPWM:649' e = 0; */
   e_re = 0.0;
 
   /* The solution to the lagrange optimization problem */
   /* The following deals with the case if the optimal solution has a negative probability.  I cheat a little by only considering the cases where the base with the maximum solution is non-zero.  This works just fine in practice since the sum(p) = 1 constraint forces one of the bases to be positive.  It speeds up computation almost two fold. */
-  /* 'gkmPWM:642' if min(p) < 0 */
+  /* 'gkmPWM:652' if min(p) < 0 */
   E = c_minimum(p);
   if (E.re < 0.0) {
     emxInit_int8_T(&x, 2);
 
-    /* 'gkmPWM:643' I = 0; */
+    /* 'gkmPWM:653' I = 0; */
     b_I = 0;
 
-    /* 'gkmPWM:644' [~,a] = max(p); */
+    /* 'gkmPWM:654' [~,a] = max(p); */
     i_maximum(p, &E, &iindx);
 
-    /* 'gkmPWM:645' nvec = posvec; */
-    /* 'gkmPWM:646' nvec(a) = []; */
+    /* 'gkmPWM:655' nvec = posvec; */
+    /* 'gkmPWM:656' nvec(a) = []; */
     i = x->size[0] * x->size[1];
     x->size[0] = 1;
     x->size[1] = 4;
@@ -3466,7 +3465,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     x_data = x->data;
 
     /* Check cases where one of the probabilities is zero */
-    /* 'gkmPWM:648' for i = 1:3 */
+    /* 'gkmPWM:658' for i = 1:3 */
     emxInit_creal_T(&vec, 1);
     emxInit_int8_T(&b_x, 2);
     emxInit_real_T(&c_x, 2);
@@ -3474,8 +3473,8 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     emxInit_creal_T(&c_A, 2);
     Posvec_size[1] = 3;
     for (b_i = 0; b_i < 3; b_i++) {
-      /* 'gkmPWM:649' Posvec = posvec; */
-      /* 'gkmPWM:650' Posvec(nvec(i)) = []; */
+      /* 'gkmPWM:659' Posvec = posvec; */
+      /* 'gkmPWM:660' Posvec(nvec(i)) = []; */
       i = b_x->size[0] * b_x->size[1];
       b_x->size[0] = 1;
       b_x->size[1] = 4;
@@ -3495,9 +3494,9 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
       emxEnsureCapacity_int8_T(b_x, i);
       b_x_data = b_x->data;
 
-      /* 'gkmPWM:651' MAT = mat; */
-      /* 'gkmPWM:652' MAT(:,nvec(i)) =[]; */
-      /* 'gkmPWM:653' MAT(nvec(i),:) =[]; */
+      /* 'gkmPWM:661' MAT = mat; */
+      /* 'gkmPWM:662' MAT(:,nvec(i)) =[]; */
+      /* 'gkmPWM:663' MAT(nvec(i),:) =[]; */
       i = c_x->size[0] * c_x->size[1];
       c_x->size[0] = 4;
       c_x->size[1] = 4;
@@ -3553,10 +3552,10 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
       b_x_size[0] = 3;
       b_x_size[1] = 3;
 
-      /* 'gkmPWM:654' Y = y(Posvec); */
-      /* 'gkmPWM:655' if reg > 0 */
+      /* 'gkmPWM:664' Y = y(Posvec); */
+      /* 'gkmPWM:665' if reg > 0 */
       if (reg > 0.0) {
-        /* 'gkmPWM:656' B=(MAT-reg*M*eye(3))^-1; */
+        /* 'gkmPWM:666' B=(MAT-reg*M*eye(3))^-1; */
         b_y.re = reg * M.re;
         b_y.im = reg * M.im;
         for (i = 0; i < 3; i++) {
@@ -3574,8 +3573,8 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         B_size[1] = 3;
         memcpy(&B[0], &dcv[0], 9U * sizeof(creal_T));
       } else {
-        /* 'gkmPWM:657' else */
-        /* 'gkmPWM:658' B=(MAT)^-1; */
+        /* 'gkmPWM:667' else */
+        /* 'gkmPWM:668' B=(MAT)^-1; */
         d_x_data.data = &c_x_data[0];
         d_x_data.size = &b_x_size[0];
         d_x_data.allocatedSize = 12;
@@ -3592,7 +3591,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         }
       }
 
-      /* 'gkmPWM:660' ps = B*Y; */
+      /* 'gkmPWM:670' ps = B*Y; */
       for (i = 0; i < 3; i++) {
         y_data[i].re = y[b_x_data[i] - 1];
         y_data[i].im = 0.0;
@@ -3614,7 +3613,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         }
       }
 
-      /* 'gkmPWM:661' p3 = ps+(1-sum(ps))*B/sum(sum(B))*ones(3,1); */
+      /* 'gkmPWM:671' p3 = ps+(1-sum(ps))*B/sum(sum(B))*ones(3,1); */
       E.re = 1.0 - ((ps_data[0].re + ps_data[1].re) + ps_data[2].re);
       E.im = 0.0 - ((ps_data[0].im + ps_data[1].im) + ps_data[2].im);
       e_sum(B, B_size, e_x_data, x_size);
@@ -3704,7 +3703,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
 
       /* solution */
       /* Checks if solution is permitted.  If so, makes sure that it creates a smaller error than other cases */
-      /* 'gkmPWM:663' if min(p3) >= 0 */
+      /* 'gkmPWM:673' if min(p3) >= 0 */
       E = p3_data[0];
       absRelopProxies(p3_data[0], p3_data[1], &E_re_tmp, &b_E_re_tmp);
       if (E_re_tmp > b_E_re_tmp) {
@@ -3717,7 +3716,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
       }
 
       if (E.re >= 0.0) {
-        /* 'gkmPWM:664' vec = b-A(:,Posvec)*p3; */
+        /* 'gkmPWM:674' vec = b-A(:,Posvec)*p3; */
         loop_ub = A->size[0];
         i = c_A->size[0] * c_A->size[1];
         c_A->size[0] = A->size[0];
@@ -3784,15 +3783,15 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
           vec_data = vec->data;
         }
 
-        /* 'gkmPWM:665' if I == 0 */
+        /* 'gkmPWM:675' if I == 0 */
         if (b_I == 0) {
-          /* 'gkmPWM:666' I = 1; */
+          /* 'gkmPWM:676' I = 1; */
           b_I = 1;
 
-          /* 'gkmPWM:667' P = zeros(4,1); */
+          /* 'gkmPWM:677' P = zeros(4,1); */
           memset(&ps[0], 0, 4U * sizeof(creal_T));
 
-          /* 'gkmPWM:668' P(Posvec) = p3; */
+          /* 'gkmPWM:678' P(Posvec) = p3; */
           loop_ub = b_x->size[1];
           for (i = 0; i < loop_ub; i++) {
             b_tmp_data[i] = b_x_data[i];
@@ -3802,7 +3801,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
           ps[b_tmp_data[1] - 1] = p3_data[1];
           ps[b_tmp_data[2] - 1] = p3_data[2];
 
-          /* 'gkmPWM:669' e = vec'*vec-reg*M*p3'*p3; */
+          /* 'gkmPWM:679' e = vec'*vec-reg*M*p3'*p3; */
           b_y.re = 0.0;
           if (vec->size[0] >= 1) {
             ixlast = vec->size[0];
@@ -3826,8 +3825,8 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
             e_x_data[1].im * p3_data[1].im)) + (e_x_data[2].re * p3_data[2].re -
             e_x_data[2].im * p3_data[2].im));
         } else {
-          /* 'gkmPWM:670' else */
-          /* 'gkmPWM:671' E = vec'*vec-reg*M*p3'*p3; */
+          /* 'gkmPWM:680' else */
+          /* 'gkmPWM:681' E = vec'*vec-reg*M*p3'*p3; */
           b_y.re = 0.0;
           if (vec->size[0] >= 1) {
             ixlast = vec->size[0];
@@ -3851,15 +3850,15 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
             e_x_data[1].im * p3_data[1].im)) + (e_x_data[2].re * p3_data[2].re -
             e_x_data[2].im * p3_data[2].im));
 
-          /* 'gkmPWM:672' if E < e */
+          /* 'gkmPWM:682' if E < e */
           if (E.re < e_re) {
-            /* 'gkmPWM:673' e = E; */
+            /* 'gkmPWM:683' e = E; */
             e_re = E.re;
 
-            /* 'gkmPWM:674' P = zeros(4,1); */
+            /* 'gkmPWM:684' P = zeros(4,1); */
             memset(&ps[0], 0, 4U * sizeof(creal_T));
 
-            /* 'gkmPWM:675' P(Posvec) = p3; */
+            /* 'gkmPWM:685' P(Posvec) = p3; */
             loop_ub = b_x->size[1];
             for (i = 0; i < loop_ub; i++) {
               b_tmp_data[i] = b_x_data[i];
@@ -3876,7 +3875,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     emxFree_int8_T(&b_x);
 
     /* Check cases where two of the probabilities are zero */
-    /* 'gkmPWM:681' ind = [nvec(1) nvec(2);nvec(1) nvec(3);nvec(2) nvec(3)]; */
+    /* 'gkmPWM:691' ind = [nvec(1) nvec(2);nvec(1) nvec(3);nvec(2) nvec(3)]; */
     ind[0] = x_data[0];
     ind[3] = x_data[1];
     ind[1] = x_data[0];
@@ -3884,12 +3883,12 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     ind[2] = x_data[1];
     ind[5] = x_data[2];
 
-    /* 'gkmPWM:682' for i = 1:3 */
+    /* 'gkmPWM:692' for i = 1:3 */
     emxFree_int8_T(&x);
     Posvec_size[0] = 1;
     for (b_i = 0; b_i < 3; b_i++) {
-      /* 'gkmPWM:683' Posvec = posvec; */
-      /* 'gkmPWM:684' Posvec(ind(i,:)) = []; */
+      /* 'gkmPWM:693' Posvec = posvec; */
+      /* 'gkmPWM:694' Posvec(ind(i,:)) = []; */
       x_size[0] = ind[b_i];
       x_size[1] = ind[b_i + 3];
       Posvec_data[0] = 1;
@@ -3929,9 +3928,9 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         Posvec_size[1] = 4 - idx_tmp;
       }
 
-      /* 'gkmPWM:685' MAT = mat; */
-      /* 'gkmPWM:686' MAT(:,ind(i,:)) =[]; */
-      /* 'gkmPWM:687' MAT(ind(i,:),:) =[]; */
+      /* 'gkmPWM:695' MAT = mat; */
+      /* 'gkmPWM:696' MAT(:,ind(i,:)) =[]; */
+      /* 'gkmPWM:697' MAT(ind(i,:),:) =[]; */
       tmp_size[0] = 4;
       tmp_size[1] = 4;
       memcpy(&tmp_data[0], &mat[0], 16U * sizeof(double));
@@ -3945,10 +3944,10 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
 
       c_nullAssignment(MAT_data, MAT_size, x_size);
 
-      /* 'gkmPWM:688' Y = y(Posvec); */
-      /* 'gkmPWM:689' if reg > 0 */
+      /* 'gkmPWM:698' Y = y(Posvec); */
+      /* 'gkmPWM:699' if reg > 0 */
       if (reg > 0.0) {
-        /* 'gkmPWM:690' B=(MAT-reg*M*eye(2))^-1; */
+        /* 'gkmPWM:700' B=(MAT-reg*M*eye(2))^-1; */
         b_y.re = reg * M.re;
         b_y.im = reg * M.im;
         if ((MAT_size[0] == 2) && (MAT_size[1] == 2)) {
@@ -3971,8 +3970,8 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         B_size[1] = 2;
         memcpy(&B[0], &p[0], 4U * sizeof(creal_T));
       } else {
-        /* 'gkmPWM:691' else */
-        /* 'gkmPWM:692' B=MAT^-1; */
+        /* 'gkmPWM:701' else */
+        /* 'gkmPWM:702' B=MAT^-1; */
         b_MAT_data.data = &MAT_data[0];
         b_MAT_data.size = &MAT_size[0];
         b_MAT_data.allocatedSize = 16;
@@ -3989,7 +3988,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         }
       }
 
-      /* 'gkmPWM:694' ps = B*Y; */
+      /* 'gkmPWM:704' ps = B*Y; */
       loop_ub = Posvec_size[1];
       for (i = 0; i < loop_ub; i++) {
         y_data[i].re = y[Posvec_data[i] - 1];
@@ -4012,7 +4011,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         }
       }
 
-      /* 'gkmPWM:695' p2 = ps+(1-sum(ps))*B/sum(sum(B))*ones(2,1); */
+      /* 'gkmPWM:705' p2 = ps+(1-sum(ps))*B/sum(sum(B))*ones(2,1); */
       if (B_size[0] == 0) {
         b_y.re = 0.0;
         b_y.im = 0.0;
@@ -4109,7 +4108,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
 
       /* solution */
       /* Checks if solution is permitted.  If so, makes sure that it creates a smaller error than other cases */
-      /* 'gkmPWM:697' if min(p2) >= 0 */
+      /* 'gkmPWM:707' if min(p2) >= 0 */
       E = p2_data[0];
       for (k = 2; k <= idx_tmp; k++) {
         b_y = p2_data[k - 1];
@@ -4120,7 +4119,7 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
       }
 
       if (E.re >= 0.0) {
-        /* 'gkmPWM:698' vec = b-A(:,Posvec)*p2; */
+        /* 'gkmPWM:708' vec = b-A(:,Posvec)*p2; */
         loop_ub = A->size[0];
         i = c_A->size[0] * c_A->size[1];
         c_A->size[0] = A->size[0];
@@ -4197,21 +4196,21 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
           vec_data = vec->data;
         }
 
-        /* 'gkmPWM:699' if I == 0 */
+        /* 'gkmPWM:709' if I == 0 */
         if (b_I == 0) {
-          /* 'gkmPWM:700' I = 1; */
+          /* 'gkmPWM:710' I = 1; */
           b_I = 1;
 
-          /* 'gkmPWM:701' P = zeros(4,1); */
+          /* 'gkmPWM:711' P = zeros(4,1); */
           memset(&ps[0], 0, 4U * sizeof(creal_T));
 
-          /* 'gkmPWM:702' P(Posvec) = p2; */
+          /* 'gkmPWM:712' P(Posvec) = p2; */
           loop_ub = Posvec_size[1];
           for (i = 0; i < loop_ub; i++) {
             ps[Posvec_data[i] - 1] = p2_data[i];
           }
 
-          /* 'gkmPWM:703' e = vec'*vec-reg*M*p2'*p2; */
+          /* 'gkmPWM:713' e = vec'*vec-reg*M*p2'*p2; */
           b_y.re = 0.0;
           if (vec->size[0] >= 1) {
             ixlast = vec->size[0];
@@ -4241,8 +4240,8 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
 
           e_re = b_y.re - E.re;
         } else {
-          /* 'gkmPWM:704' else */
-          /* 'gkmPWM:705' E = vec'*vec-reg*M*p2'*p2; */
+          /* 'gkmPWM:714' else */
+          /* 'gkmPWM:715' E = vec'*vec-reg*M*p2'*p2; */
           b_y.re = 0.0;
           if (vec->size[0] >= 1) {
             ixlast = vec->size[0];
@@ -4272,15 +4271,15 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
 
           E.re = b_y.re - E.re;
 
-          /* 'gkmPWM:706' if E < e */
+          /* 'gkmPWM:716' if E < e */
           if (E.re < e_re) {
-            /* 'gkmPWM:707' e = E; */
+            /* 'gkmPWM:717' e = E; */
             e_re = E.re;
 
-            /* 'gkmPWM:708' P = zeros(4,1); */
+            /* 'gkmPWM:718' P = zeros(4,1); */
             memset(&ps[0], 0, 4U * sizeof(creal_T));
 
-            /* 'gkmPWM:709' P(Posvec) = p2; */
+            /* 'gkmPWM:719' P(Posvec) = p2; */
             loop_ub = Posvec_size[1];
             for (i = 0; i < loop_ub; i++) {
               ps[Posvec_data[i] - 1] = p2_data[i];
@@ -4296,17 +4295,17 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
     emxFree_creal_T(&vec);
 
     /* Checks to see if one non-zero case is better than the other cases */
-    /* 'gkmPWM:715' if I == 0 */
+    /* 'gkmPWM:725' if I == 0 */
     if (b_I == 0) {
-      /* 'gkmPWM:716' P = zeros(4,1); */
+      /* 'gkmPWM:726' P = zeros(4,1); */
       memset(&ps[0], 0, 4U * sizeof(creal_T));
 
-      /* 'gkmPWM:717' P(a) = 1; */
+      /* 'gkmPWM:727' P(a) = 1; */
       ps[iindx - 1].re = 1.0;
       ps[iindx - 1].im = 0.0;
     } else {
-      /* 'gkmPWM:718' else */
-      /* 'gkmPWM:719' vec = b-A(:,a); */
+      /* 'gkmPWM:728' else */
+      /* 'gkmPWM:729' vec = b-A(:,a); */
       if (b->size[0] == A->size[0]) {
         loop_ub = b->size[0];
         for (i = 0; i < loop_ub; i++) {
@@ -4317,8 +4316,8 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
         b_data = b->data;
       }
 
-      /* 'gkmPWM:720' E = vec'*vec-reg*M; */
-      /* 'gkmPWM:721' if E < e */
+      /* 'gkmPWM:730' E = vec'*vec-reg*M; */
+      /* 'gkmPWM:731' if E < e */
       if (b->size[0] < 1) {
         E_re_tmp = 0.0;
       } else {
@@ -4327,11 +4326,11 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
       }
 
       if (E_re_tmp - reg * M.re < e_re) {
-        /* 'gkmPWM:722' e = E; */
-        /* 'gkmPWM:723' P = zeros(4,1); */
+        /* 'gkmPWM:732' e = E; */
+        /* 'gkmPWM:733' P = zeros(4,1); */
         memset(&ps[0], 0, 4U * sizeof(creal_T));
 
-        /* 'gkmPWM:724' P(Posvec) = p2; */
+        /* 'gkmPWM:734' P(Posvec) = p2; */
         loop_ub = Posvec_size[1];
         for (i = 0; i < loop_ub; i++) {
           ps[Posvec_data[i] - 1] = p2_data[i];
@@ -4339,22 +4338,22 @@ static void getEMprob_v3(const emxArray_real_T *PWM, const emxArray_real_T *res,
       }
     }
   } else {
-    /* 'gkmPWM:727' else */
-    /* 'gkmPWM:728' P = p; */
+    /* 'gkmPWM:737' else */
+    /* 'gkmPWM:738' P = p; */
     memcpy(&ps[0], &p[0], 4U * sizeof(creal_T));
   }
 
   emxFree_real_T(&b);
   emxInit_creal_T(&b_A, 2);
 
-  /* 'gkmPWM:730' kweig = A*(P-PWM(l_svm,:)'); */
-  /* 'gkmPWM:731' P = real(P); */
+  /* 'gkmPWM:740' kweig = A*(P-PWM(l_svm,:)'); */
+  /* 'gkmPWM:741' P = real(P); */
   P[0] = ps[0].re;
   P[1] = ps[1].re;
   P[2] = ps[2].re;
   P[3] = ps[3].re;
 
-  /* 'gkmPWM:732' kweig = real(kweig); */
+  /* 'gkmPWM:742' kweig = real(kweig); */
   i = b_A->size[0] * b_A->size[1];
   b_A->size[0] = A->size[0];
   b_A->size[1] = 4;
@@ -4503,16 +4502,16 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxInit_real_T(&xc, 2);
 
   /* Note: This code is rather messy.  I block commmented to the best of my ability, so hopefully this makes enough sense.  If something seems non-trivial, then I probably found a mathematical trick to speed up computation time (in particular dynamic programming). */
-  /* 'gkmPWM:378' GC = PWM{1}(1,:); */
-  /* 'gkmPWM:379' [~,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm); */
+  /* 'gkmPWM:388' GC = PWM{1}(1,:); */
+  /* 'gkmPWM:389' [~,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm); */
   genIndex(l_svm, k_svm, ct, rc, diffc, indc, xc, &rcnum);
   vec_data = rc->data;
 
   /* generate index information */
-  /* 'gkmPWM:380' lcomb = length(diffc); */
+  /* 'gkmPWM:390' lcomb = length(diffc); */
   lcomb = diffc->size[0];
 
-  /* 'gkmPWM:381' diffC = zeros(lcomb,l_svm); */
+  /* 'gkmPWM:391' diffC = zeros(lcomb,l_svm); */
   i = diffC->size[0] * diffC->size[1];
   diffC->size[0] = diffc->size[0];
   i1 = (int)l_svm;
@@ -4524,7 +4523,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     diffC_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:382' for i = 1:l_svm */
+  /* 'gkmPWM:392' for i = 1:l_svm */
   emxInit_real_T(&f, 1);
   emxInit_real_T(&CT, 2);
   emxInit_int32_T(&iidx, 1);
@@ -4532,7 +4531,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxInit_real_T(&b_iidx, 1);
   emxInit_real_T(&c_ct, 2);
   for (acount = 0; acount < i1; acount++) {
-    /* 'gkmPWM:383' ct = rc+i-1; */
+    /* 'gkmPWM:393' ct = rc+i-1; */
     i = ct->size[0] * ct->size[1];
     ct->size[0] = rc->size[0];
     ct->size[1] = rc->size[1];
@@ -4543,7 +4542,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       ct_data[i] = (vec_data[i] + ((double)acount + 1.0)) - 1.0;
     }
 
-    /* 'gkmPWM:384' f = find(sum(ct==l_svm,2)); */
+    /* 'gkmPWM:394' f = find(sum(ct==l_svm,2)); */
     i = b_ct->size[0] * b_ct->size[1];
     b_ct->size[0] = ct->size[0];
     b_ct->size[1] = ct->size[1];
@@ -4576,7 +4575,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       f_data[i] = iidx_data[i];
     }
 
-    /* 'gkmPWM:385' ct = ct(f,:); */
+    /* 'gkmPWM:395' ct = ct(f,:); */
     m = ct->size[1] - 1;
     i = c_ct->size[0] * c_ct->size[1];
     c_ct->size[0] = f->size[0];
@@ -4601,7 +4600,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       ct_data[i] = temp_data[i];
     }
 
-    /* 'gkmPWM:386' CT = zeros(length(ct),k_svm-1); */
+    /* 'gkmPWM:396' CT = zeros(length(ct),k_svm-1); */
     if ((ct->size[0] == 0) || (ct->size[1] == 0)) {
       m = 0;
     } else {
@@ -4622,7 +4621,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       CT_data[i] = 0.0;
     }
 
-    /* 'gkmPWM:387' for j = 1:length(ct) */
+    /* 'gkmPWM:397' for j = 1:length(ct) */
     if ((ct->size[0] == 0) || (ct->size[1] == 0)) {
       m = 0;
     } else {
@@ -4634,54 +4633,54 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     }
 
     for (j = 0; j < m; j++) {
-      /* 'gkmPWM:388' a = 1; */
+      /* 'gkmPWM:398' a = 1; */
       a = 1U;
 
-      /* 'gkmPWM:389' for jj = 1:k_svm */
+      /* 'gkmPWM:399' for jj = 1:k_svm */
       i = (int)k_svm;
       for (jj = 0; jj < i; jj++) {
-        /* 'gkmPWM:390' if ct(j,jj) ~= l_svm */
+        /* 'gkmPWM:400' if ct(j,jj) ~= l_svm */
         S = ct_data[j + ct->size[0] * jj];
         if (S != l_svm) {
-          /* 'gkmPWM:391' CT(j,a) = ct(j,jj); */
+          /* 'gkmPWM:401' CT(j,a) = ct(j,jj); */
           CT_data[j + CT->size[0] * ((int)a - 1)] = S;
 
-          /* 'gkmPWM:392' a = a+1; */
+          /* 'gkmPWM:402' a = a+1; */
           a++;
         }
       }
     }
 
-    /* 'gkmPWM:396' for j = 2:length(f) */
+    /* 'gkmPWM:406' for j = 2:length(f) */
     i = f->size[0];
     for (j = 0; j <= i - 2; j++) {
-      /* 'gkmPWM:397' a = 1; */
-      /* 'gkmPWM:398' while CT(j,a)==CT(j-1,a) */
+      /* 'gkmPWM:407' a = 1; */
+      /* 'gkmPWM:408' while CT(j,a)==CT(j-1,a) */
       for (a = 1U; CT_data[(j + CT->size[0] * ((int)a - 1)) + 1] == CT_data[j +
            CT->size[0] * ((int)a - 1)]; a++) {
-        /* 'gkmPWM:399' a = a+1; */
+        /* 'gkmPWM:409' a = a+1; */
       }
 
-      /* 'gkmPWM:401' if a < 2 */
+      /* 'gkmPWM:411' if a < 2 */
       if ((int)a < 2) {
-        /* 'gkmPWM:402' a = 2; */
+        /* 'gkmPWM:412' a = 2; */
         a = 2U;
       }
 
-      /* 'gkmPWM:404' diffC(f(j),i)=a; */
+      /* 'gkmPWM:414' diffC(f(j),i)=a; */
       diffC_data[((int)f_data[j + 1] + diffC->size[0] * acount) - 1] = a;
     }
 
-    /* 'gkmPWM:406' diffC(f(1),i)=2; */
+    /* 'gkmPWM:416' diffC(f(1),i)=2; */
     diffC_data[((int)f_data[0] + diffC->size[0] * acount) - 1] = 2.0;
   }
 
   emxFree_boolean_T(&b_ct);
 
-  /* 'gkmPWM:408' m = length(PWM); */
+  /* 'gkmPWM:418' m = length(PWM); */
   varargin_2 = PWM->size[0] - 1;
 
-  /* 'gkmPWM:409' scorevec = zeros(1,n); */
+  /* 'gkmPWM:419' scorevec = zeros(1,n); */
   i = scorevec->size[0] * scorevec->size[1];
   scorevec->size[0] = 1;
   m = (int)n;
@@ -4695,11 +4694,11 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxInit_real_T(&lenvec, 1);
   emxInit_cell_wrap_14(&loc);
 
-  /* 'gkmPWM:410' lenvec = zeros(m,1); */
+  /* 'gkmPWM:420' lenvec = zeros(m,1); */
   unnamed_idx_0 = PWM->size[0];
 
-  /* 'gkmPWM:411' loc = cell(m, 1); */
-  /* 'gkmPWM:412' for i = 1:m */
+  /* 'gkmPWM:421' loc = cell(m, 1); */
+  /* 'gkmPWM:422' for i = 1:m */
   i = PWM->size[0];
   i1 = lenvec->size[0];
   lenvec->size[0] = unnamed_idx_0;
@@ -4710,7 +4709,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxEnsureCapacity_cell_wrap_14(loc, i1);
   loc_data = loc->data;
   for (acount = 0; acount < i; acount++) {
-    /* 'gkmPWM:413' lenvec(i) = length(PWM{i})-l_svm*2+2; */
+    /* 'gkmPWM:423' lenvec(i) = length(PWM{i})-l_svm*2+2; */
     u0 = PWM_data[acount].f1->size[0];
     if (u0 < 4) {
       u0 = 4;
@@ -4722,7 +4721,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
     lenvec_data[acount] = ((double)u0 - l_svm * 2.0) + 2.0;
 
-    /* 'gkmPWM:414' loc{i} = zeros(length(PWM{i}), 1); */
+    /* 'gkmPWM:424' loc{i} = zeros(length(PWM{i}), 1); */
     u0 = PWM_data[acount].f1->size[0];
     if (u0 < 4) {
       u0 = 4;
@@ -4741,7 +4740,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       loc_data[acount].f1->data[i1] = 0.0;
     }
 
-    /* 'gkmPWM:415' loc{i}(l_svm:lenvec(i)+l_svm-1) = 1; */
+    /* 'gkmPWM:425' loc{i}(l_svm:lenvec(i)+l_svm-1) = 1; */
     S = (lenvec_data[acount] + l_svm) - 1.0;
     if (l_svm > S) {
       i1 = -1;
@@ -4759,7 +4758,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   emxInit_real_T(&kmat, 2);
 
-  /* 'gkmPWM:418' kmat = zeros(lcomb*4^k_svm, m); */
+  /* 'gkmPWM:428' kmat = zeros(lcomb*4^k_svm, m); */
   M = pow(4.0, k_svm);
   i = kmat->size[0] * kmat->size[1];
   kmat->size[0] = (int)((double)diffc->size[0] * M);
@@ -4771,7 +4770,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     kmat_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:419' KMAT = zeros(lcomb*4^k_svm, m); */
+  /* 'gkmPWM:429' KMAT = zeros(lcomb*4^k_svm, m); */
   i = CT->size[0] * CT->size[1];
   CT->size[0] = (int)((double)diffc->size[0] * M);
   CT->size[1] = PWM->size[0];
@@ -4782,16 +4781,16 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     CT_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:421' fprintf('Mapping PWMs to gkm space\n'); */
+  /* 'gkmPWM:431' fprintf('Mapping PWMs to gkm space\n'); */
   printf("Mapping PWMs to gkm space\n");
   fflush(stdout);
 
-  /* 'gkmPWM:422' if RC */
+  /* 'gkmPWM:432' if RC */
   if (RC != 0.0) {
-    /* 'gkmPWM:423' for i = 1:m */
+    /* 'gkmPWM:433' for i = 1:m */
     i = PWM->size[0];
     for (acount = 0; acount < i; acount++) {
-      /* 'gkmPWM:424' kmat(:,i) = PWM2kmers(PWM{i},negmat,rc,diffc,indc,loc{i},xc,l_svm,k_svm,rcnum)-negvec*(lenvec(i)+l_svm-1); */
+      /* 'gkmPWM:434' kmat(:,i) = PWM2kmers(PWM{i},negmat,rc,diffc,indc,loc{i},xc,l_svm,k_svm,rcnum)-negvec*(lenvec(i)+l_svm-1); */
       PWM2kmers(PWM_data[acount].f1, negmat, rc, diffc, indc, loc_data[acount].
                 f1, xc, l_svm, k_svm, rcnum, b_iidx);
       b_iidx_data = b_iidx->data;
@@ -4810,11 +4809,11 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       /* map PWMs to gapped kmers */
     }
   } else {
-    /* 'gkmPWM:426' else */
-    /* 'gkmPWM:427' for i = 1:m */
+    /* 'gkmPWM:436' else */
+    /* 'gkmPWM:437' for i = 1:m */
     i = PWM->size[0];
     for (acount = 0; acount < i; acount++) {
-      /* 'gkmPWM:428' kmat(:,i) = PWM2kmers_norc(PWM{i},negmat,rc,diffc,indc,loc{i},xc,l_svm,k_svm,rcnum)-negvec*(lenvec(i)+l_svm-1); */
+      /* 'gkmPWM:438' kmat(:,i) = PWM2kmers_norc(PWM{i},negmat,rc,diffc,indc,loc{i},xc,l_svm,k_svm,rcnum)-negvec*(lenvec(i)+l_svm-1); */
       PWM2kmers_norc(PWM_data[acount].f1, negmat, rc, diffc, indc,
                      loc_data[acount].f1, xc, l_svm, k_svm, b_iidx);
       b_iidx_data = b_iidx->data;
@@ -4837,8 +4836,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxInit_cell_wrap_14(&poscell);
 
   /* the following loop creates indices for the PWM column optimize to utilize dynamic programming. */
-  /* 'gkmPWM:433' poscell = cell(k_svm,1); */
-  /* 'gkmPWM:434' for i = 1:k_svm */
+  /* 'gkmPWM:443' poscell = cell(k_svm,1); */
+  /* 'gkmPWM:444' for i = 1:k_svm */
   i = (int)k_svm;
   i1 = poscell->size[0];
   poscell->size[0] = (int)k_svm;
@@ -4852,7 +4851,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxInit_real_T(&temp, 2);
   emxInit_real_T(&vec, 2);
   for (acount = 0; acount < i; acount++) {
-    /* 'gkmPWM:435' temp = zeros(4^(k_svm-1),1)'; */
+    /* 'gkmPWM:445' temp = zeros(4^(k_svm-1),1)'; */
     i1 = temp->size[0] * temp->size[1];
     temp->size[0] = 1;
     m = (int)c;
@@ -4863,7 +4862,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       temp_data[i1] = 0.0;
     }
 
-    /* 'gkmPWM:436' vec = 1:4^(i):4^(k_svm); */
+    /* 'gkmPWM:446' vec = 1:4^(i):4^(k_svm); */
     M = pow(4.0, (double)acount + 1.0);
     if (floor(M) == M) {
       i1 = vec->size[0] * vec->size[1];
@@ -4880,15 +4879,15 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       vec_data = vec->data;
     }
 
-    /* 'gkmPWM:437' for ii = 1:4^(i-1) */
+    /* 'gkmPWM:447' for ii = 1:4^(i-1) */
     i1 = (int)pow(4.0, ((double)acount + 1.0) - 1.0);
     if (0 <= i1 - 1) {
       b_loop_ub = vec->size[1];
     }
 
     for (j = 0; j < i1; j++) {
-      /* 'gkmPWM:438' t = length(vec); */
-      /* 'gkmPWM:439' temp(1+(ii-1)*t:t+(ii-1)*t) = vec+ii-1; */
+      /* 'gkmPWM:448' t = length(vec); */
+      /* 'gkmPWM:449' temp(1+(ii-1)*t:t+(ii-1)*t) = vec+ii-1; */
       S = (((double)j + 1.0) - 1.0) * (double)vec->size[1] + 1.0;
       if (S > (double)vec->size[1] + (((double)j + 1.0) - 1.0) * (double)
           vec->size[1]) {
@@ -4902,7 +4901,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       }
     }
 
-    /* 'gkmPWM:441' poscell{i} = sort(temp)'; */
+    /* 'gkmPWM:451' poscell{i} = sort(temp)'; */
     c_sort(temp);
     temp_data = temp->data;
     i1 = poscell_data[acount].f1->size[0];
@@ -4916,20 +4915,20 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   emxFree_real_T(&vec);
 
-  /* 'gkmPWM:443' fprintf('Running Recursion\n'); */
+  /* 'gkmPWM:453' fprintf('Running Recursion\n'); */
   printf("Running Recursion\n");
   fflush(stdout);
 
-  /* 'gkmPWM:444' acount = 0; */
+  /* 'gkmPWM:454' acount = 0; */
   acount = 0;
 
-  /* 'gkmPWM:445' i = 0; */
+  /* 'gkmPWM:455' i = 0; */
   a = 0U;
 
-  /* 'gkmPWM:446' scount = 0; */
+  /* 'gkmPWM:456' scount = 0; */
   scount = 0.0;
 
-  /* 'gkmPWM:447' C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
+  /* 'gkmPWM:457' C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
   mtimes(kmat, kmat, c_ct);
   if ((kmat->size[0] == 0) || (kmat->size[1] == 0) || (kweig->size[0] == 0)) {
     i = b_iidx->size[0];
@@ -4976,7 +4975,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   emxInit_real_T(&ord, 1);
 
-  /* 'gkmPWM:448' ord = zeros(m, 1); */
+  /* 'gkmPWM:458' ord = zeros(m, 1); */
   i = ord->size[0];
   ord->size[0] = PWM->size[0];
   emxEnsureCapacity_real_T(ord, i);
@@ -4986,10 +4985,10 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     ord_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:449' tic */
+  /* 'gkmPWM:459' tic */
   tic();
 
-  /* 'gkmPWM:450' while i < n */
+  /* 'gkmPWM:460' while i < n */
   emxInit_real_T(&res, 1);
   emxInit_cell_wrap_14(&new_loc);
   emxInit_cell_wrap_2(&new_PWM);
@@ -5004,26 +5003,26 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   do {
     exitg1 = 0;
     if (a < n) {
-      /* 'gkmPWM:451' i = i+1; */
+      /* 'gkmPWM:461' i = i+1; */
       a++;
 
-      /* 'gkmPWM:452' if mod(i,10) == 0 */
+      /* 'gkmPWM:462' if mod(i,10) == 0 */
       if (fmod(a, 10.0) == 0.0) {
-        /* 'gkmPWM:453' toc */
+        /* 'gkmPWM:463' toc */
         toc();
 
-        /* 'gkmPWM:454' tic */
+        /* 'gkmPWM:464' tic */
         tic();
 
-        /* 'gkmPWM:455' fprintf('%d iterations done...\n', int32(i)); */
+        /* 'gkmPWM:465' fprintf('%d iterations done...\n', int32(i)); */
         printf("%d iterations done...\n", (int)a);
         fflush(stdout);
       }
 
-      /* 'gkmPWM:457' scount = scount + 1; */
+      /* 'gkmPWM:467' scount = scount + 1; */
       scount++;
 
-      /* 'gkmPWM:458' if  i >= 10 && scount >= 5 && max(-1*diff(scorevec(i-5:i-1))./scorevec(i-4:i-1)) < 0.001 && acount < 5 && i ~= n */
+      /* 'gkmPWM:468' if  i >= 10 && scount >= 5 && max(-1*diff(scorevec(i-5:i-1))./scorevec(i-4:i-1)) < 0.001 && acount < 5 && i ~= n */
       if ((a >= 10U) && (scount >= 5.0)) {
         b_diff(*(double (*)[5])&scorevec_data[(int)((double)a + -5.0) - 1], b);
         varargin_1[0] = -b[0] / scorevec_data[(int)((double)a + -4.0) - 1];
@@ -5031,23 +5030,23 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         varargin_1[2] = -b[2] / scorevec_data[(int)((double)a + -2.0) - 1];
         varargin_1[3] = -b[3] / scorevec_data[(int)((double)a + -1.0) - 1];
         if ((e_maximum(varargin_1) < 0.001) && (acount < 5) && (a != n)) {
-          /* 'gkmPWM:459' acount = acount + 1; */
+          /* 'gkmPWM:469' acount = acount + 1; */
           acount++;
 
-          /* 'gkmPWM:460' fprintf('adjusting PWMs after %d iterations (%d)\n', int32(i), int32(acount)); */
+          /* 'gkmPWM:470' fprintf('adjusting PWMs after %d iterations (%d)\n', int32(i), int32(acount)); */
           printf("adjusting PWMs after %d iterations (%d)\n", (int)a, acount);
           fflush(stdout);
 
-          /* 'gkmPWM:461' scount = 0; */
+          /* 'gkmPWM:471' scount = 0; */
           scount = 0.0;
 
-          /* 'gkmPWM:462' for ii = 1:m */
+          /* 'gkmPWM:472' for ii = 1:m */
           for (j = 0; j <= varargin_2; j++) {
-            /* 'gkmPWM:463' if i/n <= 0.8 && C(ord(ii)) > 0 */
+            /* 'gkmPWM:473' if i/n <= 0.8 && C(ord(ii)) > 0 */
             if ((double)a / n <= 0.8) {
               i = (int)ord_data[j] - 1;
               if (C_data[i] > 0.0) {
-                /* 'gkmPWM:464' [PWM{ord(ii)}, lenvec(ord(ii))] = adjust_PWM(PWM{ord(ii)}(l_svm:(length(PWM{ord(ii)})-l_svm+1),:),GC); */
+                /* 'gkmPWM:474' [PWM{ord(ii)}, lenvec(ord(ii))] = adjust_PWM(PWM{ord(ii)}(l_svm:(length(PWM{ord(ii)})-l_svm+1),:),GC); */
                 u0 = b_PWM_data[(int)ord_data[j] - 1].f1->size[0];
                 if (u0 < 4) {
                   u0 = 4;
@@ -5087,8 +5086,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                 lenvec_data[i] = adjust_PWM(b_PWM_data[(int)ord_data[j] - 1].f1,
                   varargin_1);
 
-                /* 'gkmPWM:465' PWM{ord(ii)} = extendPWM(PWM{ord(ii)}, l_svm-1, GC); */
-                /* 'gkmPWM:992' mat = repmat(GCmat, n,1); */
+                /* 'gkmPWM:475' PWM{ord(ii)} = extendPWM(PWM{ord(ii)}, l_svm-1, GC); */
+                /* 'gkmPWM:1002' mat = repmat(GCmat, n,1); */
                 varargin_1[0] = PWM_data[0].f1->data[0];
                 varargin_1[1] = PWM_data[0].f1->data[PWM_data[0].f1->size[0]];
                 varargin_1[2] = PWM_data[0].f1->data[PWM_data[0].f1->size[0] * 2];
@@ -5096,7 +5095,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                 b_repmat(varargin_1, l_svm - 1.0, mat);
                 diffC_data = mat->data;
 
-                /* 'gkmPWM:993' ext_pwm = [mat;pwm;mat]; */
+                /* 'gkmPWM:1003' ext_pwm = [mat;pwm;mat]; */
                 i1 = b_mat->size[0] * b_mat->size[1];
                 b_mat->size[0] = (mat->size[0] + b_PWM_data[(int)ord_data[j] - 1]
                                   .f1->size[0]) + mat->size[0];
@@ -5136,7 +5135,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   b_PWM_data[(int)ord_data[j] - 1].f1->data[i1] = vec_data[i1];
                 }
 
-                /* 'gkmPWM:466' loc{ord(ii)} = zeros(lenvec(ord(ii))+2*l_svm-2, 1); */
+                /* 'gkmPWM:476' loc{ord(ii)} = zeros(lenvec(ord(ii))+2*l_svm-2, 1); */
                 S = lenvec_data[i];
                 loop_ub = (int)((S + 2.0 * l_svm) - 2.0);
                 i = loc_data[(int)ord_data[j] - 1].f1->size[0];
@@ -5146,7 +5145,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   loc_data[(int)ord_data[j] - 1].f1->data[i] = 0.0;
                 }
 
-                /* 'gkmPWM:467' loc{ord(ii)}(l_svm:lenvec(ord(ii))+l_svm-1) = 1; */
+                /* 'gkmPWM:477' loc{ord(ii)}(l_svm:lenvec(ord(ii))+l_svm-1) = 1; */
                 S = (S + l_svm) - 1.0;
                 if (l_svm > S) {
                   i = -1;
@@ -5166,7 +5165,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         }
       }
 
-      /* 'gkmPWM:471' C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
+      /* 'gkmPWM:481' C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
       mtimes(kmat, kmat, c_ct);
       if ((kmat->size[0] == 0) || (kmat->size[1] == 0) || (kweig->size[0] == 0))
       {
@@ -5214,7 +5213,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                     b_a->size[0]);
       }
 
-      /* 'gkmPWM:472' res = kweig-kmat*C; */
+      /* 'gkmPWM:482' res = kweig-kmat*C; */
       if ((kmat->size[0] == 0) || (kmat->size[1] == 0) || (C->size[0] == 0)) {
         i = res->size[0];
         res->size[0] = kmat->size[0];
@@ -5249,14 +5248,14 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         res_data = res->data;
       }
 
-      /* 'gkmPWM:473' corrvec = zeros(m,1); */
-      /* 'gkmPWM:474' for ii = 1:m */
+      /* 'gkmPWM:483' corrvec = zeros(m,1); */
+      /* 'gkmPWM:484' for ii = 1:m */
       i = ord->size[0];
       ord->size[0] = unnamed_idx_0;
       emxEnsureCapacity_real_T(ord, i);
       ord_data = ord->data;
       for (j = 0; j <= varargin_2; j++) {
-        /* 'gkmPWM:475' [~,ind] = sort(kmat(:,ii), 'descend'); */
+        /* 'gkmPWM:485' [~,ind] = sort(kmat(:,ii), 'descend'); */
         loop_ub = kmat->size[0];
         i = f->size[0];
         f->size[0] = kmat->size[0];
@@ -5277,7 +5276,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           f_data[i] = iidx_data[i];
         }
 
-        /* 'gkmPWM:476' corrvec(ii) = sum(res(ind(1:lcomb)).^2); */
+        /* 'gkmPWM:486' corrvec(ii) = sum(res(ind(1:lcomb)).^2); */
         if (1 > lcomb) {
           loop_ub = 0;
         } else {
@@ -5295,11 +5294,11 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
         ord_data[j] = blockedSummation(b_iidx, b_iidx->size[0]);
 
-        /* 'gkmPWM:477' if mod(i,20) == 0 */
+        /* 'gkmPWM:487' if mod(i,20) == 0 */
         if (fmod(a, 20.0) == 0.0) {
-          /* 'gkmPWM:478' if RC */
+          /* 'gkmPWM:488' if RC */
           if (RC != 0.0) {
-            /* 'gkmPWM:479' kmat(:,ii) = PWM2kmers(PWM{ii},negmat,rc,diffc,indc,loc{ii},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(ii)); */
+            /* 'gkmPWM:489' kmat(:,ii) = PWM2kmers(PWM{ii},negmat,rc,diffc,indc,loc{ii},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(ii)); */
             PWM2kmers(b_PWM_data[j].f1, negmat, rc, diffc, indc, loc_data[j].f1,
                       xc, l_svm, k_svm, rcnum, b_iidx);
             b_iidx_data = b_iidx->data;
@@ -5315,8 +5314,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
               kmat_data = kmat->data;
             }
           } else {
-            /* 'gkmPWM:480' else */
-            /* 'gkmPWM:481' kmat(:,ii) = PWM2kmers_norc(PWM{ii},negmat,rc,diffc,indc,loc{ii},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(ii)); */
+            /* 'gkmPWM:490' else */
+            /* 'gkmPWM:491' kmat(:,ii) = PWM2kmers_norc(PWM{ii},negmat,rc,diffc,indc,loc{ii},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(ii)); */
             PWM2kmers_norc(b_PWM_data[j].f1, negmat, rc, diffc, indc, loc_data[j]
                            .f1, xc, l_svm, k_svm, b_iidx);
             b_iidx_data = b_iidx->data;
@@ -5336,7 +5335,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       }
 
       /* The order of PWM optimization is determined by the correlation of its top 110 kmers with the gapped kmer weight vector */
-      /* 'gkmPWM:486' [~,ord] = sort(corrvec, 'descend'); */
+      /* 'gkmPWM:496' [~,ord] = sort(corrvec, 'descend'); */
       sort(ord, iidx);
       iidx_data = iidx->data;
       i = ord->size[0];
@@ -5348,10 +5347,10 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         ord_data[i] = iidx_data[i];
       }
 
-      /* 'gkmPWM:487' for ii = 1:m */
+      /* 'gkmPWM:497' for ii = 1:m */
       for (j = 0; j <= varargin_2; j++) {
         /* The order of the column optimization is determined by the max probability in each column */
-        /* 'gkmPWM:489' v = max(PWM{ord(ii)}(l_svm:lenvec(ord(ii))+l_svm-1,:)'); */
+        /* 'gkmPWM:499' v = max(PWM{ord(ii)}(l_svm:lenvec(ord(ii))+l_svm-1,:)'); */
         i = (int)ord_data[j] - 1;
         S = (lenvec_data[i] + l_svm) - 1.0;
         if (l_svm > S) {
@@ -5362,7 +5361,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           i2 = (int)S;
         }
 
-        /* 'gkmPWM:490' [~,c] = sort(v, 'ascend'); */
+        /* 'gkmPWM:500' [~,c] = sort(v, 'ascend'); */
         i3 = c_PWM->size[0] * c_PWM->size[1];
         c_PWM->size[0] = 4;
         loop_ub = i2 - i1;
@@ -5395,10 +5394,10 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
         /* C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
         /* res = kweig-kmat*C; */
-        /* 'gkmPWM:493' for iii = 1:length(c) */
+        /* 'gkmPWM:503' for iii = 1:length(c) */
         i1 = temp->size[1];
         for (jj = 0; jj < i1; jj++) {
-          /* 'gkmPWM:494' PWMtemp = PWM{ord(ii)}(c(iii):c(iii)+l_svm*2-2,:); */
+          /* 'gkmPWM:504' PWMtemp = PWM{ord(ii)}(c(iii):c(iii)+l_svm*2-2,:); */
           S = temp_data[jj];
           M = ((double)(int)S + l_svm * 2.0) - 2.0;
           if ((int)S > M) {
@@ -5413,7 +5412,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
             u0 = (int)M;
           }
 
-          /* 'gkmPWM:495' [kweigdiff,PWM{ord(ii)}(c(iii)+l_svm-1,:)] = getEMprob_v3(PWMtemp,res/C(ord(ii)),negmat,poscell,rc,diffC,indc,loc{ord(ii)}(c(iii):c(iii)+2*l_svm-2),xc,reg,l_svm,k_svm,rcnum,RC); */
+          /* 'gkmPWM:505' [kweigdiff,PWM{ord(ii)}(c(iii)+l_svm-1,:)] = getEMprob_v3(PWMtemp,res/C(ord(ii)),negmat,poscell,rc,diffC,indc,loc{ord(ii)}(c(iii):c(iii)+2*l_svm-2),xc,reg,l_svm,k_svm,rcnum,RC); */
           loop_ub = i3 - i2;
           i3 = mat->size[0] * mat->size[1];
           mat->size[0] = loop_ub;
@@ -5457,7 +5456,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           b_PWM_data[(int)ord_data[j] - 1].f1->data[(m + b_PWM_data[(int)
             ord_data[j] - 1].f1->size[0] * 3) - 1] = b[3];
 
-          /* 'gkmPWM:496' kmat(:,ord(ii)) = kmat(:,ord(ii)) + kweigdiff; */
+          /* 'gkmPWM:506' kmat(:,ord(ii)) = kmat(:,ord(ii)) + kweigdiff; */
           if (kmat->size[0] == f->size[0]) {
             m = kmat->size[0] - 1;
             S = ord_data[j];
@@ -5479,7 +5478,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
             kmat_data = kmat->data;
           }
 
-          /* 'gkmPWM:497' res = res-kweigdiff*C(ord(ii)); */
+          /* 'gkmPWM:507' res = res-kweigdiff*C(ord(ii)); */
           loop_ub = res->size[0];
           if (res->size[0] == f->size[0]) {
             for (i2 = 0; i2 < loop_ub; i2++) {
@@ -5493,12 +5492,12 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       }
 
       /* Reseed PWMs if two or more of them are too highly correlated */
-      /* 'gkmPWM:501' if i/n <= 0.80 */
+      /* 'gkmPWM:511' if i/n <= 0.80 */
       if ((double)a / n <= 0.8) {
-        /* 'gkmPWM:502' info = avg_info(PWM,l_svm); */
+        /* 'gkmPWM:512' info = avg_info(PWM,l_svm); */
         avg_info(b_PWM, l_svm, f);
 
-        /* 'gkmPWM:503' [~,ord] = sort(info,'descend'); */
+        /* 'gkmPWM:513' [~,ord] = sort(info,'descend'); */
         sort(f, iidx);
         iidx_data = iidx->data;
         i = ord->size[0];
@@ -5510,7 +5509,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           ord_data[i] = iidx_data[i];
         }
 
-        /* 'gkmPWM:504' kmat = kmat(:,ord); */
+        /* 'gkmPWM:514' kmat = kmat(:,ord); */
         m = kmat->size[0] - 1;
         i = c_ct->size[0] * c_ct->size[1];
         c_ct->size[0] = kmat->size[0];
@@ -5535,7 +5534,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           kmat_data[i] = temp_data[i];
         }
 
-        /* 'gkmPWM:505' lenvec = lenvec(ord); */
+        /* 'gkmPWM:515' lenvec = lenvec(ord); */
         i = b_iidx->size[0];
         b_iidx->size[0] = ord->size[0];
         emxEnsureCapacity_real_T(b_iidx, i);
@@ -5555,8 +5554,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         }
 
         /*  loc = loc(ord); */
-        /* 'gkmPWM:507' ord_len = length(ord); */
-        /* 'gkmPWM:508' new_loc = cell(ord_len,1); */
+        /* 'gkmPWM:517' ord_len = length(ord); */
+        /* 'gkmPWM:518' new_loc = cell(ord_len,1); */
         m = ord->size[0];
         i = new_loc->size[0];
         new_loc->size[0] = ord->size[0];
@@ -5566,16 +5565,16 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           poscell_data[i].f1->size[0] = 0;
         }
 
-        /* 'gkmPWM:509' new_loc = coder.nullcopy(new_loc); */
+        /* 'gkmPWM:519' new_loc = coder.nullcopy(new_loc); */
         i = b_new_loc->size[0];
         b_new_loc->size[0] = new_loc->size[0];
         emxEnsureCapacity_cell_wrap_14(b_new_loc, i);
         poscell_data = b_new_loc->data;
 
-        /* 'gkmPWM:510' for cur_idx=1:ord_len */
+        /* 'gkmPWM:520' for cur_idx=1:ord_len */
         i = ord->size[0];
         for (u0 = 0; u0 < i; u0++) {
-          /* 'gkmPWM:511' new_loc{cur_idx} = loc{ord(cur_idx)}; */
+          /* 'gkmPWM:521' new_loc{cur_idx} = loc{ord(cur_idx)}; */
           i1 = poscell_data[u0].f1->size[0];
           poscell_data[u0].f1->size[0] = loc_data[(int)ord_data[u0] - 1]
             .f1->size[0];
@@ -5587,11 +5586,11 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           }
         }
 
-        /* 'gkmPWM:513' loc = coder.nullcopy(loc); */
-        /* 'gkmPWM:514' for cur_idx=1:ord_len */
+        /* 'gkmPWM:523' loc = coder.nullcopy(loc); */
+        /* 'gkmPWM:524' for cur_idx=1:ord_len */
         i = ord->size[0];
         for (u0 = 0; u0 < i; u0++) {
-          /* 'gkmPWM:515' loc{cur_idx} = new_loc{cur_idx}; */
+          /* 'gkmPWM:525' loc{cur_idx} = new_loc{cur_idx}; */
           loop_ub = poscell_data[u0].f1->size[0];
           i1 = loc_data[u0].f1->size[0];
           loc_data[u0].f1->size[0] = poscell_data[u0].f1->size[0];
@@ -5602,7 +5601,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         }
 
         /*  PWM = PWM(ord); */
-        /* 'gkmPWM:520' new_PWM = cell(ord_len,1); */
+        /* 'gkmPWM:530' new_PWM = cell(ord_len,1); */
         i = new_PWM->size[0];
         new_PWM->size[0] = ord->size[0];
         emxEnsureCapacity_cell_wrap_2(new_PWM, i);
@@ -5612,16 +5611,16 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           new_PWM_data[i].f1->size[1] = 4;
         }
 
-        /* 'gkmPWM:521' new_PWM = coder.nullcopy(new_PWM); */
+        /* 'gkmPWM:531' new_PWM = coder.nullcopy(new_PWM); */
         i = b_new_PWM->size[0];
         b_new_PWM->size[0] = new_PWM->size[0];
         emxEnsureCapacity_cell_wrap_2(b_new_PWM, i);
         new_PWM_data = b_new_PWM->data;
 
-        /* 'gkmPWM:522' for cur_idx=1:ord_len */
+        /* 'gkmPWM:532' for cur_idx=1:ord_len */
         i = ord->size[0];
         for (u0 = 0; u0 < i; u0++) {
-          /* 'gkmPWM:523' new_PWM{cur_idx} = PWM{ord(cur_idx)}; */
+          /* 'gkmPWM:533' new_PWM{cur_idx} = PWM{ord(cur_idx)}; */
           i1 = new_PWM_data[u0].f1->size[0] * new_PWM_data[u0].f1->size[1];
           new_PWM_data[u0].f1->size[0] = b_PWM_data[(int)ord_data[u0] - 1]
             .f1->size[0];
@@ -5634,11 +5633,11 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           }
         }
 
-        /* 'gkmPWM:525' PWM = coder.nullcopy(PWM); */
-        /* 'gkmPWM:526' for cur_idx=1:ord_len */
+        /* 'gkmPWM:535' PWM = coder.nullcopy(PWM); */
+        /* 'gkmPWM:536' for cur_idx=1:ord_len */
         i = ord->size[0];
         for (u0 = 0; u0 < i; u0++) {
-          /* 'gkmPWM:527' PWM{cur_idx} = new_PWM{cur_idx}; */
+          /* 'gkmPWM:537' PWM{cur_idx} = new_PWM{cur_idx}; */
           i1 = b_PWM_data[u0].f1->size[0] * b_PWM_data[u0].f1->size[1];
           b_PWM_data[u0].f1->size[0] = new_PWM_data[u0].f1->size[0];
           b_PWM_data[u0].f1->size[1] = 4;
@@ -5649,7 +5648,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           }
         }
 
-        /* 'gkmPWM:530' C = C(ord); */
+        /* 'gkmPWM:540' C = C(ord); */
         i = b_iidx->size[0];
         b_iidx->size[0] = ord->size[0];
         emxEnsureCapacity_real_T(b_iidx, i);
@@ -5668,9 +5667,9 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           C_data[i] = b_iidx_data[i];
         }
 
-        /* 'gkmPWM:531' for j = 1:m */
+        /* 'gkmPWM:541' for j = 1:m */
         for (j = 0; j <= varargin_2; j++) {
-          /* 'gkmPWM:532' KMAT(:,j) = kmat(:,j)/(kmat(:,j)'*kmat(:,j)); */
+          /* 'gkmPWM:542' KMAT(:,j) = kmat(:,j)/(kmat(:,j)'*kmat(:,j)); */
           loop_ub = kmat->size[0];
           i = f->size[0];
           f->size[0] = kmat->size[0];
@@ -5702,14 +5701,14 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
           }
         }
 
-        /* 'gkmPWM:534' MAT = KMAT'*KMAT; */
+        /* 'gkmPWM:544' MAT = KMAT'*KMAT; */
         mtimes(CT, CT, ct);
         ct_data = ct->data;
 
-        /* 'gkmPWM:535' for j = 1:m-1 */
+        /* 'gkmPWM:545' for j = 1:m-1 */
         i = PWM->size[0];
         for (j = 0; j <= i - 2; j++) {
-          /* 'gkmPWM:536' vec = MAT(j+1:end,j); */
+          /* 'gkmPWM:546' vec = MAT(j+1:end,j); */
           if (j + 2U > (unsigned int)ct->size[0]) {
             i1 = 0;
             i2 = 0;
@@ -5718,7 +5717,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
             i2 = ct->size[0];
           }
 
-          /* 'gkmPWM:537' [a b] = max(vec); */
+          /* 'gkmPWM:547' [a b] = max(vec); */
           loop_ub = i2 - i1;
           i2 = b_iidx->size[0];
           b_iidx->size[0] = loop_ub;
@@ -5730,16 +5729,16 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
           d_maximum(b_iidx, &M, &m);
 
-          /* 'gkmPWM:538' if a > rcorr && C(j) > 0 */
+          /* 'gkmPWM:548' if a > rcorr && C(j) > 0 */
           if ((M > rcorr) && (C_data[j] > 0.0)) {
-            /* 'gkmPWM:539' scount = 0; */
+            /* 'gkmPWM:549' scount = 0; */
             scount = 0.0;
 
-            /* 'gkmPWM:540' fprintf('reseeding\n'); */
+            /* 'gkmPWM:550' fprintf('reseeding\n'); */
             printf("reseeding\n");
             fflush(stdout);
 
-            /* 'gkmPWM:541' f = j+find(vec > rcorr); */
+            /* 'gkmPWM:551' f = j+find(vec > rcorr); */
             i2 = d_ct->size[0];
             d_ct->size[0] = loop_ub;
             emxEnsureCapacity_boolean_T(d_ct, i2);
@@ -5759,20 +5758,20 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
               f_data[i1] = ((double)j + 1.0) + (double)iidx_data[i1];
             }
 
-            /* 'gkmPWM:542' for jj = 1:length(f) */
+            /* 'gkmPWM:552' for jj = 1:length(f) */
             i1 = f->size[0];
             if (0 <= f->size[0] - 1) {
               b_lenvec[1] = 12.0;
             }
 
             for (jj = 0; jj < i1; jj++) {
-              /* 'gkmPWM:543' for jjj = 1:min([lenvec(f(jj)) 12]) */
+              /* 'gkmPWM:553' for jjj = 1:min([lenvec(f(jj)) 12]) */
               u0 = (int)f_data[jj] - 1;
               M = lenvec_data[u0];
               b_lenvec[0] = M;
               i2 = (int)b_minimum(b_lenvec);
               for (b_loop_ub = 0; b_loop_ub < i2; b_loop_ub++) {
-                /* 'gkmPWM:544' PWM{f(jj)}(jj+9,:) =  PWM{f(jj)}(jjj+l_svm-1,randperm(4)); */
+                /* 'gkmPWM:554' PWM{f(jj)}(jj+9,:) =  PWM{f(jj)}(jjj+l_svm-1,randperm(4)); */
                 randperm(b);
                 m = (int)((((double)b_loop_ub + 1.0) + l_svm) - 1.0);
                 varargin_1[1] = b_PWM_data[u0].f1->data[(m + b_PWM_data[u0]
@@ -5792,9 +5791,9 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   f_data[jj] - 1].f1->size[0] * 3) + 9] = varargin_1[3];
               }
 
-              /* 'gkmPWM:546' if lenvec(f(jj)) >= 12 */
+              /* 'gkmPWM:556' if lenvec(f(jj)) >= 12 */
               if (M >= 12.0) {
-                /* 'gkmPWM:547' PWM{f(jj)} = PWM{f(jj)}(l_svm:l_svm+11,:); */
+                /* 'gkmPWM:557' PWM{f(jj)} = PWM{f(jj)}(l_svm:l_svm+11,:); */
                 i2 = mat->size[0] * mat->size[1];
                 mat->size[0] = 12;
                 mat->size[1] = 4;
@@ -5817,8 +5816,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   b_PWM_data[(int)f_data[jj] - 1].f1->data[i2] = diffC_data[i2];
                 }
 
-                /* 'gkmPWM:548' PWM{f(jj)} = extendPWM(PWM{f(jj)}, l_svm-1, GC); */
-                /* 'gkmPWM:992' mat = repmat(GCmat, n,1); */
+                /* 'gkmPWM:558' PWM{f(jj)} = extendPWM(PWM{f(jj)}, l_svm-1, GC); */
+                /* 'gkmPWM:1002' mat = repmat(GCmat, n,1); */
                 varargin_1[0] = PWM_data[0].f1->data[0];
                 varargin_1[1] = PWM_data[0].f1->data[PWM_data[0].f1->size[0]];
                 varargin_1[2] = PWM_data[0].f1->data[PWM_data[0].f1->size[0] * 2];
@@ -5826,7 +5825,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                 b_repmat(varargin_1, l_svm - 1.0, mat);
                 diffC_data = mat->data;
 
-                /* 'gkmPWM:993' ext_pwm = [mat;pwm;mat]; */
+                /* 'gkmPWM:1003' ext_pwm = [mat;pwm;mat]; */
                 i2 = b_mat->size[0] * b_mat->size[1];
                 b_mat->size[0] = (mat->size[0] + b_PWM_data[(int)f_data[jj] - 1]
                                   .f1->size[0]) + mat->size[0];
@@ -5867,10 +5866,10 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   b_PWM_data[(int)f_data[jj] - 1].f1->data[i2] = vec_data[i2];
                 }
 
-                /* 'gkmPWM:549' lenvec(f(jj)) = 12; */
+                /* 'gkmPWM:559' lenvec(f(jj)) = 12; */
                 lenvec_data[u0] = 12.0;
 
-                /* 'gkmPWM:550' loc{f(jj)} = zeros(lenvec(f(jj))+l_svm*2-2, 1); */
+                /* 'gkmPWM:560' loc{f(jj)} = zeros(lenvec(f(jj))+l_svm*2-2, 1); */
                 loop_ub = (int)((lenvec_data[u0] + l_svm * 2.0) - 2.0);
                 i2 = loc_data[(int)f_data[jj] - 1].f1->size[0];
                 loc_data[(int)f_data[jj] - 1].f1->size[0] = loop_ub;
@@ -5879,7 +5878,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   loc_data[(int)f_data[jj] - 1].f1->data[i2] = 0.0;
                 }
 
-                /* 'gkmPWM:551' loc{f(jj)}(l_svm:lenvec(f(jj))+l_svm-1) = 1; */
+                /* 'gkmPWM:561' loc{f(jj)}(l_svm:lenvec(f(jj))+l_svm-1) = 1; */
                 S = (lenvec_data[u0] + l_svm) - 1.0;
                 if (l_svm > S) {
                   i2 = -1;
@@ -5895,9 +5894,9 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                 }
               }
 
-              /* 'gkmPWM:553' if RC */
+              /* 'gkmPWM:563' if RC */
               if (RC != 0.0) {
-                /* 'gkmPWM:554' kmat(:,f(jj)) = PWM2kmers(PWM{f(jj)},negmat,rc,diffc,indc,loc{f(jj)},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(f(jj))); */
+                /* 'gkmPWM:564' kmat(:,f(jj)) = PWM2kmers(PWM{f(jj)},negmat,rc,diffc,indc,loc{f(jj)},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(f(jj))); */
                 PWM2kmers(b_PWM_data[u0].f1, negmat, rc, diffc, indc,
                           loc_data[u0].f1, xc, l_svm, k_svm, rcnum, b_iidx);
                 b_iidx_data = b_iidx->data;
@@ -5913,8 +5912,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   kmat_data = kmat->data;
                 }
               } else {
-                /* 'gkmPWM:555' else */
-                /* 'gkmPWM:556' kmat(:,f(jj)) = PWM2kmers_norc(PWM{f(jj)},negmat,rc,diffc,indc,loc{f(jj)},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(f(jj))); */
+                /* 'gkmPWM:565' else */
+                /* 'gkmPWM:566' kmat(:,f(jj)) = PWM2kmers_norc(PWM{f(jj)},negmat,rc,diffc,indc,loc{f(jj)},xc,l_svm,k_svm,rcnum)-negvec*(l_svm-1+lenvec(f(jj))); */
                 PWM2kmers_norc(b_PWM_data[u0].f1, negmat, rc, diffc, indc,
                                loc_data[u0].f1, xc, l_svm, k_svm, b_iidx);
                 b_iidx_data = b_iidx->data;
@@ -5936,7 +5935,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       }
 
       /* Breaks the loop if it looks like it converged */
-      /* 'gkmPWM:563' C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
+      /* 'gkmPWM:573' C = (kmat'*kmat)^(-1)*(kmat'*kweig); */
       mtimes(kmat, kmat, c_ct);
       if ((kmat->size[0] == 0) || (kmat->size[1] == 0) || (kweig->size[0] == 0))
       {
@@ -5984,7 +5983,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                     b_a->size[0]);
       }
 
-      /* 'gkmPWM:564' scorevec(i) = sqrt(res'*res); */
+      /* 'gkmPWM:574' scorevec(i) = sqrt(res'*res); */
       if (res->size[0] < 1) {
         c = 0.0;
       } else {
@@ -5994,7 +5993,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
       scorevec_data[(int)a - 1] = sqrt(c);
 
-      /* 'gkmPWM:565' if i >= 10 && acount == 5 && scount >= 10 && max(abs(diff(scorevec(i-9:i))./scorevec(i-8:i))) < 0.0001 */
+      /* 'gkmPWM:575' if i >= 10 && acount == 5 && scount >= 10 && max(abs(diff(scorevec(i-9:i))./scorevec(i-8:i))) < 0.0001 */
       guard1 = false;
       if (((int)a >= 10) && (acount == 5) && (scount >= 10.0)) {
         c_diff(*(double (*)[10])&scorevec_data[(int)a - 10], b_varargin_1);
@@ -6004,7 +6003,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         }
 
         if (j_maximum(b_varargin_1) < 0.0001) {
-          /* 'gkmPWM:566' scorevec = scorevec(1:i); */
+          /* 'gkmPWM:576' scorevec = scorevec(1:i); */
           i = scorevec->size[0] * scorevec->size[1];
           scorevec->size[1] = (int)a;
           emxEnsureCapacity_real_T(scorevec, i);
@@ -6018,7 +6017,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       }
 
       if (guard1 && (((int)a > 10) && (acount == 5) && (scount >= 10.0))) {
-        /* 'gkmPWM:569' if i > 10 && acount == 5 && scount >= 10 && sum(diff(scorevec(i-9:i))>0) > 7 */
+        /* 'gkmPWM:579' if i > 10 && acount == 5 && scount >= 10 && sum(diff(scorevec(i-9:i))>0) > 7 */
         c_diff(*(double (*)[10])&scorevec_data[(int)a - 10], b_varargin_1);
         for (i = 0; i < 9; i++) {
           x[i] = (b_varargin_1[i] > 0.0);
@@ -6030,7 +6029,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
         }
 
         if (m > 7) {
-          /* 'gkmPWM:570' scorevec = scorevec(1:i); */
+          /* 'gkmPWM:580' scorevec = scorevec(1:i); */
           i = scorevec->size[0] * scorevec->size[1];
           scorevec->size[1] = (int)a;
           emxEnsureCapacity_real_T(scorevec, i);
@@ -6062,17 +6061,17 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxFree_real_T(&lenvec);
   emxFree_real_T(&diffC);
 
-  /* 'gkmPWM:574' toc */
+  /* 'gkmPWM:584' toc */
   toc();
 
-  /* 'gkmPWM:575' fprintf('gkmPWM completed after %d iterations\n', int32(i)); */
+  /* 'gkmPWM:585' fprintf('gkmPWM completed after %d iterations\n', int32(i)); */
   printf("gkmPWM completed after %d iterations\n", (int)a);
   fflush(stdout);
 
-  /* 'gkmPWM:577' for i = 1:length(PWM) */
+  /* 'gkmPWM:587' for i = 1:length(PWM) */
   i = b_PWM->size[0];
   for (acount = 0; acount < i; acount++) {
-    /* 'gkmPWM:578' PWM{i} = PWM{i}(l_svm:(length(PWM{i})-l_svm+1),:); */
+    /* 'gkmPWM:588' PWM{i} = PWM{i}(l_svm:(length(PWM{i})-l_svm+1),:); */
     u0 = b_PWM_data[acount].f1->size[0];
     if (u0 < 4) {
       u0 = 4;
@@ -6107,7 +6106,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   /* the following just calculates a few interesting quantities */
   /*  r = corr(kweig, kmat*C); */
-  /* 'gkmPWM:582' r = corrcoef(kweig, kmat*C); */
+  /* 'gkmPWM:592' r = corrcoef(kweig, kmat*C); */
   if ((kmat->size[0] == 0) || (kmat->size[1] == 0) || (C->size[0] == 0)) {
     i = b_iidx->size[0];
     b_iidx->size[0] = kmat->size[0];
@@ -6128,18 +6127,18 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                 &b_iidx_data[0], (blasint)kmat->size[0]);
   }
 
-  /* 'gkmPWM:583' r = r(1,2); */
+  /* 'gkmPWM:593' r = r(1,2); */
   corrcoef(kweig, b_iidx, b);
 
-  /* 'gkmPWM:584' M = mean(kweig); */
+  /* 'gkmPWM:594' M = mean(kweig); */
   M = blockedSummation(kweig, kweig->size[0]) / (double)kweig->size[0];
 
-  /* 'gkmPWM:585' S = std(kweig); */
+  /* 'gkmPWM:595' S = std(kweig); */
   S = b_std(kweig);
 
-  /* 'gkmPWM:586' R = zeros(m,1); */
-  /* 'gkmPWM:587' E = zeros(m,1); */
-  /* 'gkmPWM:588' CM = corrcoef(kmat)-eye(m); */
+  /* 'gkmPWM:596' R = zeros(m,1); */
+  /* 'gkmPWM:597' E = zeros(m,1); */
+  /* 'gkmPWM:598' CM = corrcoef(kmat)-eye(m); */
   m = PWM->size[0];
   i = ct->size[0] * ct->size[1];
   ct->size[0] = PWM->size[0];
@@ -6167,7 +6166,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     CT_data = CT->data;
   }
 
-  /* 'gkmPWM:589' for i = 1:m */
+  /* 'gkmPWM:599' for i = 1:m */
   i = PWM->size[0];
   i1 = R->size[0];
   R->size[0] = unnamed_idx_0;
@@ -6191,7 +6190,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   emxFree_real_T(&diffc);
   for (acount = 0; acount < i; acount++) {
-    /* 'gkmPWM:590' [~,a] = sort(kmat(:,i),'descend'); */
+    /* 'gkmPWM:600' [~,a] = sort(kmat(:,i),'descend'); */
     i1 = f->size[0];
     f->size[0] = i4;
     emxEnsureCapacity_real_T(f, i1);
@@ -6211,7 +6210,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       f_data[i1] = iidx_data[i1];
     }
 
-    /* 'gkmPWM:591' R(i) = (mean(kweig(a(1:lcomb)))-M)/S; */
+    /* 'gkmPWM:601' R(i) = (mean(kweig(a(1:lcomb)))-M)/S; */
     i1 = b_iidx->size[0];
     b_iidx->size[0] = d_loop_ub;
     emxEnsureCapacity_real_T(b_iidx, i1);
@@ -6223,8 +6222,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     vec_data[acount] = (blockedSummation(b_iidx, d_loop_ub) / (double)d_loop_ub
                         - M) / S;
 
-    /* 'gkmPWM:592' Kmat = kmat; */
-    /* 'gkmPWM:593' Kmat(:,i) = []; */
+    /* 'gkmPWM:602' Kmat = kmat; */
+    /* 'gkmPWM:603' Kmat(:,i) = []; */
     i1 = ct->size[0] * ct->size[1];
     ct->size[0] = kmat->size[0];
     ct->size[1] = kmat->size[1];
@@ -6237,7 +6236,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     nullAssignment(ct, acount + 1);
     ct_data = ct->data;
 
-    /* 'gkmPWM:594' c = (Kmat'*Kmat)^(-1)*(Kmat'*kweig); */
+    /* 'gkmPWM:604' c = (Kmat'*Kmat)^(-1)*(Kmat'*kweig); */
     mtimes(ct, ct, c_ct);
     if ((ct->size[0] == 0) || (ct->size[1] == 0) || (kweig->size[0] == 0)) {
       i1 = b_iidx->size[0];
@@ -6281,7 +6280,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
                   [0], 0.0, &f_data[0], (blasint)b_a->size[0]);
     }
 
-    /* 'gkmPWM:595' res = kweig-Kmat*c; */
+    /* 'gkmPWM:605' res = kweig-Kmat*c; */
     if ((ct->size[0] == 0) || (ct->size[1] == 0) || (f->size[0] == 0)) {
       i1 = res->size[0];
       res->size[0] = ct->size[0];
@@ -6316,7 +6315,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
       res_data = res->data;
     }
 
-    /* 'gkmPWM:596' E(i) = (sqrt(res'*res)-scorevec(end))/scorevec(end); */
+    /* 'gkmPWM:606' E(i) = (sqrt(res'*res)-scorevec(end))/scorevec(end); */
     if (res->size[0] < 1) {
       c = 0.0;
     } else {
@@ -6327,15 +6326,15 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     diffC_data[acount] = (sqrt(c) - scorevec_data[scorevec->size[1] - 1]) /
       scorevec_data[scorevec->size[1] - 1];
 
-    /* 'gkmPWM:597' if C(i) < 0 */
+    /* 'gkmPWM:607' if C(i) < 0 */
     if (C_data[acount] < 0.0) {
-      /* 'gkmPWM:598' CM(i,:) = 0; */
+      /* 'gkmPWM:608' CM(i,:) = 0; */
       loop_ub = CT->size[1];
       for (i1 = 0; i1 < loop_ub; i1++) {
         CT_data[acount + CT->size[0] * i1] = 0.0;
       }
 
-      /* 'gkmPWM:599' CM(:,i) = 0; */
+      /* 'gkmPWM:609' CM(:,i) = 0; */
       loop_ub = CT->size[0];
       for (i1 = 0; i1 < loop_ub; i1++) {
         CT_data[i1 + CT->size[0] * acount] = 0.0;
@@ -6349,7 +6348,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxFree_real_T(&kmat);
   emxFree_real_T(&ct);
 
-  /* 'gkmPWM:602' [R,a] = sort(R, 'descend'); */
+  /* 'gkmPWM:612' [R,a] = sort(R, 'descend'); */
   sort(R, iidx);
   iidx_data = iidx->data;
   i = f->size[0];
@@ -6364,8 +6363,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
   emxFree_int32_T(&iidx);
 
   /*  PWM = PWM(a); */
-  /* 'gkmPWM:604' a_len = length(a); */
-  /* 'gkmPWM:605' new_PWM = cell(a_len,1); */
+  /* 'gkmPWM:614' a_len = length(a); */
+  /* 'gkmPWM:615' new_PWM = cell(a_len,1); */
   unnamed_idx_0 = f->size[0];
   i = PWM->size[0];
   PWM->size[0] = f->size[0];
@@ -6376,14 +6375,14 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     PWM_data[i].f1->size[1] = 4;
   }
 
-  /* 'gkmPWM:606' for cur_idx=1:a_len */
+  /* 'gkmPWM:616' for cur_idx=1:a_len */
   i = f->size[0];
   i1 = PWM->size[0];
   PWM->size[0] = f->size[0];
   emxEnsureCapacity_cell_wrap_2(PWM, i1);
   PWM_data = PWM->data;
   for (u0 = 0; u0 < i; u0++) {
-    /* 'gkmPWM:607' new_PWM{cur_idx} = PWM{a(cur_idx)}; */
+    /* 'gkmPWM:617' new_PWM{cur_idx} = PWM{a(cur_idx)}; */
     i1 = PWM_data[u0].f1->size[0] * PWM_data[u0].f1->size[1];
     PWM_data[u0].f1->size[0] = b_PWM_data[(int)f_data[u0] - 1].f1->size[0];
     PWM_data[u0].f1->size[1] = 4;
@@ -6396,8 +6395,8 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   emxFree_cell_wrap_2(&b_PWM);
 
-  /* 'gkmPWM:609' PWM = new_PWM; */
-  /* 'gkmPWM:611' C = C(a); */
+  /* 'gkmPWM:619' PWM = new_PWM; */
+  /* 'gkmPWM:621' C = C(a); */
   i = b_iidx->size[0];
   b_iidx->size[0] = f->size[0];
   emxEnsureCapacity_real_T(b_iidx, i);
@@ -6416,7 +6415,7 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
     C_data[i] = b_iidx_data[i];
   }
 
-  /* 'gkmPWM:612' E = E(a); */
+  /* 'gkmPWM:622' E = E(a); */
   i = b_iidx->size[0];
   b_iidx->size[0] = f->size[0];
   emxEnsureCapacity_real_T(b_iidx, i);
@@ -6437,11 +6436,11 @@ static void gkmPWM_lagrange(const emxArray_real_T *kweig, const double negmat[16
 
   emxFree_real_T(&b_iidx);
 
-  /* 'gkmPWM:613' Rd = max(CM); */
+  /* 'gkmPWM:623' Rd = max(CM); */
   g_maximum(CT, Rd);
   vec_data = Rd->data;
 
-  /* 'gkmPWM:614' Rd = Rd(a); */
+  /* 'gkmPWM:624' Rd = Rd(a); */
   i = temp->size[0] * temp->size[1];
   temp->size[0] = 1;
   temp->size[1] = f->size[0];
@@ -6721,14 +6720,14 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
 
   /* uses dynamic programming to find the matrix A (kweig in this code) such that A*p = expected gapped kmer vector, where p is the middle column of a 2*l-1 PWM. */
   /* I use a 1st order Markov model to model the flanking bases for a PWM */
-  /* 'gkmPWM:740' p = cell(l,1); */
+  /* 'gkmPWM:750' p = cell(l,1); */
   i = p->size[0];
   p->size[0] = (int)l;
   emxEnsureCapacity_cell_wrap_13(p, i);
   p_data = p->data;
 
-  /* 'gkmPWM:741' p = coder.nullcopy(p); */
-  /* 'gkmPWM:742' p{1} = eye(4); */
+  /* 'gkmPWM:751' p = coder.nullcopy(p); */
+  /* 'gkmPWM:752' p{1} = eye(4); */
   for (i = 0; i < 16; i++) {
     p_data[0].f1[i] = 0.0;
   }
@@ -6738,10 +6737,10 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
   p_data[0].f1[10] = 1.0;
   p_data[0].f1[15] = 1.0;
 
-  /* 'gkmPWM:743' for i = 1:l-1 */
+  /* 'gkmPWM:753' for i = 1:l-1 */
   i = (int)(l - 1.0);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:744' p{i+1} = p{i}*negmat; */
+    /* 'gkmPWM:754' p{i+1} = p{i}*negmat; */
     for (b_k = 0; b_k < 4; b_k++) {
       for (indloc2_tmp = 0; indloc2_tmp < 4; indloc2_tmp++) {
         m = indloc2_tmp << 2;
@@ -6759,18 +6758,18 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
   emxInit_real_T(&mat2, 2);
   emxInit_real_T(&indvec, 2);
 
-  /* 'gkmPWM:746' n = 4^k*max(max(x)); */
+  /* 'gkmPWM:756' n = 4^k*max(max(x)); */
   g_maximum(x, indvec);
   n_tmp = h_maximum(indvec);
   b_n_tmp = pow(4.0, k);
   n = b_n_tmp * n_tmp;
 
   /* number of possible k-mers */
-  /* 'gkmPWM:747' mat2 = rot90(mat,2); */
+  /* 'gkmPWM:757' mat2 = rot90(mat,2); */
   c_rot90(mat, mat2);
   mat2_data = mat2->data;
 
-  /* 'gkmPWM:748' kweig = zeros(n, 4); */
+  /* 'gkmPWM:758' kweig = zeros(n, 4); */
   i = kweig->size[0] * kweig->size[1];
   kweig->size[0] = (int)n;
   kweig->size[1] = 4;
@@ -6784,15 +6783,15 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
   emxInit_cell_wrap_14(&ktree);
   emxInit_cell_wrap_14(&ktree2);
 
-  /* 'gkmPWM:749' ktree = cell(k-1,1); */
+  /* 'gkmPWM:759' ktree = cell(k-1,1); */
   m = (int)(k - 1.0);
   i = ktree->size[0];
   ktree->size[0] = (int)(k - 1.0);
   emxEnsureCapacity_cell_wrap_14(ktree, i);
   ktree_data = ktree->data;
 
-  /* 'gkmPWM:750' ktree = coder.nullcopy(ktree); */
-  /* 'gkmPWM:751' ktree2 = cell(k-1,1); */
+  /* 'gkmPWM:760' ktree = coder.nullcopy(ktree); */
+  /* 'gkmPWM:761' ktree2 = cell(k-1,1); */
   i = ktree2->size[0];
   ktree2->size[0] = (int)(k - 1.0);
   emxEnsureCapacity_cell_wrap_14(ktree2, i);
@@ -6804,15 +6803,15 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
 
   emxInit_uint32_T(&X);
 
-  /* 'gkmPWM:752' ktree2 = coder.nullcopy(ktree2); */
-  /* 'gkmPWM:753' [rx,cx] = size(x); */
+  /* 'gkmPWM:762' ktree2 = coder.nullcopy(ktree2); */
+  /* 'gkmPWM:763' [rx,cx] = size(x); */
   rx = x->size[0];
 
-  /* 'gkmPWM:754' m=rx; */
+  /* 'gkmPWM:764' m=rx; */
   b_m = x->size[0];
 
-  /* 'gkmPWM:755' M = l-1; */
-  /* 'gkmPWM:756' X = cx*ones(M+1,1); */
+  /* 'gkmPWM:765' M = l-1; */
+  /* 'gkmPWM:766' X = cx*ones(M+1,1); */
   loop_ub_tmp = (int)((l - 1.0) + 1.0);
   i = X->size[0];
   X->size[0] = (int)((l - 1.0) + 1.0);
@@ -6822,16 +6821,16 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
     X_data[i] = (unsigned int)x->size[1];
   }
 
-  /* 'gkmPWM:757' for i = 1:cx */
+  /* 'gkmPWM:767' for i = 1:cx */
   i = x->size[1];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:758' X(i) = i; */
+    /* 'gkmPWM:768' X(i) = i; */
     X_data[b_i] = (unsigned int)(b_i + 1);
   }
 
   emxInit_real_T(&indloc2, 1);
 
-  /* 'gkmPWM:760' indloc2 = flipud(indloc); */
+  /* 'gkmPWM:770' indloc2 = flipud(indloc); */
   i = indloc2->size[0];
   indloc2->size[0] = indloc->size[0];
   emxEnsureCapacity_real_T(indloc2, i);
@@ -6850,9 +6849,9 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
     indloc2_data[indloc2_tmp] = n;
   }
 
-  /* 'gkmPWM:761' for i = 2:5 */
+  /* 'gkmPWM:771' for i = 2:5 */
   for (b_i = 0; b_i < 4; b_i++) {
-    /* 'gkmPWM:762' ktree{i} = zeros(4^i,1); */
+    /* 'gkmPWM:772' ktree{i} = zeros(4^i,1); */
     c_tmp = pow(4.0, (double)b_i + 2.0);
     m = (int)pow(4.0, (double)b_i + 2.0);
     i = ktree_data[b_i + 1].f1->size[0];
@@ -6862,7 +6861,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
       ktree_data[b_i + 1].f1->data[i] = 0.0;
     }
 
-    /* 'gkmPWM:763' ktree2{i} = zeros(4^i,1); */
+    /* 'gkmPWM:773' ktree2{i} = zeros(4^i,1); */
     i = ktree2_data[b_i + 1].f1->size[0];
     ktree2_data[b_i + 1].f1->size[0] = (int)c_tmp;
     emxEnsureCapacity_real_T(ktree2_data[b_i + 1].f1, i);
@@ -6871,7 +6870,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
     }
   }
 
-  /* 'gkmPWM:765' for i = 0:M */
+  /* 'gkmPWM:775' for i = 0:M */
   emxInit_int32_T(&f1, 2);
   emxInit_real_T(&sPWM, 2);
   emxInit_real_T(&sPWM2, 2);
@@ -6881,9 +6880,9 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
   emxInit_boolean_T(&b_x, 2);
   emxInit_real_T(&b_kweig, 1);
   for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-    /* 'gkmPWM:766' if i > M-cx+1 */
+    /* 'gkmPWM:776' if i > M-cx+1 */
     if (b_i > ((l - 1.0) - (double)x->size[1]) + 1.0) {
-      /* 'gkmPWM:767' m = length(c); */
+      /* 'gkmPWM:777' m = length(c); */
       if ((c->size[0] == 0) || (c->size[1] == 0)) {
         b_m = 0;
       } else {
@@ -6896,9 +6895,9 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
     }
 
     /* the following loops is basically dynamic programming for tensor multiplication.  there are multiple cases to consider, hence the if statements. */
-    /* 'gkmPWM:770' for ii = 1:m */
+    /* 'gkmPWM:780' for ii = 1:m */
     for (ii = 0; ii < b_m; ii++) {
-      /* 'gkmPWM:771' if sum((c(ii,:)+i)==l) > 0 && ~(i == M-1 && ii > rx && ii ~= m) */
+      /* 'gkmPWM:781' if sum((c(ii,:)+i)==l) > 0 && ~(i == M-1 && ii > rx && ii ~= m) */
       md2 = c->size[1];
       i = b_x->size[0] * b_x->size[1];
       b_x->size[0] = 1;
@@ -6921,7 +6920,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
 
       if ((md2 > 0) && ((b_i != (l - 1.0) - 1.0) || (ii + 1 <= rx) || (ii + 1 ==
             b_m))) {
-        /* 'gkmPWM:772' indvec = c(ii,:)+i; */
+        /* 'gkmPWM:782' indvec = c(ii,:)+i; */
         md2 = c->size[1];
         i = indvec->size[0] * indvec->size[1];
         indvec->size[0] = 1;
@@ -6932,8 +6931,8 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
           indvec_data[i] = c_data[ii + c->size[0] * i] + (double)b_i;
         }
 
-        /* 'gkmPWM:773' coder.varsize('f', [1 1]); */
-        /* 'gkmPWM:774' f1 = find(indvec == l); */
+        /* 'gkmPWM:783' coder.varsize('f', [1 1]); */
+        /* 'gkmPWM:784' f1 = find(indvec == l); */
         i = b_x->size[0] * b_x->size[1];
         b_x->size[0] = 1;
         b_x->size[1] = indvec->size[1];
@@ -6947,21 +6946,21 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
         eml_find(b_x, f1);
         f1_data = f1->data;
 
-        /* 'gkmPWM:775' if length(f1) == 0 */
+        /* 'gkmPWM:785' if length(f1) == 0 */
         if (f1->size[1] == 0) {
-          /* 'gkmPWM:776' f = zeros(1,1); */
+          /* 'gkmPWM:786' f = zeros(1,1); */
           f = -1;
 
-          /* 'gkmPWM:777' fprintf("Resizing f\n"); */
+          /* 'gkmPWM:787' fprintf("Resizing f\n"); */
           printf("Resizing f\n");
           fflush(stdout);
         } else {
-          /* 'gkmPWM:778' else */
-          /* 'gkmPWM:779' f = f1(1); */
+          /* 'gkmPWM:788' else */
+          /* 'gkmPWM:789' f = f1(1); */
           f = f1_data[0] - 1;
         }
 
-        /* 'gkmPWM:781' indvec(f) = []; */
+        /* 'gkmPWM:791' indvec(f) = []; */
         indloc2_tmp = f + 1;
         m = indvec->size[1];
         md2 = indvec->size[1] - 1;
@@ -6979,9 +6978,9 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
         emxEnsureCapacity_real_T(indvec, i);
         indvec_data = indvec->data;
 
-        /* 'gkmPWM:782' loc = indloc(indvec); */
-        /* 'gkmPWM:783' loc2 = indloc2(indvec); */
-        /* 'gkmPWM:784' sPWM = mat(indvec,:).'; */
+        /* 'gkmPWM:792' loc = indloc(indvec); */
+        /* 'gkmPWM:793' loc2 = indloc2(indvec); */
+        /* 'gkmPWM:794' sPWM = mat(indvec,:).'; */
         i = indvec_loop2->size[0];
         indvec_loop2->size[0] = indvec->size[1];
         emxEnsureCapacity_real_T(indvec_loop2, i);
@@ -7005,7 +7004,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
           sPWM_data[4 * i + 3] = mat_data[m + mat->size[0] * 3];
         }
 
-        /* 'gkmPWM:785' sPWM2 = mat2(indvec,:).'; */
+        /* 'gkmPWM:795' sPWM2 = mat2(indvec,:).'; */
         i = sPWM2->size[0] * sPWM2->size[1];
         sPWM2->size[0] = 4;
         sPWM2->size[1] = indvec_loop2->size[0];
@@ -7020,12 +7019,12 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
           sPWM2_data[4 * i + 3] = mat2_data[m + mat2->size[0] * 3];
         }
 
-        /* 'gkmPWM:786' ktree{1} = sPWM(:,1); */
+        /* 'gkmPWM:796' ktree{1} = sPWM(:,1); */
         i = ktree_data[0].f1->size[0];
         ktree_data[0].f1->size[0] = 4;
         emxEnsureCapacity_real_T(ktree_data[0].f1, i);
 
-        /* 'gkmPWM:787' ktree2{1} = sPWM2(:,1); */
+        /* 'gkmPWM:797' ktree2{1} = sPWM2(:,1); */
         i = ktree2_data[0].f1->size[0];
         ktree2_data[0].f1->size[0] = 4;
         emxEnsureCapacity_real_T(ktree2_data[0].f1, i);
@@ -7038,25 +7037,25 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
         ktree_data[0].f1->data[3] = sPWM_data[3];
         ktree2_data[0].f1->data[3] = sPWM2_data[3];
 
-        /* 'gkmPWM:788' for iii = s(ii,i+1):k-1 */
+        /* 'gkmPWM:798' for iii = s(ii,i+1):k-1 */
         d = s_data[ii + s->size[0] * b_i];
         i = (int)((k - 1.0) + (1.0 - d));
         for (iii = 0; iii < i; iii++) {
           n = d + (double)iii;
 
-          /* 'gkmPWM:789' if loc(iii)==0 */
+          /* 'gkmPWM:799' if loc(iii)==0 */
           b_k = (int)indvec_data[(int)n - 1] - 1;
           if (indloc_data[b_k] == 0.0) {
-            /* 'gkmPWM:790' if loc(iii-1)==1 && indvec(iii-1) < l */
+            /* 'gkmPWM:800' if loc(iii-1)==1 && indvec(iii-1) < l */
             if ((indloc_data[(int)indvec_data[(int)(n - 1.0) - 1] - 1] == 1.0) &&
                 ((unsigned int)indvec_data[(int)(n - 1.0) - 1] < l)) {
-              /* 'gkmPWM:791' matt = sPWM(:,iii).'*p{indvec(iii)-l}; */
+              /* 'gkmPWM:801' matt = sPWM(:,iii).'*p{indvec(iii)-l}; */
               for (b_k = 0; b_k < 16; b_k++) {
                 b_p[b_k] = p_data[(int)((double)(unsigned int)indvec_data[(int)n
                   - 1] - l) - 1].f1[b_k];
               }
 
-              /* 'gkmPWM:792' a = ktree2{iii-1}.*sPWM2(:,iii).'; */
+              /* 'gkmPWM:802' a = ktree2{iii-1}.*sPWM2(:,iii).'; */
               b_k = a->size[0] * a->size[1];
               a->size[0] = ktree2_data[(int)(n - 1.0) - 1].f1->size[0];
               a->size[1] = 4;
@@ -7071,7 +7070,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 }
               }
 
-              /* 'gkmPWM:793' ktree2{iii} = a(:); */
+              /* 'gkmPWM:803' ktree2{iii} = a(:); */
               b_k = ktree2_data[(int)n - 1].f1->size[0];
               ktree2_data[(int)n - 1].f1->size[0] = a->size[0] << 2;
               emxEnsureCapacity_real_T(ktree2_data[(int)n - 1].f1, b_k);
@@ -7080,7 +7079,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 ktree2_data[(int)n - 1].f1->data[b_k] = a_data[b_k];
               }
 
-              /* 'gkmPWM:794' ktree{iii} = repmat(ktree{iii-1},4,1).*repelem(matt', 4^(iii-1)); */
+              /* 'gkmPWM:804' ktree{iii} = repmat(ktree{iii-1},4,1).*repelem(matt', 4^(iii-1)); */
               c_repmat(ktree_data[(int)(n - 1.0) - 1].f1, indvec2_loop2);
               indvec2_loop2_data = indvec2_loop2->data;
               m = 4 * ((int)n - 1);
@@ -7108,9 +7107,9 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 ktree_data = ktree->data;
               }
             } else {
-              /* 'gkmPWM:795' else */
-              /* 'gkmPWM:796' matt = p{indvec(iii)-indvec(iii-1)+1}; */
-              /* 'gkmPWM:797' ktree{iii} = repmat(ktree{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2)); */
+              /* 'gkmPWM:805' else */
+              /* 'gkmPWM:806' matt = p{indvec(iii)-indvec(iii-1)+1}; */
+              /* 'gkmPWM:807' ktree{iii} = repmat(ktree{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2)); */
               c_tmp = pow(4.0, n - 2.0);
               b_k = indvec_loop2->size[0];
               indvec_loop2->size[0] = (int)c_tmp << 4;
@@ -7144,7 +7143,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 ktree_data = ktree->data;
               }
 
-              /* 'gkmPWM:798' a = ktree2{iii-1}.*sPWM2(:,iii).'; */
+              /* 'gkmPWM:808' a = ktree2{iii-1}.*sPWM2(:,iii).'; */
               b_k = a->size[0] * a->size[1];
               a->size[0] = ktree2_data[(int)(n - 1.0) - 1].f1->size[0];
               a->size[1] = 4;
@@ -7159,7 +7158,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 }
               }
 
-              /* 'gkmPWM:799' ktree2{iii} = a(:); */
+              /* 'gkmPWM:809' ktree2{iii} = a(:); */
               b_k = ktree2_data[(int)n - 1].f1->size[0];
               ktree2_data[(int)n - 1].f1->size[0] = a->size[0] << 2;
               emxEnsureCapacity_real_T(ktree2_data[(int)n - 1].f1, b_k);
@@ -7169,17 +7168,17 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               }
             }
           } else if (indloc2_data[b_k] == 0.0) {
-            /* 'gkmPWM:801' elseif loc2(iii)==0 */
-            /* 'gkmPWM:802' if loc2(iii-1)==1 && indvec(iii-1) < l */
+            /* 'gkmPWM:811' elseif loc2(iii)==0 */
+            /* 'gkmPWM:812' if loc2(iii-1)==1 && indvec(iii-1) < l */
             if ((indloc2_data[(int)indvec_data[(int)(n - 1.0) - 1] - 1] == 1.0) &&
                 ((unsigned int)indvec_data[(int)(n - 1.0) - 1] < l)) {
-              /* 'gkmPWM:803' matt = sPWM2(:,iii).'*p{indvec(iii)-l}; */
+              /* 'gkmPWM:813' matt = sPWM2(:,iii).'*p{indvec(iii)-l}; */
               for (b_k = 0; b_k < 16; b_k++) {
                 b_p[b_k] = p_data[(int)((double)(unsigned int)indvec_data[(int)n
                   - 1] - l) - 1].f1[b_k];
               }
 
-              /* 'gkmPWM:804' a = ktree{iii-1}.*sPWM(:,iii).'; */
+              /* 'gkmPWM:814' a = ktree{iii-1}.*sPWM(:,iii).'; */
               b_k = a->size[0] * a->size[1];
               a->size[0] = ktree_data[(int)(n - 1.0) - 1].f1->size[0];
               a->size[1] = 4;
@@ -7194,7 +7193,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 }
               }
 
-              /* 'gkmPWM:805' ktree{iii} = a(:); */
+              /* 'gkmPWM:815' ktree{iii} = a(:); */
               b_k = ktree_data[(int)n - 1].f1->size[0];
               ktree_data[(int)n - 1].f1->size[0] = a->size[0] << 2;
               emxEnsureCapacity_real_T(ktree_data[(int)n - 1].f1, b_k);
@@ -7203,7 +7202,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 ktree_data[(int)n - 1].f1->data[b_k] = a_data[b_k];
               }
 
-              /* 'gkmPWM:806' ktree2{iii} = repmat(ktree2{iii-1},4,1).*repelem(matt', 4^(iii-1)); */
+              /* 'gkmPWM:816' ktree2{iii} = repmat(ktree2{iii-1},4,1).*repelem(matt', 4^(iii-1)); */
               c_repmat(ktree2_data[(int)(n - 1.0) - 1].f1, indvec2_loop2);
               indvec2_loop2_data = indvec2_loop2->data;
               for (b_k = 0; b_k < 4; b_k++) {
@@ -7231,9 +7230,9 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 ktree2_data = ktree2->data;
               }
             } else {
-              /* 'gkmPWM:807' else */
-              /* 'gkmPWM:808' matt = p{indvec(iii)-indvec(iii-1)+1}; */
-              /* 'gkmPWM:809' ktree2{iii} = repmat(ktree2{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2)); */
+              /* 'gkmPWM:817' else */
+              /* 'gkmPWM:818' matt = p{indvec(iii)-indvec(iii-1)+1}; */
+              /* 'gkmPWM:819' ktree2{iii} = repmat(ktree2{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2)); */
               c_tmp = pow(4.0, n - 2.0);
               b_k = indvec_loop2->size[0];
               indvec_loop2->size[0] = (int)c_tmp << 4;
@@ -7267,7 +7266,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 ktree2_data = ktree2->data;
               }
 
-              /* 'gkmPWM:810' a = ktree{iii-1}.*sPWM(:,iii).'; */
+              /* 'gkmPWM:820' a = ktree{iii-1}.*sPWM(:,iii).'; */
               b_k = a->size[0] * a->size[1];
               a->size[0] = ktree_data[(int)(n - 1.0) - 1].f1->size[0];
               a->size[1] = 4;
@@ -7282,7 +7281,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                 }
               }
 
-              /* 'gkmPWM:811' ktree{iii} = a(:); */
+              /* 'gkmPWM:821' ktree{iii} = a(:); */
               b_k = ktree_data[(int)n - 1].f1->size[0];
               ktree_data[(int)n - 1].f1->size[0] = a->size[0] << 2;
               emxEnsureCapacity_real_T(ktree_data[(int)n - 1].f1, b_k);
@@ -7292,8 +7291,8 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               }
             }
           } else {
-            /* 'gkmPWM:813' else */
-            /* 'gkmPWM:814' a = ktree{iii-1}.*sPWM(:,iii).'; */
+            /* 'gkmPWM:823' else */
+            /* 'gkmPWM:824' a = ktree{iii-1}.*sPWM(:,iii).'; */
             b_k = a->size[0] * a->size[1];
             a->size[0] = ktree_data[(int)(n - 1.0) - 1].f1->size[0];
             a->size[1] = 4;
@@ -7308,7 +7307,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               }
             }
 
-            /* 'gkmPWM:815' ktree{iii} = a(:); */
+            /* 'gkmPWM:825' ktree{iii} = a(:); */
             b_k = ktree_data[(int)n - 1].f1->size[0];
             ktree_data[(int)n - 1].f1->size[0] = a->size[0] << 2;
             emxEnsureCapacity_real_T(ktree_data[(int)n - 1].f1, b_k);
@@ -7317,7 +7316,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               ktree_data[(int)n - 1].f1->data[b_k] = a_data[b_k];
             }
 
-            /* 'gkmPWM:816' a = ktree2{iii-1}.*sPWM2(:,iii).'; */
+            /* 'gkmPWM:826' a = ktree2{iii-1}.*sPWM2(:,iii).'; */
             b_k = a->size[0] * a->size[1];
             a->size[0] = ktree2_data[(int)(n - 1.0) - 1].f1->size[0];
             a->size[1] = 4;
@@ -7332,7 +7331,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               }
             }
 
-            /* 'gkmPWM:817' ktree2{iii} = a(:); */
+            /* 'gkmPWM:827' ktree2{iii} = a(:); */
             b_k = ktree2_data[(int)n - 1].f1->size[0];
             ktree2_data[(int)n - 1].f1->size[0] = a->size[0] << 2;
             emxEnsureCapacity_real_T(ktree2_data[(int)n - 1].f1, b_k);
@@ -7344,20 +7343,20 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
         }
 
         /* the weird indexing that I did early in the code comes to fruition.  It is critical to do so to make this computation as fast as possible. */
-        /* 'gkmPWM:821' if ii <= rx */
+        /* 'gkmPWM:831' if ii <= rx */
         if (ii + 1 <= rx) {
-          /* 'gkmPWM:822' for j = 1:X(i+1) */
+          /* 'gkmPWM:832' for j = 1:X(i+1) */
           i = (int)X_data[b_i];
           for (j = 0; j < i; j++) {
-            /* 'gkmPWM:823' if x(ii,j) ~= 0 */
+            /* 'gkmPWM:833' if x(ii,j) ~= 0 */
             d = x_data[ii + x->size[0] * j];
             if (d != 0.0) {
-              /* 'gkmPWM:824' for iii = 1:2 */
+              /* 'gkmPWM:834' for iii = 1:2 */
               c_tmp = pow(4.0, (double)(f + 1) - 1.0);
               b_c = b_n_tmp * (ind_data[(int)d - 1] - 1.0);
               md2 = poscell_data[f].f1->size[0];
               for (iii = 0; iii < 2; iii++) {
-                /* 'gkmPWM:825' indvec_loop1 = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(x(ii,j))-1); */
+                /* 'gkmPWM:835' indvec_loop1 = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(x(ii,j))-1); */
                 n = c_tmp * (((double)iii + 1.0) - 1.0);
                 b_k = indvec_loop2->size[0];
                 indvec_loop2->size[0] = poscell_data[f].f1->size[0];
@@ -7368,7 +7367,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                     b_c;
                 }
 
-                /* 'gkmPWM:826' indvec2_loop1 = indvec_loop1+(5-2*iii)*4^(f-1); */
+                /* 'gkmPWM:836' indvec2_loop1 = indvec_loop1+(5-2*iii)*4^(f-1); */
                 d = (5.0 - 2.0 * ((double)iii + 1.0)) * c_tmp;
                 b_k = indvec2_loop2->size[0];
                 indvec2_loop2->size[0] = indvec_loop2->size[0];
@@ -7379,7 +7378,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                   indvec2_loop2_data[b_k] = indvec_loop2_data[b_k] + d;
                 }
 
-                /* 'gkmPWM:827' kweig(indvec_loop1,iii) = kweig(indvec_loop1,iii) + ktree{k-1}; */
+                /* 'gkmPWM:837' kweig(indvec_loop1,iii) = kweig(indvec_loop1,iii) + ktree{k-1}; */
                 if (indvec_loop2->size[0] == ktree_data[(int)(k - 1.0) - 1]
                     .f1->size[0]) {
                   b_k = b_kweig->size[0];
@@ -7403,7 +7402,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                   kweig_data = kweig->data;
                 }
 
-                /* 'gkmPWM:828' kweig(indvec2_loop1,5-iii) = kweig(indvec2_loop1,5-iii) + ktree{k-1}; */
+                /* 'gkmPWM:838' kweig(indvec2_loop1,5-iii) = kweig(indvec2_loop1,5-iii) + ktree{k-1}; */
                 if (indvec2_loop2->size[0] == ktree_data[(int)(k - 1.0) - 1].
                     f1->size[0]) {
                   b_k = b_kweig->size[0];
@@ -7427,7 +7426,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                   kweig_data = kweig->data;
                 }
 
-                /* 'gkmPWM:829' kweig(indvec2_loop1,iii) = kweig(indvec2_loop1,iii) + ktree2{k-1}; */
+                /* 'gkmPWM:839' kweig(indvec2_loop1,iii) = kweig(indvec2_loop1,iii) + ktree2{k-1}; */
                 if (indvec2_loop2->size[0] == ktree2_data[(int)(k - 1.0) - 1].
                     f1->size[0]) {
                   b_k = b_kweig->size[0];
@@ -7451,7 +7450,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
                   kweig_data = kweig->data;
                 }
 
-                /* 'gkmPWM:830' kweig(indvec_loop1,5-iii) = kweig(indvec_loop1,5-iii) + ktree2{k-1}; */
+                /* 'gkmPWM:840' kweig(indvec_loop1,5-iii) = kweig(indvec_loop1,5-iii) + ktree2{k-1}; */
                 if (indvec_loop2->size[0] == ktree2_data[(int)(k - 1.0) - 1].
                     f1->size[0]) {
                   b_k = b_kweig->size[0];
@@ -7478,13 +7477,13 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
             }
           }
         } else {
-          /* 'gkmPWM:834' else */
-          /* 'gkmPWM:835' for iii = 1:2 */
+          /* 'gkmPWM:844' else */
+          /* 'gkmPWM:845' for iii = 1:2 */
           c_tmp = pow(4.0, (double)(f + 1) - 1.0);
           b_c = b_n_tmp * (ind_data[ii] - 1.0);
           md2 = poscell_data[f].f1->size[0];
           for (iii = 0; iii < 2; iii++) {
-            /* 'gkmPWM:836' indvec_loop2 = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(ii)-1); */
+            /* 'gkmPWM:846' indvec_loop2 = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(ii)-1); */
             n = c_tmp * (((double)iii + 1.0) - 1.0);
             i = indvec_loop2->size[0];
             indvec_loop2->size[0] = poscell_data[f].f1->size[0];
@@ -7494,7 +7493,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               indvec_loop2_data[i] = (poscell_data[f].f1->data[i] + n) + b_c;
             }
 
-            /* 'gkmPWM:837' indvec2_loop2 = indvec_loop2+(5-2*iii)*4^(f-1); */
+            /* 'gkmPWM:847' indvec2_loop2 = indvec_loop2+(5-2*iii)*4^(f-1); */
             d = (5.0 - 2.0 * ((double)iii + 1.0)) * c_tmp;
             i = indvec2_loop2->size[0];
             indvec2_loop2->size[0] = indvec_loop2->size[0];
@@ -7505,7 +7504,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               indvec2_loop2_data[i] = indvec_loop2_data[i] + d;
             }
 
-            /* 'gkmPWM:838' kweig(indvec_loop2,iii) = kweig(indvec_loop2,iii) + ktree{k-1}; */
+            /* 'gkmPWM:848' kweig(indvec_loop2,iii) = kweig(indvec_loop2,iii) + ktree{k-1}; */
             if (indvec_loop2->size[0] == ktree_data[(int)(k - 1.0) - 1].f1->
                 size[0]) {
               i = b_kweig->size[0];
@@ -7528,7 +7527,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               kweig_data = kweig->data;
             }
 
-            /* 'gkmPWM:839' kweig(indvec2_loop2,5-iii) = kweig(indvec2_loop2,5-iii) + ktree{k-1}; */
+            /* 'gkmPWM:849' kweig(indvec2_loop2,5-iii) = kweig(indvec2_loop2,5-iii) + ktree{k-1}; */
             if (indvec2_loop2->size[0] == ktree_data[(int)(k - 1.0) - 1]
                 .f1->size[0]) {
               i = b_kweig->size[0];
@@ -7552,7 +7551,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               kweig_data = kweig->data;
             }
 
-            /* 'gkmPWM:840' kweig(indvec2_loop2,iii) = kweig(indvec2_loop2,iii) + ktree2{k-1}; */
+            /* 'gkmPWM:850' kweig(indvec2_loop2,iii) = kweig(indvec2_loop2,iii) + ktree2{k-1}; */
             if (indvec2_loop2->size[0] == ktree2_data[(int)(k - 1.0) - 1]
                 .f1->size[0]) {
               i = b_kweig->size[0];
@@ -7576,7 +7575,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
               kweig_data = kweig->data;
             }
 
-            /* 'gkmPWM:841' kweig(indvec_loop2,5-iii) = kweig(indvec_loop2,5-iii) + ktree2{k-1}; */
+            /* 'gkmPWM:851' kweig(indvec_loop2,5-iii) = kweig(indvec_loop2,5-iii) + ktree2{k-1}; */
             if (indvec_loop2->size[0] == ktree2_data[(int)(k - 1.0) - 1]
                 .f1->size[0]) {
               i = b_kweig->size[0];
@@ -7620,7 +7619,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
   emxFree_cell_wrap_14(&ktree2);
   emxFree_cell_wrap_14(&ktree);
 
-  /* 'gkmPWM:847' kweig(4^k*(max(max(x))-rcnum)+1:end,:) = kweig(4^k*(max(max(x))-rcnum)+1:end,:)/sqrt(2); */
+  /* 'gkmPWM:857' kweig(4^k*(max(max(x))-rcnum)+1:end,:) = kweig(4^k*(max(max(x))-rcnum)+1:end,:)/sqrt(2); */
   d = b_n_tmp * (n_tmp - rcnum) + 1.0;
   if (d > kweig->size[0]) {
     i = 0;
@@ -7729,14 +7728,14 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
 
   /* uses dynamic programming to find the matrix A (kweig in this code) such that A*p = expected gapped kmer vector, where p is the middle column of a 2*l-1 PWM. */
   /* I use a 1st order Markov model to model the flanking bases for a PWM */
-  /* 'gkmPWM:854' p = cell(l,1); */
+  /* 'gkmPWM:864' p = cell(l,1); */
   i = p->size[0];
   p->size[0] = (int)l;
   emxEnsureCapacity_cell_wrap_13(p, i);
   p_data = p->data;
 
-  /* 'gkmPWM:855' p = coder.nullcopy(p); */
-  /* 'gkmPWM:856' p{1} = eye(4); */
+  /* 'gkmPWM:865' p = coder.nullcopy(p); */
+  /* 'gkmPWM:866' p{1} = eye(4); */
   for (i = 0; i < 16; i++) {
     p_data[0].f1[i] = 0.0;
   }
@@ -7746,10 +7745,10 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
   p_data[0].f1[10] = 1.0;
   p_data[0].f1[15] = 1.0;
 
-  /* 'gkmPWM:857' for i = 1:l-1 */
+  /* 'gkmPWM:867' for i = 1:l-1 */
   i = (int)(l - 1.0);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:858' p{i+1} = p{i}*negmat; */
+    /* 'gkmPWM:868' p{i+1} = p{i}*negmat; */
     for (b_k = 0; b_k < 4; b_k++) {
       for (ni = 0; ni < 4; ni++) {
         n = ni << 2;
@@ -7766,7 +7765,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
 
   emxInit_real_T(&indvec, 2);
 
-  /* 'gkmPWM:860' n = 4^k*max(max(x)); */
+  /* 'gkmPWM:870' n = 4^k*max(max(x)); */
   m = x->size[0];
   n = x->size[1];
   i = indvec->size[0] * indvec->size[1];
@@ -7809,8 +7808,8 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
   b_n *= n_tmp;
 
   /* number of possible k-mers */
-  /* 'gkmPWM:861' mat2 = rot90(mat,2); */
-  /* 'gkmPWM:862' kweig = zeros(n, 4); */
+  /* 'gkmPWM:871' mat2 = rot90(mat,2); */
+  /* 'gkmPWM:872' kweig = zeros(n, 4); */
   i = kweig->size[0] * kweig->size[1];
   kweig->size[0] = (int)b_n;
   kweig->size[1] = 4;
@@ -7823,7 +7822,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
 
   emxInit_cell_wrap_14(&ktree);
 
-  /* 'gkmPWM:863' ktree = cell(k-1,1); */
+  /* 'gkmPWM:873' ktree = cell(k-1,1); */
   n = (int)(k - 1.0);
   i = ktree->size[0];
   ktree->size[0] = (int)(k - 1.0);
@@ -7835,15 +7834,15 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
 
   emxInit_uint32_T(&X);
 
-  /* 'gkmPWM:864' ktree = coder.nullcopy(ktree); */
-  /* 'gkmPWM:865' [rx,cx] = size(x); */
+  /* 'gkmPWM:874' ktree = coder.nullcopy(ktree); */
+  /* 'gkmPWM:875' [rx,cx] = size(x); */
   rx = x->size[0];
 
-  /* 'gkmPWM:866' m=rx; */
+  /* 'gkmPWM:876' m=rx; */
   m = x->size[0];
 
-  /* 'gkmPWM:867' M = l-1; */
-  /* 'gkmPWM:868' X = cx*ones(M+1,1); */
+  /* 'gkmPWM:877' M = l-1; */
+  /* 'gkmPWM:878' X = cx*ones(M+1,1); */
   loop_ub_tmp = (int)((l - 1.0) + 1.0);
   i = X->size[0];
   X->size[0] = (int)((l - 1.0) + 1.0);
@@ -7853,16 +7852,16 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
     X_data[i] = (unsigned int)x->size[1];
   }
 
-  /* 'gkmPWM:869' for i = 1:cx */
+  /* 'gkmPWM:879' for i = 1:cx */
   i = x->size[1];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:870' X(i) = i; */
+    /* 'gkmPWM:880' X(i) = i; */
     X_data[b_i] = (unsigned int)(b_i + 1);
   }
 
   emxInit_real_T(&indloc2, 1);
 
-  /* 'gkmPWM:872' indloc2 = flipud(indloc); */
+  /* 'gkmPWM:882' indloc2 = flipud(indloc); */
   i = indloc2->size[0];
   indloc2->size[0] = indloc->size[0];
   emxEnsureCapacity_real_T(indloc2, i);
@@ -7881,9 +7880,9 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
     indloc2_data[ni] = b_n;
   }
 
-  /* 'gkmPWM:873' for i = 2:5 */
+  /* 'gkmPWM:883' for i = 2:5 */
   for (b_i = 0; b_i < 4; b_i++) {
-    /* 'gkmPWM:874' ktree{i} = zeros(4^i,1); */
+    /* 'gkmPWM:884' ktree{i} = zeros(4^i,1); */
     n = (int)pow(4.0, (double)b_i + 2.0);
     i = ktree_data[b_i + 1].f1->size[0];
     ktree_data[b_i + 1].f1->size[0] = n;
@@ -7893,7 +7892,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
     }
   }
 
-  /* 'gkmPWM:876' for i = 0:M */
+  /* 'gkmPWM:886' for i = 0:M */
   emxInit_int32_T(&f1, 2);
   emxInit_real_T(&sPWM, 2);
   emxInit_real_T(&a, 2);
@@ -7902,9 +7901,9 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
   emxInit_boolean_T(&b_x, 2);
   emxInit_real_T(&b_kweig, 1);
   for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-    /* 'gkmPWM:877' if i > M-cx+1 */
+    /* 'gkmPWM:887' if i > M-cx+1 */
     if (b_i > ((l - 1.0) - (double)x->size[1]) + 1.0) {
-      /* 'gkmPWM:878' m = length(c); */
+      /* 'gkmPWM:888' m = length(c); */
       if ((c->size[0] == 0) || (c->size[1] == 0)) {
         m = 0;
       } else {
@@ -7917,9 +7916,9 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
     }
 
     /* the following loops is basically dynamic programming for tensor multiplication.  there are multiple cases to consider, hence the if statements. */
-    /* 'gkmPWM:881' for ii = 1:m */
+    /* 'gkmPWM:891' for ii = 1:m */
     for (ii = 0; ii < m; ii++) {
-      /* 'gkmPWM:882' if sum((c(ii,:)+i)==l) > 0 && ~(i == M-1 && ii > rx && ii ~= m) */
+      /* 'gkmPWM:892' if sum((c(ii,:)+i)==l) > 0 && ~(i == M-1 && ii > rx && ii ~= m) */
       md2 = c->size[1];
       i = b_x->size[0] * b_x->size[1];
       b_x->size[0] = 1;
@@ -7942,7 +7941,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
 
       if ((md2 > 0) && ((b_i != (l - 1.0) - 1.0) || (ii + 1 <= rx) || (ii + 1 ==
             m))) {
-        /* 'gkmPWM:883' indvec = c(ii,:)+i; */
+        /* 'gkmPWM:893' indvec = c(ii,:)+i; */
         md2 = c->size[1];
         i = indvec->size[0] * indvec->size[1];
         indvec->size[0] = 1;
@@ -7953,8 +7952,8 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
           indvec_data[i] = c_data[ii + c->size[0] * i] + (double)b_i;
         }
 
-        /* 'gkmPWM:884' coder.varsize('f', [1 1]); */
-        /* 'gkmPWM:885' f1 = find(indvec == l); */
+        /* 'gkmPWM:894' coder.varsize('f', [1 1]); */
+        /* 'gkmPWM:895' f1 = find(indvec == l); */
         i = b_x->size[0] * b_x->size[1];
         b_x->size[0] = 1;
         b_x->size[1] = indvec->size[1];
@@ -7968,21 +7967,21 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
         eml_find(b_x, f1);
         f1_data = f1->data;
 
-        /* 'gkmPWM:886' if length(f1) == 0 */
+        /* 'gkmPWM:896' if length(f1) == 0 */
         if (f1->size[1] == 0) {
-          /* 'gkmPWM:887' f = zeros(1,1); */
+          /* 'gkmPWM:897' f = zeros(1,1); */
           f = -1;
 
-          /* 'gkmPWM:888' fprintf("Resizing f\n"); */
+          /* 'gkmPWM:898' fprintf("Resizing f\n"); */
           printf("Resizing f\n");
           fflush(stdout);
         } else {
-          /* 'gkmPWM:889' else */
-          /* 'gkmPWM:890' f = f1(1); */
+          /* 'gkmPWM:899' else */
+          /* 'gkmPWM:900' f = f1(1); */
           f = f1_data[0] - 1;
         }
 
-        /* 'gkmPWM:892' indvec(f) = []; */
+        /* 'gkmPWM:902' indvec(f) = []; */
         idx = f + 1;
         n = indvec->size[1];
         md2 = indvec->size[1] - 1;
@@ -8000,9 +7999,9 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
         emxEnsureCapacity_real_T(indvec, i);
         indvec_data = indvec->data;
 
-        /* 'gkmPWM:893' loc = indloc(indvec); */
-        /* 'gkmPWM:894' loc2 = indloc2(indvec); */
-        /* 'gkmPWM:895' sPWM = mat(indvec,:).'; */
+        /* 'gkmPWM:903' loc = indloc(indvec); */
+        /* 'gkmPWM:904' loc2 = indloc2(indvec); */
+        /* 'gkmPWM:905' sPWM = mat(indvec,:).'; */
         i = sPWM->size[0] * sPWM->size[1];
         sPWM->size[0] = 4;
         sPWM->size[1] = indvec->size[1];
@@ -8017,7 +8016,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
           sPWM_data[4 * i + 3] = mat_data[n + mat->size[0] * 3];
         }
 
-        /* 'gkmPWM:896' ktree{1} = sPWM(:,1); */
+        /* 'gkmPWM:906' ktree{1} = sPWM(:,1); */
         i = ktree_data[0].f1->size[0];
         ktree_data[0].f1->size[0] = 4;
         emxEnsureCapacity_real_T(ktree_data[0].f1, i);
@@ -8026,25 +8025,25 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
         ktree_data[0].f1->data[2] = sPWM_data[2];
         ktree_data[0].f1->data[3] = sPWM_data[3];
 
-        /* 'gkmPWM:897' for iii = s(ii,i+1):k-1 */
+        /* 'gkmPWM:907' for iii = s(ii,i+1):k-1 */
         d = s_data[ii + s->size[0] * b_i];
         i = (int)((k - 1.0) + (1.0 - d));
         for (iii = 0; iii < i; iii++) {
           b_n = d + (double)iii;
 
-          /* 'gkmPWM:898' if loc(iii)==0 */
+          /* 'gkmPWM:908' if loc(iii)==0 */
           b_k = (int)indvec_data[(int)b_n - 1] - 1;
           if (indloc_data[b_k] == 0.0) {
-            /* 'gkmPWM:899' if loc(iii-1)==1 && indvec(iii-1) < l */
+            /* 'gkmPWM:909' if loc(iii-1)==1 && indvec(iii-1) < l */
             if ((indloc_data[(int)indvec_data[(int)(b_n - 1.0) - 1] - 1] == 1.0)
                 && ((unsigned int)indvec_data[(int)(b_n - 1.0) - 1] < l)) {
-              /* 'gkmPWM:900' matt = sPWM(:,iii).'*p{indvec(iii)-l}; */
+              /* 'gkmPWM:910' matt = sPWM(:,iii).'*p{indvec(iii)-l}; */
               for (b_k = 0; b_k < 16; b_k++) {
                 b_p[b_k] = p_data[(int)((double)(unsigned int)indvec_data[(int)
                   b_n - 1] - l) - 1].f1[b_k];
               }
 
-              /* 'gkmPWM:901' ktree{iii} = repmat(ktree{iii-1},4,1).*repelem(matt', 4^(iii-1)); */
+              /* 'gkmPWM:911' ktree{iii} = repmat(ktree{iii-1},4,1).*repelem(matt', 4^(iii-1)); */
               b_k = b_indvec->size[0];
               b_indvec->size[0] = ktree_data[(int)(b_n - 1.0) - 1].f1->size[0] <<
                 2;
@@ -8092,9 +8091,9 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                 ktree_data = ktree->data;
               }
             } else {
-              /* 'gkmPWM:902' else */
-              /* 'gkmPWM:903' matt = p{indvec(iii)-indvec(iii-1)+1}; */
-              /* 'gkmPWM:904' ktree{iii} = repmat(ktree{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2)); */
+              /* 'gkmPWM:912' else */
+              /* 'gkmPWM:913' matt = p{indvec(iii)-indvec(iii-1)+1}; */
+              /* 'gkmPWM:914' ktree{iii} = repmat(ktree{iii-1}, 4, 1).*repelem(matt(:), 4^(iii-2)); */
               b_k = b_indvec->size[0];
               b_indvec->size[0] = ktree_data[(int)(b_n - 1.0) - 1].f1->size[0] <<
                 2;
@@ -8141,11 +8140,11 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
               }
             }
           } else if (indloc2_data[b_k] == 0.0) {
-            /* 'gkmPWM:906' elseif loc2(iii)==0 */
-            /* 'gkmPWM:907' if loc2(iii-1)==1 && indvec(iii-1) < l */
+            /* 'gkmPWM:916' elseif loc2(iii)==0 */
+            /* 'gkmPWM:917' if loc2(iii-1)==1 && indvec(iii-1) < l */
             if ((indloc2_data[(int)indvec_data[(int)(b_n - 1.0) - 1] - 1] == 1.0)
                 && ((unsigned int)indvec_data[(int)(b_n - 1.0) - 1] < l)) {
-              /* 'gkmPWM:908' a = ktree{iii-1}.*sPWM(:,iii).'; */
+              /* 'gkmPWM:918' a = ktree{iii-1}.*sPWM(:,iii).'; */
               b_k = a->size[0] * a->size[1];
               a->size[0] = ktree_data[(int)(b_n - 1.0) - 1].f1->size[0];
               a->size[1] = 4;
@@ -8159,7 +8158,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                 }
               }
 
-              /* 'gkmPWM:909' ktree{iii} = a(:); */
+              /* 'gkmPWM:919' ktree{iii} = a(:); */
               b_k = ktree_data[(int)b_n - 1].f1->size[0];
               ktree_data[(int)b_n - 1].f1->size[0] = a->size[0] << 2;
               emxEnsureCapacity_real_T(ktree_data[(int)b_n - 1].f1, b_k);
@@ -8168,8 +8167,8 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                 ktree_data[(int)b_n - 1].f1->data[b_k] = a_data[b_k];
               }
             } else {
-              /* 'gkmPWM:910' else */
-              /* 'gkmPWM:911' a = ktree{iii-1}.*sPWM(:,iii).'; */
+              /* 'gkmPWM:920' else */
+              /* 'gkmPWM:921' a = ktree{iii-1}.*sPWM(:,iii).'; */
               b_k = a->size[0] * a->size[1];
               a->size[0] = ktree_data[(int)(b_n - 1.0) - 1].f1->size[0];
               a->size[1] = 4;
@@ -8183,7 +8182,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                 }
               }
 
-              /* 'gkmPWM:912' ktree{iii} = a(:); */
+              /* 'gkmPWM:922' ktree{iii} = a(:); */
               b_k = ktree_data[(int)b_n - 1].f1->size[0];
               ktree_data[(int)b_n - 1].f1->size[0] = a->size[0] << 2;
               emxEnsureCapacity_real_T(ktree_data[(int)b_n - 1].f1, b_k);
@@ -8193,8 +8192,8 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
               }
             }
           } else {
-            /* 'gkmPWM:914' else */
-            /* 'gkmPWM:915' a = ktree{iii-1}.*sPWM(:,iii).'; */
+            /* 'gkmPWM:924' else */
+            /* 'gkmPWM:925' a = ktree{iii-1}.*sPWM(:,iii).'; */
             b_k = a->size[0] * a->size[1];
             a->size[0] = ktree_data[(int)(b_n - 1.0) - 1].f1->size[0];
             a->size[1] = 4;
@@ -8208,7 +8207,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
               }
             }
 
-            /* 'gkmPWM:916' ktree{iii} = a(:); */
+            /* 'gkmPWM:926' ktree{iii} = a(:); */
             b_k = ktree_data[(int)b_n - 1].f1->size[0];
             ktree_data[(int)b_n - 1].f1->size[0] = a->size[0] << 2;
             emxEnsureCapacity_real_T(ktree_data[(int)b_n - 1].f1, b_k);
@@ -8220,20 +8219,20 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
         }
 
         /* the weird indexing that I did early in the code comes to fruition.  It is critical to do so to make this computation as fast as possible. */
-        /* 'gkmPWM:920' if ii <= rx */
+        /* 'gkmPWM:930' if ii <= rx */
         if (ii + 1 <= rx) {
-          /* 'gkmPWM:921' for j = 1:X(i+1) */
+          /* 'gkmPWM:931' for j = 1:X(i+1) */
           i = (int)X_data[b_i];
           for (j = 0; j < i; j++) {
-            /* 'gkmPWM:922' if x(ii,j) ~= 0 */
+            /* 'gkmPWM:932' if x(ii,j) ~= 0 */
             d = x_data[ii + x->size[0] * j];
             if (d != 0.0) {
-              /* 'gkmPWM:923' for iii = 1:2 */
+              /* 'gkmPWM:933' for iii = 1:2 */
               varargin_1 = pow(4.0, (double)(f + 1) - 1.0);
               b_c = n_tmp * (ind_data[(int)d - 1] - 1.0);
               md2 = poscell_data[f].f1->size[0];
               for (iii = 0; iii < 2; iii++) {
-                /* 'gkmPWM:924' indvec = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(x(ii,j))-1); */
+                /* 'gkmPWM:934' indvec = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(x(ii,j))-1); */
                 b_n = varargin_1 * (((double)iii + 1.0) - 1.0);
                 b_k = b_indvec->size[0];
                 b_indvec->size[0] = poscell_data[f].f1->size[0];
@@ -8244,7 +8243,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                     b_c;
                 }
 
-                /* 'gkmPWM:925' indvec2 = indvec+(5-2*iii)*4^(f-1); */
+                /* 'gkmPWM:935' indvec2 = indvec+(5-2*iii)*4^(f-1); */
                 d = (5.0 - 2.0 * ((double)iii + 1.0)) * varargin_1;
                 b_k = indvec2->size[0];
                 indvec2->size[0] = b_indvec->size[0];
@@ -8255,7 +8254,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                   indvec2_data[b_k] = b_indvec_data[b_k] + d;
                 }
 
-                /* 'gkmPWM:926' kweig(indvec,iii) = kweig(indvec,iii) + ktree{k-1}; */
+                /* 'gkmPWM:936' kweig(indvec,iii) = kweig(indvec,iii) + ktree{k-1}; */
                 if (b_indvec->size[0] == ktree_data[(int)(k - 1.0) - 1].f1->
                     size[0]) {
                   b_k = b_kweig->size[0];
@@ -8279,7 +8278,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
                   kweig_data = kweig->data;
                 }
 
-                /* 'gkmPWM:927' kweig(indvec2,5-iii) = kweig(indvec2,5-iii) + ktree{k-1}; */
+                /* 'gkmPWM:937' kweig(indvec2,5-iii) = kweig(indvec2,5-iii) + ktree{k-1}; */
                 if (indvec2->size[0] == ktree_data[(int)(k - 1.0) - 1].f1->size
                     [0]) {
                   b_k = b_kweig->size[0];
@@ -8306,13 +8305,13 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
             }
           }
         } else {
-          /* 'gkmPWM:931' else */
-          /* 'gkmPWM:932' for iii = 1:2 */
+          /* 'gkmPWM:941' else */
+          /* 'gkmPWM:942' for iii = 1:2 */
           varargin_1 = pow(4.0, (double)(f + 1) - 1.0);
           b_c = n_tmp * (ind_data[ii] - 1.0);
           md2 = poscell_data[f].f1->size[0];
           for (iii = 0; iii < 2; iii++) {
-            /* 'gkmPWM:933' indvec = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(ii)-1); */
+            /* 'gkmPWM:943' indvec = poscell{f}+4^(f-1)*(iii-1)+4^k*(ind(ii)-1); */
             b_n = varargin_1 * (((double)iii + 1.0) - 1.0);
             i = b_indvec->size[0];
             b_indvec->size[0] = poscell_data[f].f1->size[0];
@@ -8322,7 +8321,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
               b_indvec_data[i] = (poscell_data[f].f1->data[i] + b_n) + b_c;
             }
 
-            /* 'gkmPWM:934' indvec2 = indvec+(5-2*iii)*4^(f-1); */
+            /* 'gkmPWM:944' indvec2 = indvec+(5-2*iii)*4^(f-1); */
             d = (5.0 - 2.0 * ((double)iii + 1.0)) * varargin_1;
             i = indvec2->size[0];
             indvec2->size[0] = b_indvec->size[0];
@@ -8333,7 +8332,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
               indvec2_data[i] = b_indvec_data[i] + d;
             }
 
-            /* 'gkmPWM:935' kweig(indvec,iii) = kweig(indvec,iii) + ktree{k-1}; */
+            /* 'gkmPWM:945' kweig(indvec,iii) = kweig(indvec,iii) + ktree{k-1}; */
             if (b_indvec->size[0] == ktree_data[(int)(k - 1.0) - 1].f1->size[0])
             {
               i = b_kweig->size[0];
@@ -8356,7 +8355,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
               kweig_data = kweig->data;
             }
 
-            /* 'gkmPWM:936' kweig(indvec2,5-iii) = kweig(indvec2,5-iii) + ktree{k-1}; */
+            /* 'gkmPWM:946' kweig(indvec2,5-iii) = kweig(indvec2,5-iii) + ktree{k-1}; */
             if (indvec2->size[0] == ktree_data[(int)(k - 1.0) - 1].f1->size[0])
             {
               i = b_kweig->size[0];
@@ -8684,26 +8683,26 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   bool y;
   bool *x_data;
 
-  /* 'gkmPWM:198' fid = fopen(fn, 'r'); */
+  /* 'gkmPWM:208' fid = fopen(fn, 'r'); */
   fileid = cfopen(fn, "rb");
 
   /*  a = textscan(fid, '%s\t%f\n'); */
-  /* 'gkmPWM:201' curr_pos = ftell(fid); */
+  /* 'gkmPWM:211' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
 
-  /* 'gkmPWM:202' idx=0; */
+  /* 'gkmPWM:212' idx=0; */
   idx = 0.0;
 
-  /* 'gkmPWM:203' while ~feof(fid) */
+  /* 'gkmPWM:213' while ~feof(fid) */
   emxInit_char_T(&b_fileid, 2);
   do {
     exitg1 = 0;
     d = b_feof(fileid);
     if (d == 0.0) {
-      /* 'gkmPWM:204' idx=idx+1; */
+      /* 'gkmPWM:214' idx=idx+1; */
       idx++;
 
-      /* 'gkmPWM:205' fgetl(fid); */
+      /* 'gkmPWM:215' fgetl(fid); */
       b_fgets(fileid, b_fileid);
     } else {
       exitg1 = 1;
@@ -8713,10 +8712,10 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   emxFree_char_T(&b_fileid);
   emxInit_cell_wrap_0(&sequences, 1);
 
-  /* 'gkmPWM:207' fseek(fid, curr_pos, 'bof'); */
+  /* 'gkmPWM:217' fseek(fid, curr_pos, 'bof'); */
   b_fseek(fileid, curr_pos);
 
-  /* 'gkmPWM:208' sequences = cell(idx, 1); */
+  /* 'gkmPWM:218' sequences = cell(idx, 1); */
   unnamed_idx_0_tmp_tmp = (int)idx;
   i = sequences->size[0];
   sequences->size[0] = (int)idx;
@@ -8729,8 +8728,8 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   emxInit_real_T(&alpha, 1);
 
-  /* 'gkmPWM:209' sequences = coder.nullcopy(sequences); */
-  /* 'gkmPWM:210' alpha = zeros(idx, 1); */
+  /* 'gkmPWM:219' sequences = coder.nullcopy(sequences); */
+  /* 'gkmPWM:220' alpha = zeros(idx, 1); */
   i = alpha->size[0];
   alpha->size[0] = (int)idx;
   emxEnsureCapacity_real_T(alpha, i);
@@ -8739,17 +8738,17 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
     alpha_data[i] = 0.0;
   }
 
-  /* 'gkmPWM:211' for cur_idx=1:idx */
+  /* 'gkmPWM:221' for cur_idx=1:idx */
   cur_idx = 0;
   emxInit_char_T(&cur_line, 2);
   emxInit_char_T(&cur_seq, 2);
   emxInit_char_T(&cur_alpha, 2);
   exitg2 = false;
   while ((!exitg2) && (cur_idx <= (int)idx - 1)) {
-    /* 'gkmPWM:212' cur_line = fgetl(fid); */
+    /* 'gkmPWM:222' cur_line = fgetl(fid); */
     fgetl(fileid, cur_line);
 
-    /* 'gkmPWM:213' if cur_line == -1 */
+    /* 'gkmPWM:223' if cur_line == -1 */
     y = (cur_line->size[1] != 0);
     if (y) {
       y = (0 > cur_line->size[1] - 1);
@@ -8758,14 +8757,14 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
     if (y) {
       exitg2 = true;
     } else {
-      /* 'gkmPWM:216' [cur_seq, cur_alpha] = strtok(cur_line, char(9)); */
+      /* 'gkmPWM:226' [cur_seq, cur_alpha] = strtok(cur_line, char(9)); */
       b_strtok(cur_line, cur_seq, cur_alpha);
 
-      /* 'gkmPWM:217' alpha(cur_idx,1) = real(str2double(cur_alpha)); */
+      /* 'gkmPWM:227' alpha(cur_idx,1) = real(str2double(cur_alpha)); */
       dc = str2double(cur_alpha);
       alpha_data[cur_idx] = dc.re;
 
-      /* 'gkmPWM:218' sequences{cur_idx} = (strip(cur_seq)); */
+      /* 'gkmPWM:228' sequences{cur_idx} = (strip(cur_seq)); */
       strip(cur_seq, sequences_data[cur_idx].f1);
       cur_idx++;
     }
@@ -8777,12 +8776,12 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   emxInit_real_T(&M, 1);
   emxInit_int32_T(&D, 1);
 
-  /* 'gkmPWM:220' fclose(fid); */
+  /* 'gkmPWM:230' fclose(fid); */
   cfclose(fileid);
 
   /*  [w, ind] = sort(a{2}, pn); */
   /*  s = a{1}(ind(1:min([100000 length(a{1})]))); */
-  /* 'gkmPWM:225' [w, ind] = sort(alpha, pn); */
+  /* 'gkmPWM:235' [w, ind] = sort(alpha, pn); */
   sort(alpha, D);
   D_data = D->data;
   alpha_data = alpha->data;
@@ -8797,11 +8796,11 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   emxInit_cell_wrap_0(&s, 1);
 
-  /* 'gkmPWM:226' s_len = min([100000 length(sequences)]); */
+  /* 'gkmPWM:236' s_len = min([100000 length(sequences)]); */
   m[0] = 100000.0;
   m[1] = sequences->size[0];
 
-  /* 'gkmPWM:227' s = cell(s_len, 1); */
+  /* 'gkmPWM:237' s = cell(s_len, 1); */
   unnamed_idx_0_tmp_tmp = (int)b_minimum(m);
   i = s->size[0];
   s->size[0] = unnamed_idx_0_tmp_tmp;
@@ -8812,10 +8811,10 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
     s_data[i].f1->size[1] = 0;
   }
 
-  /* 'gkmPWM:228' s = coder.nullcopy(s); */
-  /* 'gkmPWM:229' for cur_idx=1:s_len */
+  /* 'gkmPWM:238' s = coder.nullcopy(s); */
+  /* 'gkmPWM:239' for cur_idx=1:s_len */
   for (cur_idx = 0; cur_idx < unnamed_idx_0_tmp_tmp; cur_idx++) {
-    /* 'gkmPWM:230' s{cur_idx} = sequences{ind(cur_idx)}; */
+    /* 'gkmPWM:240' s{cur_idx} = sequences{ind(cur_idx)}; */
     i = s_data[cur_idx].f1->size[0] * s_data[cur_idx].f1->size[1];
     s_data[cur_idx].f1->size[0] = 1;
     s_data[cur_idx].f1->size[1] = sequences_data[(int)M_data[cur_idx] - 1]
@@ -8830,15 +8829,15 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   emxInit_cell_wrap_0(&b_p, 1);
 
-  /* 'gkmPWM:234' l = length(s{1}); */
+  /* 'gkmPWM:244' l = length(s{1}); */
   varargin_2 = s_data[0].f1->size[1] - 1;
   l = s_data[0].f1->size[1] - 4;
 
-  /* 'gkmPWM:235' k = round(l/2)+1; */
+  /* 'gkmPWM:245' k = round(l/2)+1; */
   x = (int)rt_roundd((double)s_data[0].f1->size[1] / 2.0);
 
-  /* 'gkmPWM:236' ikl = length(ik); */
-  /* 'gkmPWM:237' p = cell(num,1); */
+  /* 'gkmPWM:246' ikl = length(ik); */
+  /* 'gkmPWM:247' p = cell(num,1); */
   unnamed_idx_0_tmp_tmp = (int)num;
   i = b_p->size[0];
   b_p->size[0] = (int)num;
@@ -8849,16 +8848,16 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
     p_data[i].f1->size[1] = 0;
   }
 
-  /* 'gkmPWM:238' p = coder.nullcopy(p); */
+  /* 'gkmPWM:248' p = coder.nullcopy(p); */
   i = sequences->size[0];
   sequences->size[0] = b_p->size[0];
   emxEnsureCapacity_cell_wrap_0(sequences, i);
   sequences_data = sequences->data;
 
-  /* 'gkmPWM:239' c = ikl+1; */
+  /* 'gkmPWM:249' c = ikl+1; */
   *c = 1.0;
 
-  /* 'gkmPWM:240' p{1} = s{1}; */
+  /* 'gkmPWM:250' p{1} = s{1}; */
   i = sequences_data[0].f1->size[0] * sequences_data[0].f1->size[1];
   sequences_data[0].f1->size[0] = 1;
   sequences_data[0].f1->size[1] = s_data[0].f1->size[1];
@@ -8872,17 +8871,17 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   emxInit_cell_wrap_1(&b_mat);
   emxInit_cell_wrap_2(&b_pwms);
 
-  /* 'gkmPWM:241' mat = cell(ikl+num,1); */
+  /* 'gkmPWM:251' mat = cell(ikl+num,1); */
   i = b_mat->size[0];
   b_mat->size[0] = (int)num;
   emxEnsureCapacity_cell_wrap_1(b_mat, i);
   mat_data = b_mat->data;
 
-  /* 'gkmPWM:242' mat = coder.nullcopy(mat); */
+  /* 'gkmPWM:252' mat = coder.nullcopy(mat); */
   /*  mat(1:ikl) = ik; */
-  /* 'gkmPWM:244' for cur_idx=1:length(ik) */
-  /* 'gkmPWM:247' mat{c} = letterconvert(s{1}); */
-  /* 'gkmPWM:248' pwms = cell(num,1); */
+  /* 'gkmPWM:254' for cur_idx=1:length(ik) */
+  /* 'gkmPWM:257' mat{c} = letterconvert(s{1}); */
+  /* 'gkmPWM:258' pwms = cell(num,1); */
   i = b_pwms->size[0];
   b_pwms->size[0] = (int)num;
   emxEnsureCapacity_cell_wrap_2(b_pwms, i);
@@ -8896,10 +8895,10 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   letterconvert(s_data[0].f1, mat_data[0].f1);
 
-  /* 'gkmPWM:249' pwms = coder.nullcopy(pwms); */
-  /* 'gkmPWM:250' for i = 1:num */
+  /* 'gkmPWM:259' pwms = coder.nullcopy(pwms); */
+  /* 'gkmPWM:260' for i = 1:num */
   for (b_i = 0; b_i < unnamed_idx_0_tmp_tmp; b_i++) {
-    /* 'gkmPWM:251' pwms{i} = zeros(l,4); */
+    /* 'gkmPWM:261' pwms{i} = zeros(l,4); */
     i = pwms_data[b_i].f1->size[0] * pwms_data[b_i].f1->size[1];
     pwms_data[b_i].f1->size[0] = varargin_2 + 1;
     pwms_data[b_i].f1->size[1] = 4;
@@ -8910,42 +8909,42 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
     }
   }
 
-  /* 'gkmPWM:253' for i = 1:l */
+  /* 'gkmPWM:263' for i = 1:l */
   i = s_data[0].f1->size[1];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:254' pwms{1}(i,mat{c}(i)+1) = pwms{1}(i,mat{c}(i)+1)+w(i); */
+    /* 'gkmPWM:264' pwms{1}(i,mat{c}(i)+1) = pwms{1}(i,mat{c}(i)+1)+w(i); */
     d = mat_data[0].f1->data[b_i];
     pwms_data[0].f1->data[b_i + pwms_data[0].f1->size[0] * ((int)(d + 1.0) - 1)]
       += alpha_data[b_i];
   }
 
-  /* 'gkmPWM:256' B = zeros(9,1); */
-  /* 'gkmPWM:257' BB = zeros(9,1); */
+  /* 'gkmPWM:266' B = zeros(9,1); */
+  /* 'gkmPWM:267' BB = zeros(9,1); */
   for (b_i = 0; b_i < 9; b_i++) {
     B[b_i] = 0;
     BB[b_i] = 0;
   }
 
-  /* 'gkmPWM:258' B(1:5) = (0:4)'; */
-  /* 'gkmPWM:259' B(6:9) = 0; */
+  /* 'gkmPWM:268' B(1:5) = (0:4)'; */
+  /* 'gkmPWM:269' B(6:9) = 0; */
   B[5] = 0;
   B[6] = 0;
   B[7] = 0;
   B[8] = 0;
 
-  /* 'gkmPWM:260' BB(1:5) = 0; */
+  /* 'gkmPWM:270' BB(1:5) = 0; */
   for (b_i = 0; b_i < 5; b_i++) {
     B[b_i] = (signed char)b_i;
     BB[b_i] = 0;
   }
 
-  /* 'gkmPWM:261' BB(6:9) = (1:4)'; */
+  /* 'gkmPWM:271' BB(6:9) = (1:4)'; */
   BB[5] = 1;
   BB[6] = 2;
   BB[7] = 3;
   BB[8] = 4;
 
-  /* 'gkmPWM:262' CC = [l l-1 l-2 l-3 l-4 l-1 l-2 l-3 l-4]; */
+  /* 'gkmPWM:272' CC = [l l-1 l-2 l-3 l-4 l-1 l-2 l-3 l-4]; */
   CC[0] = s_data[0].f1->size[1];
   CC[1] = s_data[0].f1->size[1] - 1;
   CC[2] = s_data[0].f1->size[1] - 2;
@@ -8957,7 +8956,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   CC[8] = s_data[0].f1->size[1] - 4;
 
   /* this process picks kmers to seed the PWMs.  kmers that match one of the seeds by round(l/2)+1 or more are added that particular seed.  Otherwise, it becomes another seed. */
-  /* 'gkmPWM:264' for i = 2:100000 */
+  /* 'gkmPWM:274' for i = 2:100000 */
   b_i = 1;
   emxInit_real_T(&ss, 2);
   emxInit_real_T(&rs, 2);
@@ -8965,11 +8964,11 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   emxInit_boolean_T(&b_x, 2);
   exitg2 = false;
   while ((!exitg2) && (b_i - 1 < 99999)) {
-    /* 'gkmPWM:265' ss = letterconvert(s{i}); */
+    /* 'gkmPWM:275' ss = letterconvert(s{i}); */
     letterconvert(s_data[b_i].f1, ss);
     ss_data = ss->data;
 
-    /* 'gkmPWM:266' rs = 3-fliplr(ss); */
+    /* 'gkmPWM:276' rs = 3-fliplr(ss); */
     i = rs->size[0] * rs->size[1];
     rs->size[0] = 1;
     rs->size[1] = ss->size[1];
@@ -8990,7 +8989,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       rs_data[i] = 3.0 - rs_data[i];
     }
 
-    /* 'gkmPWM:267' M = zeros(c,1); */
+    /* 'gkmPWM:277' M = zeros(c,1); */
     loop_ub_tmp = (int)*c;
     i = M->size[0];
     M->size[0] = (int)*c;
@@ -9000,7 +8999,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       M_data[i] = 0.0;
     }
 
-    /* 'gkmPWM:268' D = zeros(c,1); */
+    /* 'gkmPWM:278' D = zeros(c,1); */
     i = D->size[0];
     D->size[0] = (int)*c;
     emxEnsureCapacity_int32_T(D, i);
@@ -9009,7 +9008,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       D_data[i] = 0;
     }
 
-    /* 'gkmPWM:269' DD = zeros(c,1); */
+    /* 'gkmPWM:279' DD = zeros(c,1); */
     i = DD->size[0];
     DD->size[0] = (int)*c;
     emxEnsureCapacity_int8_T(DD, i);
@@ -9018,9 +9017,9 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       DD_data[i] = 0;
     }
 
-    /* 'gkmPWM:270' for j = 1:c */
+    /* 'gkmPWM:280' for j = 1:c */
     for (j = 0; j < loop_ub_tmp; j++) {
-      /* 'gkmPWM:271' [m,d] = max([sum(mat{j}==ss) sum(mat{j}(2:end)==ss(1:l-1)) sum(mat{j}(3:end)==ss(1:l-2)) sum(mat{j}(4:end)==ss(1:l-3)) sum(mat{j}(5:end)==ss(1:l-4)) sum(mat{j}(1:l-1)==ss(2:end)) sum(mat{j}(1:l-2)==ss(3:end)) sum(mat{j}(1:l-3)==ss(4:end)) sum(mat{j}(1:l-4)==ss(5:end))]); */
+      /* 'gkmPWM:281' [m,d] = max([sum(mat{j}==ss) sum(mat{j}(2:end)==ss(1:l-1)) sum(mat{j}(3:end)==ss(1:l-2)) sum(mat{j}(4:end)==ss(1:l-3)) sum(mat{j}(5:end)==ss(1:l-4)) sum(mat{j}(1:l-1)==ss(2:end)) sum(mat{j}(1:l-2)==ss(3:end)) sum(mat{j}(1:l-3)==ss(4:end)) sum(mat{j}(1:l-4)==ss(5:end))]); */
       if (2 > mat_data[j].f1->size[1]) {
         i = 0;
         b_y = 0;
@@ -9366,7 +9365,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       h_y[8] = unnamed_idx_0_tmp_tmp;
       b_maximum(h_y, &curr_pos, &iindx);
 
-      /* 'gkmPWM:272' [mm,dd] = max([sum(mat{j}==rs) sum(mat{j}(2:end)==rs(1:l-1)) sum(mat{j}(3:end)==rs(1:l-2)) sum(mat{j}(4:end)==rs(1:l-3)) sum(mat{j}(5:end)==rs(1:l-4)) sum(mat{j}(1:l-1)==rs(2:end)) sum(mat{j}(1:l-2)==rs(3:end)) sum(mat{j}(1:l-3)==rs(4:end)) sum(mat{j}(1:l-4)==rs(5:end))]); */
+      /* 'gkmPWM:282' [mm,dd] = max([sum(mat{j}==rs) sum(mat{j}(2:end)==rs(1:l-1)) sum(mat{j}(3:end)==rs(1:l-2)) sum(mat{j}(4:end)==rs(1:l-3)) sum(mat{j}(5:end)==rs(1:l-4)) sum(mat{j}(1:l-1)==rs(2:end)) sum(mat{j}(1:l-2)==rs(3:end)) sum(mat{j}(1:l-3)==rs(4:end)) sum(mat{j}(1:l-4)==rs(5:end))]); */
       if (2 > mat_data[j].f1->size[1]) {
         i = 0;
         b_y = 0;
@@ -9712,34 +9711,34 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       h_y[8] = unnamed_idx_0_tmp_tmp;
       b_maximum(h_y, &idx, &unnamed_idx_0_tmp_tmp);
 
-      /* 'gkmPWM:273' [M(j),ddd] = max([m mm]); */
+      /* 'gkmPWM:283' [M(j),ddd] = max([m mm]); */
       m[0] = curr_pos;
       m[1] = idx;
       c_maximum(m, &M_data[j], &cur_idx);
 
-      /* 'gkmPWM:274' if ddd == 1 */
+      /* 'gkmPWM:284' if ddd == 1 */
       if (cur_idx == 1) {
-        /* 'gkmPWM:275' D(j) = d; */
+        /* 'gkmPWM:285' D(j) = d; */
         D_data[j] = iindx;
 
-        /* 'gkmPWM:276' DD(j) = 1; */
+        /* 'gkmPWM:286' DD(j) = 1; */
         DD_data[j] = 1;
       } else {
-        /* 'gkmPWM:277' else */
-        /* 'gkmPWM:278' D(j) = dd; */
+        /* 'gkmPWM:287' else */
+        /* 'gkmPWM:288' D(j) = dd; */
         D_data[j] = unnamed_idx_0_tmp_tmp;
 
-        /* 'gkmPWM:279' DD(j) = 2; */
+        /* 'gkmPWM:289' DD(j) = 2; */
         DD_data[j] = 2;
       }
     }
 
-    /* 'gkmPWM:282' if max(M) < k */
+    /* 'gkmPWM:292' if max(M) < k */
     if (maximum(M) < (double)x + 1.0) {
-      /* 'gkmPWM:283' c = c+1; */
+      /* 'gkmPWM:293' c = c+1; */
       (*c)++;
 
-      /* 'gkmPWM:284' p{c-ikl} = s{i}; */
+      /* 'gkmPWM:294' p{c-ikl} = s{i}; */
       i = sequences_data[(int)*c - 1].f1->size[0] * sequences_data[(int)*c - 1].
         f1->size[1];
       sequences_data[(int)*c - 1].f1->size[0] = 1;
@@ -9750,7 +9749,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
         sequences_data[(int)*c - 1].f1->data[i] = s_data[b_i].f1->data[i];
       }
 
-      /* 'gkmPWM:285' mat{c} = ss; */
+      /* 'gkmPWM:295' mat{c} = ss; */
       i = mat_data[(int)*c - 1].f1->size[0] * mat_data[(int)*c - 1].f1->size[1];
       mat_data[(int)*c - 1].f1->size[0] = 1;
       mat_data[(int)*c - 1].f1->size[1] = ss->size[1];
@@ -9760,7 +9759,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
         mat_data[(int)*c - 1].f1->data[i] = ss_data[i];
       }
 
-      /* 'gkmPWM:286' ss = ss+1; */
+      /* 'gkmPWM:296' ss = ss+1; */
       i = ss->size[0] * ss->size[1];
       ss->size[0] = 1;
       emxEnsureCapacity_real_T(ss, i);
@@ -9770,22 +9769,22 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
         ss_data[i]++;
       }
 
-      /* 'gkmPWM:287' for j = 1:l */
+      /* 'gkmPWM:297' for j = 1:l */
       for (j = 0; j <= varargin_2; j++) {
-        /* 'gkmPWM:288' pwms{c-ikl}(j,ss(j)) = pwms{c-ikl}(j,ss(j))+w(i); */
+        /* 'gkmPWM:298' pwms{c-ikl}(j,ss(j)) = pwms{c-ikl}(j,ss(j))+w(i); */
         i = (int)ss_data[j] - 1;
         pwms_data[(int)*c - 1].f1->data[j + pwms_data[(int)*c - 1].f1->size[0] *
           i] += alpha_data[b_i];
       }
     } else {
-      /* 'gkmPWM:290' else */
-      /* 'gkmPWM:291' [~,d] = max(M); */
+      /* 'gkmPWM:300' else */
+      /* 'gkmPWM:301' [~,d] = max(M); */
       d_maximum(M, &curr_pos, &iindx);
 
-      /* 'gkmPWM:292' if DD(d) == 1 && d > ikl */
+      /* 'gkmPWM:302' if DD(d) == 1 && d > ikl */
       i = DD_data[iindx - 1];
       if (i == 1) {
-        /* 'gkmPWM:293' ss = ss+1; */
+        /* 'gkmPWM:303' ss = ss+1; */
         i = ss->size[0] * ss->size[1];
         ss->size[0] = 1;
         emxEnsureCapacity_real_T(ss, i);
@@ -9795,20 +9794,20 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
           ss_data[i]++;
         }
 
-        /* 'gkmPWM:294' d = d-ikl; */
-        /* 'gkmPWM:295' for j = 1:CC(D(d)) */
+        /* 'gkmPWM:304' d = d-ikl; */
+        /* 'gkmPWM:305' for j = 1:CC(D(d)) */
         i = D_data[iindx - 1] - 1;
         b_y = CC[i];
         for (j = 0; j < b_y; j++) {
-          /* 'gkmPWM:296' pwms{d}(j+B(D(d)),ss(j+BB(D(d)))) = pwms{d}(j+B(D(d)),ss(j+BB(D(d))))+w(i); */
+          /* 'gkmPWM:306' pwms{d}(j+B(D(d)),ss(j+BB(D(d)))) = pwms{d}(j+B(D(d)),ss(j+BB(D(d))))+w(i); */
           unnamed_idx_0_tmp_tmp = (int)((unsigned int)j + B[i]);
           cur_idx = (int)ss_data[(int)((unsigned int)j + BB[i])] - 1;
           pwms_data[iindx - 1].f1->data[unnamed_idx_0_tmp_tmp + pwms_data[iindx
             - 1].f1->size[0] * cur_idx] += alpha_data[b_i];
         }
       } else if (i == 2) {
-        /* 'gkmPWM:298' elseif DD(d) == 2 && d > ikl */
-        /* 'gkmPWM:299' rs = rs+1; */
+        /* 'gkmPWM:308' elseif DD(d) == 2 && d > ikl */
+        /* 'gkmPWM:309' rs = rs+1; */
         i = rs->size[0] * rs->size[1];
         rs->size[0] = 1;
         emxEnsureCapacity_real_T(rs, i);
@@ -9818,12 +9817,12 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
           rs_data[i]++;
         }
 
-        /* 'gkmPWM:300' d = d-ikl; */
-        /* 'gkmPWM:301' for j = 1:CC(D(d)) */
+        /* 'gkmPWM:310' d = d-ikl; */
+        /* 'gkmPWM:311' for j = 1:CC(D(d)) */
         i = D_data[iindx - 1] - 1;
         b_y = CC[i];
         for (j = 0; j < b_y; j++) {
-          /* 'gkmPWM:302' pwms{d}(j+B(D(d)),rs(j+BB(D(d)))) = pwms{d}(j+B(D(d)),rs(j+BB(D(d))))+w(i); */
+          /* 'gkmPWM:312' pwms{d}(j+B(D(d)),rs(j+BB(D(d)))) = pwms{d}(j+B(D(d)),rs(j+BB(D(d))))+w(i); */
           unnamed_idx_0_tmp_tmp = (int)((unsigned int)j + B[i]);
           cur_idx = (int)rs_data[(int)((unsigned int)j + BB[i])] - 1;
           pwms_data[iindx - 1].f1->data[unnamed_idx_0_tmp_tmp + pwms_data[iindx
@@ -9832,7 +9831,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
       }
     }
 
-    /* 'gkmPWM:306' if c == num+ikl */
+    /* 'gkmPWM:316' if c == num+ikl */
     if (*c == num) {
       exitg2 = true;
     } else {
@@ -9850,15 +9849,15 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
   emxFree_real_T(&alpha);
 
   /*  mat = mat(1:c); */
-  /* 'gkmPWM:311' new_mat = cell(c, 1); */
-  /* 'gkmPWM:312' for cur_idx=1:c */
+  /* 'gkmPWM:321' new_mat = cell(c, 1); */
+  /* 'gkmPWM:322' for cur_idx=1:c */
   i = (int)*c;
   b_y = mat->size[0];
   mat->size[0] = (int)*c;
   emxEnsureCapacity_cell_wrap_1(mat, b_y);
   b_mat_data = mat->data;
   for (cur_idx = 0; cur_idx < i; cur_idx++) {
-    /* 'gkmPWM:313' new_mat{cur_idx} = mat{cur_idx}; */
+    /* 'gkmPWM:323' new_mat{cur_idx} = mat{cur_idx}; */
     b_y = b_mat_data[cur_idx].f1->size[0] * b_mat_data[cur_idx].f1->size[1];
     b_mat_data[cur_idx].f1->size[0] = 1;
     b_mat_data[cur_idx].f1->size[1] = mat_data[cur_idx].f1->size[1];
@@ -9871,18 +9870,18 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   emxFree_cell_wrap_1(&b_mat);
 
-  /* 'gkmPWM:315' mat = new_mat; */
+  /* 'gkmPWM:325' mat = new_mat; */
   /*  p = p(1:c-ikl); */
-  /* 'gkmPWM:318' p_len = c-ikl; */
-  /* 'gkmPWM:319' new_p = cell(p_len, 1); */
-  /* 'gkmPWM:320' for cur_idx=1:p_len */
+  /* 'gkmPWM:328' p_len = c-ikl; */
+  /* 'gkmPWM:329' new_p = cell(p_len, 1); */
+  /* 'gkmPWM:330' for cur_idx=1:p_len */
   b_y = p->size[0] * p->size[1];
   p->size[0] = (int)*c;
   p->size[1] = 1;
   emxEnsureCapacity_cell_wrap_0(p, b_y);
   p_data = p->data;
   for (cur_idx = 0; cur_idx < i; cur_idx++) {
-    /* 'gkmPWM:321' new_p{cur_idx} = p{cur_idx}; */
+    /* 'gkmPWM:331' new_p{cur_idx} = p{cur_idx}; */
     b_y = p_data[cur_idx].f1->size[0] * p_data[cur_idx].f1->size[1];
     p_data[cur_idx].f1->size[0] = 1;
     p_data[cur_idx].f1->size[1] = sequences_data[cur_idx].f1->size[1];
@@ -9895,17 +9894,17 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   emxFree_cell_wrap_0(&sequences);
 
-  /* 'gkmPWM:323' p = new_p; */
+  /* 'gkmPWM:333' p = new_p; */
   /*  pwms = pwms(1:c-ikl); */
-  /* 'gkmPWM:326' pwms_len = c-ikl; */
-  /* 'gkmPWM:327' new_pwms = cell(pwms_len, 1); */
-  /* 'gkmPWM:328' for cur_idx=1:pwms_len */
+  /* 'gkmPWM:336' pwms_len = c-ikl; */
+  /* 'gkmPWM:337' new_pwms = cell(pwms_len, 1); */
+  /* 'gkmPWM:338' for cur_idx=1:pwms_len */
   b_y = pwms->size[0];
   pwms->size[0] = (int)*c;
   emxEnsureCapacity_cell_wrap_2(pwms, b_y);
   b_pwms_data = pwms->data;
   for (cur_idx = 0; cur_idx < i; cur_idx++) {
-    /* 'gkmPWM:329' new_pwms{cur_idx} = pwms{cur_idx}; */
+    /* 'gkmPWM:339' new_pwms{cur_idx} = pwms{cur_idx}; */
     b_y = b_pwms_data[cur_idx].f1->size[0] * b_pwms_data[cur_idx].f1->size[1];
     b_pwms_data[cur_idx].f1->size[0] = pwms_data[cur_idx].f1->size[0];
     b_pwms_data[cur_idx].f1->size[1] = 4;
@@ -9918,12 +9917,12 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
 
   emxFree_cell_wrap_2(&b_pwms);
 
-  /* 'gkmPWM:331' pwms = new_pwms; */
-  /* 'gkmPWM:333' for i = 1:c-ikl */
+  /* 'gkmPWM:341' pwms = new_pwms; */
+  /* 'gkmPWM:343' for i = 1:c-ikl */
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:334' for j = 1:l */
+    /* 'gkmPWM:344' for j = 1:l */
     for (j = 0; j <= varargin_2; j++) {
-      /* 'gkmPWM:335' pwms{i}(j,:) = pwms{i}(j,:)/sum(pwms{i}(j,:)); */
+      /* 'gkmPWM:345' pwms{i}(j,:) = pwms{i}(j,:)/sum(pwms{i}(j,:)); */
       curr_pos = ((b_pwms_data[b_i].f1->data[j] + b_pwms_data[b_i].f1->data[j +
                    b_pwms_data[b_i].f1->size[0]]) + b_pwms_data[b_i].f1->data[j
                   + b_pwms_data[b_i].f1->size[0] * 2]) + b_pwms_data[b_i]
@@ -10298,9 +10297,10 @@ static void y_binary_expand_op(emxArray_real_T *b, const emxArray_real_T *A, int
  * function gkmPWM(varargin)
  */
 void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
-            double varargin_3, double varargin_4, double varargin_5, double
-            varargin_6, double varargin_7, double varargin_8, double varargin_9,
-            double varargin_10, double varargin_11)
+            const emxArray_char_T *varargin_3, double varargin_4, double
+            varargin_5, double varargin_6, double varargin_7, double varargin_8,
+            double varargin_9, double varargin_10, double varargin_11, double
+            varargin_12)
 {
   FILE* b_NULL;
   FILE* filestar;
@@ -10340,10 +10340,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   double startvec[4];
   double GCmat_tmp;
   double GCneg1;
+  double GCpos1;
   double c;
+  double pnr;
   double rcnum;
   double tmp;
-  double tot;
   double xtmp;
   double *c2_data;
   double *cfile_data;
@@ -10369,35 +10370,50 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   signed char fileid;
   char *b_varargin_1_data;
   char *charStr_data;
-  bool autoflush;
+  bool ipnr;
   if (!isInitialized_gkmPWM) {
     gkmPWM_initialize();
   }
 
   varargin_1_data = varargin_1->data;
+
+  /*  usage  gkmPWM(fileheader, wfile, mnum, num) */
+  /*  fileheader: everything before *svseq.fa */
+  /*  wfile: a list of kmer weights */
+  /*  memefile: memefile to identify motifs */
+  /*  mmun: the number of motifs to identify */
+  /*  num: number of iterations (I recommend at least 10*mnum) */
+  /* 'gkmPWM:8' if nargin < 4 */
+  /* 'gkmPWM:12' fileheader = varargin{1}; */
+  /* 'gkmPWM:13' wfile = varargin{2}; */
+  /* 'gkmPWM:14' memefile = varargin{3}; */
+  /* 'gkmPWM:15' mnum = varargin{4}; */
+  /* 'gkmPWM:16' num = varargin{5}; */
+  /* 'gkmPWM:17' rcorr = varargin{6}; */
+  /* 'gkmPWM:18' reg = varargin{7}; */
+  /* 'gkmPWM:19' l_svm = varargin{8}; */
+  /* 'gkmPWM:20' k_svm = varargin{9}; */
+  /* 'gkmPWM:21' BG_GC = varargin{10}; */
+  /* 'gkmPWM:22' RC = varargin{11}; */
+  /* 'gkmPWM:23' pnr = varargin{12}; */
+  pnr = varargin_12;
+
+  /* 'gkmPWM:25' if pnr == 0 */
+  if (varargin_12 == 0.0) {
+    /* 'gkmPWM:26' ipnr = true; */
+    ipnr = true;
+  } else {
+    /* 'gkmPWM:27' else */
+    /* 'gkmPWM:28' ipnr = false; */
+    ipnr = false;
+  }
+
   emxInit_real_T(&a__2, 1);
   emxInit_real_T(&a__3, 1);
   emxInit_real_T(&comb, 2);
   emxInit_real_T(&c2, 2);
   emxInit_real_T(&seqvec2, 2);
 
-  /*  usage  gkmPWM(fileheader, wfile, mnum, num) */
-  /*  fileheader: everything before *svseq.fa */
-  /*  wfile: a list of kmer weights */
-  /*  mmun: the number of motifs to identify */
-  /*  num: number of iterations (I recommend at least 10*mnum) */
-  /* 'gkmPWM:7' if nargin < 4 */
-  /* 'gkmPWM:11' fileheader = varargin{1}; */
-  /* 'gkmPWM:12' wfile = varargin{2}; */
-  /* 'gkmPWM:13' mnum = varargin{3}; */
-  /* 'gkmPWM:14' num = varargin{4}; */
-  /* 'gkmPWM:15' rcorr = varargin{5}; */
-  /* 'gkmPWM:16' reg = varargin{6}; */
-  /* 'gkmPWM:17' l_svm = varargin{7}; */
-  /* 'gkmPWM:18' k_svm = varargin{8}; */
-  /* 'gkmPWM:19' BG_GC = varargin{9}; */
-  /* 'gkmPWM:20' RC = varargin{10}; */
-  /* 'gkmPWM:21' ipnr = varargin{11}; */
   /*  if nargin > 4 */
   /*      f = find(strcmp('MaxCorr', varargin)); */
   /*      if ~isempty(f); */
@@ -10431,12 +10447,12 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   /*          RC = varargin{f+1}; */
   /*      end */
   /*  end */
-  /* 'gkmPWM:58' [comb,~,~,~,~,rcnum] = genIndex(l_svm,k_svm); */
-  genIndex(varargin_7, varargin_8, comb, c2, a__2, a__3, seqvec2, &rcnum);
+  /* 'gkmPWM:65' [comb,~,~,~,~,rcnum] = genIndex(l_svm,k_svm); */
+  genIndex(varargin_8, varargin_9, comb, c2, a__2, a__3, seqvec2, &rcnum);
   mat_data = comb->data;
 
   /* generate gapped positions, adjusted for reverse complements */
-  /* 'gkmPWM:60' if length(comb)*4^k_svm > 10^6 */
+  /* 'gkmPWM:67' if length(comb)*4^k_svm > 10^6 */
   if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
     u1 = 0;
   } else {
@@ -10447,14 +10463,14 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     }
   }
 
-  c = pow(4.0, varargin_8);
+  c = pow(4.0, varargin_9);
   if ((double)u1 * c > 1.0E+6) {
     /*  error([num2str(length(comb)*4^k_svm) ' exceeds the maximum number of gapped kmers allowed (10^6)']) */
-    /* 'gkmPWM:62' fprintf('The choice of l and k combination exceeds the maximum number of gapped kmers allowed (10^6)\n'); */
+    /* 'gkmPWM:69' fprintf('The choice of l and k combination exceeds the maximum number of gapped kmers allowed (10^6)\n'); */
     printf("The choice of l and k combination exceeds the maximum number of gapped kmers allowed (10^6)\n");
     fflush(stdout);
 
-    /* 'gkmPWM:63' fprintf('l = 10, k = 6\n'); */
+    /* 'gkmPWM:70' fprintf('l = 10, k = 6\n'); */
     printf("l = 10, k = 6\n");
     fflush(stdout);
   }
@@ -10462,7 +10478,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   emxInit_char_T(&b_varargin_1, 2);
 
   /*  disp(['Running gkmPWM on ' fileheader ' for ' num2str(mnum) ' motifs and ' num2str(num) ' iterations']) */
-  /* 'gkmPWM:67' fprintf('Running gkmPWM on %s for %d motifs and %d iterations\n', fileheader, int32(mnum), int32(num)); */
+  /* 'gkmPWM:74' fprintf('Running gkmPWM on %s for %d motifs and %d iterations\n', fileheader, int32(mnum), int32(num)); */
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
@@ -10476,34 +10492,34 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   emxInit_real_T(&cfile, 1);
   b_varargin_1_data[varargin_1->size[1]] = '\x00';
   printf("Running gkmPWM on %s for %d motifs and %d iterations\n",
-         &b_varargin_1_data[0], (int)rt_roundd(varargin_3), (int)rt_roundd
-         (varargin_4));
+         &b_varargin_1_data[0], (int)rt_roundd(varargin_4), (int)rt_roundd
+         (varargin_5));
   fflush(stdout);
 
-  /* 'gkmPWM:68' fprintf('Counting gapped k-mers\n'); */
+  /* 'gkmPWM:75' fprintf('Counting gapped k-mers\n'); */
   printf("Counting gapped k-mers\n");
   fflush(stdout);
 
-  /* 'gkmPWM:70' [A, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fileheader,l_svm,k_svm,1,RC); */
-  getgkmcounts(varargin_1, varargin_7, varargin_8, varargin_10, cfile, &xtmp,
+  /* 'gkmPWM:77' [A, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fileheader,l_svm,k_svm,1,RC); */
+  getgkmcounts(varargin_1, varargin_8, varargin_9, varargin_11, cfile, &GCpos1,
                &GCneg1, mat, mat2);
   cfile_data = cfile->data;
 
   /* count gapped k-mers, get GC content, and dinucleotide distribution */
-  /* 'gkmPWM:71' if BG_GC == 1 */
-  if (varargin_9 == 1.0) {
-    /* 'gkmPWM:72' mat = (mat+mat2)/2; */
+  /* 'gkmPWM:78' if BG_GC == 1 */
+  if (varargin_10 == 1.0) {
+    /* 'gkmPWM:79' mat = (mat+mat2)/2; */
     for (i = 0; i < 16; i++) {
       mat[i] = (mat[i] + mat2[i]) / 2.0;
     }
 
-    /* 'gkmPWM:73' GCpos1 = (GCpos1+GCneg1)/2; */
-    GCneg1 = (xtmp + GCneg1) / 2.0;
+    /* 'gkmPWM:80' GCpos1 = (GCpos1+GCneg1)/2; */
+    GCneg1 = (GCpos1 + GCneg1) / 2.0;
 
-    /* 'gkmPWM:74' GCneg1 = GCpos1; */
+    /* 'gkmPWM:81' GCneg1 = GCpos1; */
   }
 
-  /* 'gkmPWM:76' negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC); */
+  /* 'gkmPWM:83' negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC); */
   /* 'BGkmer:2' len = length(c); */
   if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
     u1 = 0;
@@ -10569,7 +10585,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   /*  To appease Coder */
   /* 'BGkmer:10' p = cell(l,1); */
   i = p->size[0];
-  p->size[0] = (int)varargin_7;
+  p->size[0] = (int)varargin_8;
   emxEnsureCapacity_cell_wrap_13(p, i);
   p_data = p->data;
 
@@ -10585,7 +10601,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   p_data[0].f1[15] = 1.0;
 
   /* 'BGkmer:13' for i = 1:l-1 */
-  i = (int)(varargin_7 - 1.0);
+  i = (int)(varargin_8 - 1.0);
   for (b_i = 0; b_i < i; b_i++) {
     /* 'BGkmer:14' p{i+1} = p{i}*mat; */
     for (j2 = 0; j2 < 4; j2++) {
@@ -10608,11 +10624,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   i = seqvec->size[0] * seqvec->size[1];
   j2 = (int)c;
   seqvec->size[0] = (int)c;
-  nd2 = (int)varargin_8;
-  seqvec->size[1] = (int)varargin_8;
+  nd2 = (int)varargin_9;
+  seqvec->size[1] = (int)varargin_9;
   emxEnsureCapacity_real_T(seqvec, i);
   seqvec_data = seqvec->data;
-  loop_ub = (int)c * (int)varargin_8;
+  loop_ub = (int)c * (int)varargin_9;
   for (i = 0; i < loop_ub; i++) {
     seqvec_data[i] = 0.0;
   }
@@ -10638,7 +10654,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   }
 
   /* 'BGkmer:22' if RC */
-  if (varargin_10 != 0.0) {
+  if (varargin_11 != 0.0) {
     /* 'BGkmer:23' seqvec2 = 5-fliplr(seqvec); */
     i = seqvec2->size[0] * seqvec2->size[1];
     seqvec2->size[0] = seqvec->size[0];
@@ -10691,7 +10707,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
     loop_ub = c2->size[0] * c2->size[1];
     for (i = 0; i < loop_ub; i++) {
-      c2_data[i] = (varargin_7 + 1.0) - c2_data[i];
+      c2_data[i] = (varargin_8 + 1.0) - c2_data[i];
     }
   }
 
@@ -10721,16 +10737,16 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       mat2[i] = p_data[(int)mat_data[b_i] - 1].f1[i];
     }
 
-    tot = GCmat[1];
+    GCpos1 = GCmat[1];
     xtmp = GCmat[2];
     for (i = 0; i < 4; i++) {
       j2 = i << 2;
-      startvec[i] = ((GCmat_tmp * mat2[j2] + tot * mat2[j2 + 1]) + xtmp *
+      startvec[i] = ((GCmat_tmp * mat2[j2] + GCpos1 * mat2[j2 + 1]) + xtmp *
                      mat2[j2 + 2]) + GCmat_tmp * mat2[j2 + 3];
     }
 
     /* 'BGkmer:30' if RC */
-    if (varargin_10 != 0.0) {
+    if (varargin_11 != 0.0) {
       /* 'BGkmer:31' dc2 = diff(c2(i,:)); */
       loop_ub = c2->size[1];
       i = b_comb->size[0] * b_comb->size[1];
@@ -10749,20 +10765,20 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     }
 
     /* 'BGkmer:34' for ii = 1:4^k */
-    i = (int)pow(4.0, varargin_8);
+    i = (int)pow(4.0, varargin_9);
     for (m = 0; m < i; m++) {
       /* 'BGkmer:35' negweights(a) = startvec(seqvec(ii,1)); */
       b_j1 = (int)(a + m) - 1;
       negvec_data[b_j1] = startvec[(int)seqvec_data[m] - 1];
 
       /* 'BGkmer:36' if RC */
-      if (varargin_10 != 0.0) {
+      if (varargin_11 != 0.0) {
         /* 'BGkmer:37' tmp = startvec(seqvec2(ii,1)); */
         tmp = startvec[(int)seqvec2_data[m] - 1];
       }
 
       /* 'BGkmer:39' for iii = 1:k-1 */
-      j2 = (int)(varargin_8 - 1.0);
+      j2 = (int)(varargin_9 - 1.0);
       for (nd2 = 0; nd2 < j2; nd2++) {
         /* 'BGkmer:40' matt = p{dc(iii)+1}; */
         /* 'BGkmer:41' negweights(a) = negweights(a)*matt(seqvec(ii,iii), seqvec(ii,iii+1)); */
@@ -10771,7 +10787,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
           seqvec->size[0] * (nd2 + 1)] - 1) << 2)) - 1];
 
         /* 'BGkmer:42' if RC */
-        if (varargin_10 != 0.0) {
+        if (varargin_11 != 0.0) {
           /* 'BGkmer:43' matt2 = p{dc2(iii)+1}; */
           /* 'BGkmer:44' tmp = tmp*matt2(seqvec2(ii,iii), seqvec2(ii,iii+1)); */
           tmp *= p_data[(int)(dc2_data[nd2] + 1.0) - 1].f1[((int)seqvec2_data[m
@@ -10781,7 +10797,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       }
 
       /* 'BGkmer:47' if RC */
-      if (varargin_10 != 0.0) {
+      if (varargin_11 != 0.0) {
         /* 'BGkmer:48' negweights(a) = (negweights(a)+tmp); */
         negvec_data[b_j1] += tmp;
       }
@@ -10799,16 +10815,16 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   emxFree_real_T(&comb);
 
   /* 'BGkmer:53' if rcnum > 0 && RC */
-  if ((rcnum > 0.0) && (varargin_10 != 0.0)) {
+  if ((rcnum > 0.0) && (varargin_11 != 0.0)) {
     /* 'BGkmer:54' negweights(4^k*alen+1:end) = negweights(4^k*alen+1:end)/sqrt(2); */
-    tot = c * ((double)u1 - rcnum) + 1.0;
-    if (tot > negvec->size[0]) {
+    GCpos1 = c * ((double)u1 - rcnum) + 1.0;
+    if (GCpos1 > negvec->size[0]) {
       i = 1;
       j2 = -1;
       nd2 = 0;
     } else {
-      i = (int)tot;
-      j2 = (int)tot - 2;
+      i = (int)GCpos1;
+      j2 = (int)GCpos1 - 2;
       nd2 = negvec->size[0];
     }
 
@@ -10831,60 +10847,57 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   emxFree_real_T(&b_comb);
 
   /* generate expected gapped kmer distribution of background */
-  /* 'gkmPWM:77' GC=[0.5-GCneg1/2 GCneg1/2 GCneg1/2 0.5-GCneg1/2]; */
+  /* 'gkmPWM:84' GC=[0.5-GCneg1/2 GCneg1/2 GCneg1/2 0.5-GCneg1/2]; */
   GCmat[0] = GCmat_tmp;
   GCmat[1] = GCneg1 / 2.0;
   GCmat[2] = GCneg1 / 2.0;
   GCmat[3] = GCmat_tmp;
 
   /* GC content vector */
-  /* 'gkmPWM:78' pnr = 0; */
-  xtmp = 0.0;
-
-  /* 'gkmPWM:79' if ipnr */
-  if (varargin_11 != 0.0) {
-    /* 'gkmPWM:80' pnr = abs(min(A)/max(A)); */
-    xtmp = fabs(minimum(cfile) / maximum(cfile));
+  /* 'gkmPWM:85' if ipnr */
+  if (ipnr) {
+    /* 'gkmPWM:86' pnr = abs(min(A)/max(A)); */
+    pnr = fabs(minimum(cfile) / maximum(cfile));
   }
 
   emxInit_cell_wrap_0(&kmers, 2);
   emxInit_cell_wrap_2(&b_p);
   emxInit_cell_wrap_1(&seed);
 
-  /* 'gkmPWM:82' fprintf('Finding PWM seeds\n'); */
+  /* 'gkmPWM:88' fprintf('Finding PWM seeds\n'); */
   printf("Finding PWM seeds\n");
   fflush(stdout);
 
   /* get PWM seeds using the kmer weight vectors */
-  /* 'gkmPWM:84' coder.varsize('p'); */
-  /* 'gkmPWM:85' [kmers, seed,p,c] = seed_kmers(wfile, mnum,'descend', {}); */
-  seed_kmers(varargin_2, varargin_3, kmers, seed, b_p, &tot);
+  /* 'gkmPWM:90' coder.varsize('p'); */
+  /* 'gkmPWM:91' [kmers, seed,p,c] = seed_kmers(wfile, mnum,'descend', {}); */
+  seed_kmers(varargin_2, varargin_4, kmers, seed, b_p, &xtmp);
   b_p_data = b_p->data;
   kmers_data = kmers->data;
 
-  /* 'gkmPWM:86' if pnr ~= 0 */
-  if (xtmp != 0.0) {
+  /* 'gkmPWM:92' if pnr ~= 0 */
+  if (pnr != 0.0) {
     emxInit_cell_wrap_0(&kmers2, 1);
     emxInit_cell_wrap_1(&seed2);
     emxInit_cell_wrap_2(&pp);
 
-    /* 'gkmPWM:87' [kmers2, seed2,pp, c2] = seed_kmers(wfile, max([floor(mnum*pnr) 2]),'ascend',seed); */
-    xtmp = floor(varargin_3 * xtmp);
-    if (xtmp < 2.0) {
-      xtmp = 2.0;
+    /* 'gkmPWM:93' [kmers2, seed2,pp, c2] = seed_kmers(wfile, max([floor(mnum/pnr) 2]),'ascend',seed); */
+    GCpos1 = floor(varargin_4 / pnr);
+    if (GCpos1 < 2.0) {
+      GCpos1 = 2.0;
     }
 
-    b_seed_kmers(varargin_2, xtmp, seed, kmers2, seed2, pp, &tot);
+    b_seed_kmers(varargin_2, GCpos1, seed, kmers2, seed2, pp, &xtmp);
     pp_data = pp->data;
     kmers2_data = kmers2->data;
 
     /*      kmers = [kmers;kmers2]; */
     /*      p = [p;pp]; */
-    /* 'gkmPWM:90' for cur_idx=1:length(kmers2) */
+    /* 'gkmPWM:96' for cur_idx=1:length(kmers2) */
     i = kmers2->size[0];
     emxFree_cell_wrap_1(&seed2);
     for (nd2 = 0; nd2 < i; nd2++) {
-      /* 'gkmPWM:91' kmers{end + 1} = kmers2{cur_idx}; */
+      /* 'gkmPWM:97' kmers{end + 1} = kmers2{cur_idx}; */
       m = kmers->size[0] + 1;
       j2 = kmers->size[0] * kmers->size[1];
       kmers->size[0]++;
@@ -10907,10 +10920,10 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
     emxFree_cell_wrap_0(&kmers2);
 
-    /* 'gkmPWM:93' for cur_idx=1:length(pp) */
+    /* 'gkmPWM:99' for cur_idx=1:length(pp) */
     i = pp->size[0];
     for (nd2 = 0; nd2 < i; nd2++) {
-      /* 'gkmPWM:94' p{end + 1} = pp{cur_idx}; */
+      /* 'gkmPWM:100' p{end + 1} = pp{cur_idx}; */
       m = b_p->size[0] + 1;
       j2 = b_p->size[0];
       b_p->size[0]++;
@@ -10932,22 +10945,22 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
     emxFree_cell_wrap_2(&pp);
 
-    /* 'gkmPWM:96' tot = c2; */
+    /* 'gkmPWM:102' tot = c2; */
   } else {
-    /* 'gkmPWM:97' else */
-    /* 'gkmPWM:98' tot = c; */
+    /* 'gkmPWM:103' else */
+    /* 'gkmPWM:104' tot = c; */
   }
 
   emxFree_cell_wrap_1(&seed);
 
-  /* 'gkmPWM:100' fprintf('Seeding PWMs at the following kmers\n'); */
-  printf("Seeding PWMs at the following kmers\n");
+  /* 'gkmPWM:106' fprintf('Seeding %d PWMs at the following kmers\n', int32(tot)); */
+  printf("Seeding %d PWMs at the following kmers\n", (int)rt_roundd(xtmp));
   fflush(stdout);
 
-  /* 'gkmPWM:101' for i = 1:tot */
-  i = (int)tot;
+  /* 'gkmPWM:107' for i = 1:tot */
+  i = (int)xtmp;
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:102' fprintf("%s\n", kmers{i}); */
+    /* 'gkmPWM:108' fprintf("%s\n", kmers{i}); */
     j2 = b_varargin_1->size[0] * b_varargin_1->size[1];
     b_varargin_1->size[0] = 1;
     b_varargin_1->size[1] = kmers_data[b_i].f1->size[1] + 1;
@@ -10965,18 +10978,18 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
   emxFree_cell_wrap_0(&kmers);
 
-  /* 'gkmPWM:105' for i = 1:length(p) */
+  /* 'gkmPWM:111' for i = 1:length(p) */
   i = b_p->size[0];
   if (0 <= b_p->size[0] - 1) {
-    outsize_idx_0 = (int)(varargin_7 + 1.0);
-    ntilerows = (int)(varargin_7 + 1.0);
+    outsize_idx_0 = (int)(varargin_8 + 1.0);
+    ntilerows = (int)(varargin_8 + 1.0);
   }
 
   emxInit_real_T(&b_mat, 2);
   emxInit_real_T(&c_mat, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWM:106' p{i} = extendPWM(p{i},l_svm+1,GC); */
-    /* 'gkmPWM:992' mat = repmat(GCmat, n,1); */
+    /* 'gkmPWM:112' p{i} = extendPWM(p{i},l_svm+1,GC); */
+    /* 'gkmPWM:1002' mat = repmat(GCmat, n,1); */
     j2 = b_mat->size[0] * b_mat->size[1];
     b_mat->size[0] = outsize_idx_0;
     b_mat->size[1] = 4;
@@ -10989,7 +11002,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       }
     }
 
-    /* 'gkmPWM:993' ext_pwm = [mat;pwm;mat]; */
+    /* 'gkmPWM:1003' ext_pwm = [mat;pwm;mat]; */
     j2 = c_mat->size[0] * c_mat->size[1];
     c_mat->size[0] = (b_mat->size[0] + b_p_data[b_i].f1->size[0]) + b_mat->size
       [0];
@@ -11032,26 +11045,26 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   emxFree_real_T(&c_mat);
   emxFree_real_T(&b_mat);
 
-  /* 'gkmPWM:109' fprintf('Running de novo motif discovery\n'); */
+  /* 'gkmPWM:115' fprintf('Running de novo motif discovery\n'); */
   printf("Running de novo motif discovery\n");
   fflush(stdout);
 
-  /* 'gkmPWM:110' m = mean(A); */
-  /* 'gkmPWM:111' s = std(A); */
-  /* 'gkmPWM:112' cfile = A-negvec/sum(negvec)*sum(A); */
-  xtmp = blockedSummation(cfile, cfile->size[0]);
-  tot = blockedSummation(negvec, negvec->size[0]);
+  /* 'gkmPWM:116' m = mean(A); */
+  /* 'gkmPWM:117' s = std(A); */
+  /* 'gkmPWM:118' cfile = A-negvec/sum(negvec)*sum(A); */
+  GCpos1 = blockedSummation(cfile, cfile->size[0]);
+  xtmp = blockedSummation(negvec, negvec->size[0]);
   if (cfile->size[0] == negvec->size[0]) {
     loop_ub = cfile->size[0];
     for (i = 0; i < loop_ub; i++) {
-      cfile_data[i] -= negvec_data[i] / tot * xtmp;
+      cfile_data[i] -= negvec_data[i] / xtmp * GCpos1;
     }
   } else {
-    binary_expand_op(cfile, negvec, tot, xtmp);
+    binary_expand_op(cfile, negvec, xtmp, GCpos1);
     cfile_data = cfile->data;
   }
 
-  /* 'gkmPWM:113' cfile = cfile/max(abs(cfile)); */
+  /* 'gkmPWM:119' cfile = cfile/max(abs(cfile)); */
   m = cfile->size[0];
   i = a__2->size[0];
   a__2->size[0] = cfile->size[0];
@@ -11061,28 +11074,28 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     mat_data[nd2] = fabs(cfile_data[nd2]);
   }
 
-  xtmp = maximum(a__2);
+  GCpos1 = maximum(a__2);
   loop_ub = cfile->size[0];
   for (i = 0; i < loop_ub; i++) {
-    cfile_data[i] /= xtmp;
+    cfile_data[i] /= GCpos1;
   }
 
   emxInit_real_T(&E, 1);
 
   /*  normalize to speed up computation */
   /*  clear A */
-  /* 'gkmPWM:115' [pp, scorevec, C, r, R, E, Rd] = gkmPWM_lagrange(cfile,mat,p,negvec,num,rcorr,reg,l_svm,k_svm,RC); */
-  gkmPWM_lagrange(cfile, mat, b_p, negvec, varargin_4, varargin_5, varargin_6,
-                  varargin_7, varargin_8, varargin_10, dc2, a__2, &xtmp, a__3, E,
+  /* 'gkmPWM:121' [pp, scorevec, C, r, R, E, Rd] = gkmPWM_lagrange(cfile,mat,p,negvec,num,rcorr,reg,l_svm,k_svm,RC); */
+  gkmPWM_lagrange(cfile, mat, b_p, negvec, varargin_5, varargin_6, varargin_7,
+                  varargin_8, varargin_9, varargin_11, dc2, a__2, &xtmp, a__3, E,
                   dc);
   dc2_data = dc2->data;
 
   /*  createMEME([fileheader '_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum)], pp, GCneg1, C, r, R, rcorr, E, Rd); */
-  /* 'gkmPWM:118' createMEME(sprintf("%s_%d_%d_%d_%d", fileheader, int32(l_svm), int32(k_svm), int32(reg), int32(mnum)), pp, GCneg1, C, r, R, rcorr, E, Rd); */
-  nd2 = (int)rt_roundd(varargin_7);
-  j2 = (int)rt_roundd(varargin_8);
-  b_j1 = (int)rt_roundd(varargin_6);
-  u1 = (int)rt_roundd(varargin_3);
+  /* 'gkmPWM:124' createMEME(sprintf("%s_%d_%d_%d_%d", fileheader, int32(l_svm), int32(k_svm), int32(reg), int32(mnum)), pp, memefile, GCneg1, C, r, R, rcorr, E, Rd); */
+  nd2 = (int)rt_roundd(varargin_8);
+  j2 = (int)rt_roundd(varargin_9);
+  b_j1 = (int)rt_roundd(varargin_7);
+  u1 = (int)rt_roundd(varargin_4);
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
@@ -11125,10 +11138,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   }
 
   emxEnsureCapacity_char_T(charStr, i);
-  createMEME(charStr, b_p, GCneg1, a__2, xtmp, a__3, varargin_5, E, dc);
+  createMEME(charStr, b_p, varargin_3, GCneg1, a__2, xtmp, a__3, varargin_6, E,
+             dc);
 
   /*  dlmwrite([fileheader '_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum) '_error.out'],scorevec'); */
-  /* 'gkmPWM:120' fidw = fopen(sprintf("%s_%d_%d_%d_%d_error.out", fileheader, int32(l_svm), int32(k_svm), int32(reg), int32(mnum)), 'w'); */
+  /* 'gkmPWM:126' fidw = fopen(sprintf("%s_%d_%d_%d_%d_error.out", fileheader, int32(l_svm), int32(k_svm), int32(reg), int32(mnum)), 'w'); */
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
@@ -11177,18 +11191,18 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   emxEnsureCapacity_char_T(b_charStr, i);
   fileid = cfopen(b_charStr, "wb");
 
-  /* 'gkmPWM:121' for idx=1:length(scorevec) */
+  /* 'gkmPWM:127' for idx=1:length(scorevec) */
   i = dc2->size[1];
   emxFree_char_T(&b_charStr);
   emxFree_char_T(&c_varargin_1);
   emxFree_char_T(&b_varargin_1);
   for (m = 0; m < i; m++) {
-    /* 'gkmPWM:122' fprintf(fidw, "%f\n", scorevec(idx)); */
+    /* 'gkmPWM:128' fprintf(fidw, "%f\n", scorevec(idx)); */
     b_NULL = NULL;
-    getfilestar(fileid, &filestar, &autoflush);
+    getfilestar(fileid, &filestar, &ipnr);
     if (!(filestar == b_NULL)) {
       fprintf(filestar, "%f\n", dc2_data[m]);
-      if (autoflush) {
+      if (ipnr) {
         fflush(filestar);
       }
     }

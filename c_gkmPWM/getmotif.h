@@ -24,7 +24,8 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void getmotif(cell_wrap_3 mat[1968]);
+void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
+              emxArray_cell_wrap_3 *mat, emxArray_cell_wrap_0 *names);
 
 #ifdef __cplusplus
 }

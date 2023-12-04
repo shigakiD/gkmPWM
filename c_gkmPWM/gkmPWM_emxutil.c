@@ -354,6 +354,48 @@ void emxEnsureCapacity_cell_wrap_2(emxArray_cell_wrap_2 *emxArray, int oldNumel)
   }
 }
 
+void emxEnsureCapacity_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int oldNumel)
+{
+  int i;
+  int newNumel;
+  void *newData;
+  if (oldNumel < 0) {
+    oldNumel = 0;
+  }
+  newNumel = 1;
+  for (i = 0; i < emxArray->numDimensions; i++) {
+    newNumel *= emxArray->size[i];
+  }
+  if (newNumel > emxArray->allocatedSize) {
+    i = emxArray->allocatedSize;
+    if (i < 16) {
+      i = 16;
+    }
+    while (i < newNumel) {
+      if (i > 1073741823) {
+        i = MAX_int32_T;
+      } else {
+        i *= 2;
+      }
+    }
+    newData = calloc((unsigned int)i, sizeof(cell_wrap_3));
+    if (emxArray->data != NULL) {
+      memcpy(newData, emxArray->data, sizeof(cell_wrap_3) * oldNumel);
+      if (emxArray->canFreeData) {
+        free(emxArray->data);
+      }
+    }
+    emxArray->data = (cell_wrap_3 *)newData;
+    emxArray->allocatedSize = i;
+    emxArray->canFreeData = true;
+  }
+  if (oldNumel > newNumel) {
+    emxTrim_cell_wrap_3(emxArray, newNumel, oldNumel);
+  } else if (oldNumel < newNumel) {
+    emxExpand_cell_wrap_3(emxArray, oldNumel, newNumel);
+  }
+}
+
 void emxEnsureCapacity_char_T(emxArray_char_T *emxArray, int oldNumel)
 {
   int i;
@@ -576,48 +618,6 @@ void emxEnsureCapacity_real_T(emxArray_real_T *emxArray, int oldNumel)
   }
 }
 
-void emxEnsureCapacity_rtString(emxArray_rtString *emxArray, int oldNumel)
-{
-  int i;
-  int newNumel;
-  void *newData;
-  if (oldNumel < 0) {
-    oldNumel = 0;
-  }
-  newNumel = 1;
-  for (i = 0; i < emxArray->numDimensions; i++) {
-    newNumel *= emxArray->size[i];
-  }
-  if (newNumel > emxArray->allocatedSize) {
-    i = emxArray->allocatedSize;
-    if (i < 16) {
-      i = 16;
-    }
-    while (i < newNumel) {
-      if (i > 1073741823) {
-        i = MAX_int32_T;
-      } else {
-        i *= 2;
-      }
-    }
-    newData = calloc((unsigned int)i, sizeof(rtString));
-    if (emxArray->data != NULL) {
-      memcpy(newData, emxArray->data, sizeof(rtString) * oldNumel);
-      if (emxArray->canFreeData) {
-        free(emxArray->data);
-      }
-    }
-    emxArray->data = (rtString *)newData;
-    emxArray->allocatedSize = i;
-    emxArray->canFreeData = true;
-  }
-  if (oldNumel > newNumel) {
-    emxTrim_rtString(emxArray, newNumel, oldNumel);
-  } else if (oldNumel < newNumel) {
-    emxExpand_rtString(emxArray, oldNumel, newNumel);
-  }
-}
-
 void emxEnsureCapacity_uint32_T(emxArray_uint32_T *emxArray, int oldNumel)
 {
   int i;
@@ -700,33 +700,18 @@ void emxExpand_cell_wrap_2(emxArray_cell_wrap_2 *emxArray, int fromIndex,
   }
 }
 
-void emxExpand_rtString(emxArray_rtString *emxArray, int fromIndex, int toIndex)
+void emxExpand_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int fromIndex,
+                           int toIndex)
 {
   int i;
   for (i = fromIndex; i < toIndex; i++) {
-    emxInitStruct_rtString(&emxArray->data[i]);
+    emxInitStruct_cell_wrap_3(&emxArray->data[i]);
   }
 }
 
 void emxFreeMatrix_cell_wrap_0(cell_wrap_0 *pMatrix)
 {
   emxFreeStruct_cell_wrap_0(pMatrix);
-}
-
-void emxFreeMatrix_cell_wrap_3(cell_wrap_3 pMatrix[1968])
-{
-  int i;
-  for (i = 0; i < 1968; i++) {
-    emxFreeStruct_cell_wrap_3(&pMatrix[i]);
-  }
-}
-
-void emxFreeMatrix_cell_wrap_31(cell_wrap_3 pMatrix[1969])
-{
-  int i;
-  for (i = 0; i < 1969; i++) {
-    emxFreeStruct_cell_wrap_3(&pMatrix[i]);
-  }
 }
 
 void emxFreeStruct_cell_wrap_0(cell_wrap_0 *pStruct)
@@ -757,11 +742,6 @@ void emxFreeStruct_cell_wrap_2(cell_wrap_2 *pStruct)
 void emxFreeStruct_cell_wrap_3(cell_wrap_3 *pStruct)
 {
   emxFree_real_T(&pStruct->f1);
-}
-
-void emxFreeStruct_rtString(rtString *pStruct)
-{
-  emxFree_char_T(&pStruct->Value);
 }
 
 void emxFree_boolean_T(emxArray_boolean_T **pEmxArray)
@@ -904,6 +884,29 @@ void emxFree_cell_wrap_2(emxArray_cell_wrap_2 **pEmxArray)
   }
 }
 
+void emxFree_cell_wrap_3(emxArray_cell_wrap_3 **pEmxArray)
+{
+  int i;
+  int numEl;
+  if (*pEmxArray != (emxArray_cell_wrap_3 *)NULL) {
+    if ((*pEmxArray)->data != (cell_wrap_3 *)NULL) {
+      numEl = 1;
+      for (i = 0; i < (*pEmxArray)->numDimensions; i++) {
+        numEl *= (*pEmxArray)->size[i];
+      }
+      for (i = 0; i < numEl; i++) {
+        emxFreeStruct_cell_wrap_3(&(*pEmxArray)->data[i]);
+      }
+      if ((*pEmxArray)->canFreeData) {
+        free((*pEmxArray)->data);
+      }
+    }
+    free((*pEmxArray)->size);
+    free(*pEmxArray);
+    *pEmxArray = (emxArray_cell_wrap_3 *)NULL;
+  }
+}
+
 void emxFree_char_T(emxArray_char_T **pEmxArray)
 {
   if (*pEmxArray != (emxArray_char_T *)NULL) {
@@ -978,29 +981,6 @@ void emxFree_real_T(emxArray_real_T **pEmxArray)
   }
 }
 
-void emxFree_rtString(emxArray_rtString **pEmxArray)
-{
-  int i;
-  int numEl;
-  if (*pEmxArray != (emxArray_rtString *)NULL) {
-    if ((*pEmxArray)->data != (rtString *)NULL) {
-      numEl = 1;
-      for (i = 0; i < (*pEmxArray)->numDimensions; i++) {
-        numEl *= (*pEmxArray)->size[i];
-      }
-      for (i = 0; i < numEl; i++) {
-        emxFreeStruct_rtString(&(*pEmxArray)->data[i]);
-      }
-      if ((*pEmxArray)->canFreeData) {
-        free((*pEmxArray)->data);
-      }
-    }
-    free((*pEmxArray)->size);
-    free(*pEmxArray);
-    *pEmxArray = (emxArray_rtString *)NULL;
-  }
-}
-
 void emxFree_uint32_T(emxArray_uint32_T **pEmxArray)
 {
   if (*pEmxArray != (emxArray_uint32_T *)NULL) {
@@ -1017,22 +997,6 @@ void emxFree_uint32_T(emxArray_uint32_T **pEmxArray)
 void emxInitMatrix_cell_wrap_0(cell_wrap_0 *pMatrix)
 {
   emxInitStruct_cell_wrap_0(pMatrix);
-}
-
-void emxInitMatrix_cell_wrap_3(cell_wrap_3 pMatrix[1968])
-{
-  int i;
-  for (i = 0; i < 1968; i++) {
-    emxInitStruct_cell_wrap_3(&pMatrix[i]);
-  }
-}
-
-void emxInitMatrix_cell_wrap_31(cell_wrap_3 pMatrix[1969])
-{
-  int i;
-  for (i = 0; i < 1969; i++) {
-    emxInitStruct_cell_wrap_3(&pMatrix[i]);
-  }
 }
 
 void emxInitStruct_cell_wrap_0(cell_wrap_0 *pStruct)
@@ -1063,11 +1027,6 @@ void emxInitStruct_cell_wrap_2(cell_wrap_2 *pStruct)
 void emxInitStruct_cell_wrap_3(cell_wrap_3 *pStruct)
 {
   emxInit_real_T(&pStruct->f1, 2);
-}
-
-void emxInitStruct_rtString(rtString *pStruct)
-{
-  emxInit_char_T(&pStruct->Value, 2);
 }
 
 void emxInit_boolean_T(emxArray_boolean_T **pEmxArray, int numDimensions)
@@ -1160,6 +1119,19 @@ void emxInit_cell_wrap_2(emxArray_cell_wrap_2 **pEmxArray)
   *pEmxArray = (emxArray_cell_wrap_2 *)malloc(sizeof(emxArray_cell_wrap_2));
   emxArray = *pEmxArray;
   emxArray->data = (cell_wrap_2 *)NULL;
+  emxArray->numDimensions = 1;
+  emxArray->size = (int *)malloc(sizeof(int));
+  emxArray->allocatedSize = 0;
+  emxArray->canFreeData = true;
+  emxArray->size[0] = 0;
+}
+
+void emxInit_cell_wrap_3(emxArray_cell_wrap_3 **pEmxArray)
+{
+  emxArray_cell_wrap_3 *emxArray;
+  *pEmxArray = (emxArray_cell_wrap_3 *)malloc(sizeof(emxArray_cell_wrap_3));
+  emxArray = *pEmxArray;
+  emxArray->data = (cell_wrap_3 *)NULL;
   emxArray->numDimensions = 1;
   emxArray->size = (int *)malloc(sizeof(int));
   emxArray->allocatedSize = 0;
@@ -1260,19 +1232,6 @@ void emxInit_real_T(emxArray_real_T **pEmxArray, int numDimensions)
   }
 }
 
-void emxInit_rtString(emxArray_rtString **pEmxArray)
-{
-  emxArray_rtString *emxArray;
-  *pEmxArray = (emxArray_rtString *)malloc(sizeof(emxArray_rtString));
-  emxArray = *pEmxArray;
-  emxArray->data = (rtString *)NULL;
-  emxArray->numDimensions = 1;
-  emxArray->size = (int *)malloc(sizeof(int));
-  emxArray->allocatedSize = 0;
-  emxArray->canFreeData = true;
-  emxArray->size[0] = 0;
-}
-
 void emxInit_uint32_T(emxArray_uint32_T **pEmxArray)
 {
   emxArray_uint32_T *emxArray;
@@ -1331,11 +1290,12 @@ void emxTrim_cell_wrap_2(emxArray_cell_wrap_2 *emxArray, int fromIndex,
   }
 }
 
-void emxTrim_rtString(emxArray_rtString *emxArray, int fromIndex, int toIndex)
+void emxTrim_cell_wrap_3(emxArray_cell_wrap_3 *emxArray, int fromIndex,
+                         int toIndex)
 {
   int i;
   for (i = fromIndex; i < toIndex; i++) {
-    emxFreeStruct_rtString(&emxArray->data[i]);
+    emxFreeStruct_cell_wrap_3(&emxArray->data[i]);
   }
 }
 

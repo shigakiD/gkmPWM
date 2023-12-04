@@ -248,23 +248,16 @@ typedef struct {
 } cell_wrap_3;
 #endif /* typedef_cell_wrap_3 */
 
-#ifndef typedef_rtString
-#define typedef_rtString
+#ifndef typedef_emxArray_cell_wrap_3
+#define typedef_emxArray_cell_wrap_3
 typedef struct {
-  emxArray_char_T *Value;
-} rtString;
-#endif /* typedef_rtString */
-
-#ifndef typedef_emxArray_rtString
-#define typedef_emxArray_rtString
-typedef struct {
-  rtString *data;
+  cell_wrap_3 *data;
   int *size;
   int allocatedSize;
   int numDimensions;
   bool canFreeData;
-} emxArray_rtString;
-#endif /* typedef_emxArray_rtString */
+} emxArray_cell_wrap_3;
+#endif /* typedef_emxArray_cell_wrap_3 */
 
 #endif
 /* End of code generation (gkmPWM_types.h) */

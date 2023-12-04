@@ -28,9 +28,6 @@ void b_merge_block(emxArray_int32_T *idx, emxArray_real_T *x, int offset, int n,
                    int preSortLevel, emxArray_int32_T *iwork,
                    emxArray_real_T *xwork);
 
-void c_merge_block(int idx[1968], double x[1968], int offset, int n,
-                   int preSortLevel, int iwork[1968], double xwork[1968]);
-
 void merge_block(emxArray_int32_T *idx, emxArray_real_T *x, int offset, int n,
                  int preSortLevel, emxArray_int32_T *iwork,
                  emxArray_real_T *xwork);

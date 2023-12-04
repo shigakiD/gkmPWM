@@ -51,27 +51,6 @@ static signed char filedata(void)
 /*
  *
  */
-signed char b_cfopen(const char *cfilename)
-{
-  FILE *filestar;
-  signed char fileid;
-  signed char j;
-  fileid = -1;
-  j = filedata();
-  if (j >= 1) {
-    filestar = fopen(cfilename, "rb");
-    if (filestar != NULL) {
-      eml_openfiles[j - 1] = filestar;
-      eml_autoflush[j - 1] = true;
-      fileid = (signed char)(j + 2);
-    }
-  }
-  return fileid;
-}
-
-/*
- *
- */
 int cfclose(double fid)
 {
   FILE *filestar;
@@ -81,7 +60,7 @@ int cfclose(double fid)
   signed char fileid;
   st = -1;
   fileid = (signed char)rt_roundd(fid);
-  if ((fileid < 0) || (fid != fileid)) {
+  if ((fileid > 22) || (fileid < 0) || (fid != fileid)) {
     fileid = -1;
   }
   b_fileid = fileid;
@@ -170,7 +149,7 @@ void getfilestar(double fid, FILE **filestar, bool *autoflush)
 {
   signed char fileid;
   fileid = (signed char)rt_roundd(fid);
-  if ((fileid < 0) || (fid != fileid)) {
+  if ((fileid > 22) || (fileid < 0) || (fid != fileid)) {
     fileid = -1;
   }
   if (fileid >= 3) {
