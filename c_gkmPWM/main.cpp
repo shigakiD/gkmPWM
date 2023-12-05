@@ -45,25 +45,28 @@ void display_arguments() {
             "Author:    Dustin Shigaki\n"
             "Contact:   Report issues to the Github page\n"
             "\n\n"
-            "Usage:     gkmPWM [options] <prefix> <weight file> <motif number> <iterations>"
+            "Usage:     gkmPWM [options] <prefix> <weight file> <database> <motif number>\n"
             "\n"
             "Arguments:\n"
             "        prefix: prefix of a gkmSVM model, where the model files are either\n"
             "                *_svseq.fa and *_svalpha.out OR *.model.txt\n"
             "   weight file: file name to the corresponding ungapped k-mer weight file\n"
+            "      database: file name to a database of transcription factor binding sites\n"
+            "                that is in meme format. An example file is provided.\n"
             "  motif number: number of position weight matrix (PWM) to extract\n"
-            "    iteartions: number of training iterations. Recommend at least 10x the number of motifs\n"
             "\n"
             "  Options:\n"
             "    -c <float>    correlation cutoff for considering two PWMs to be distinct (default: 0.90)\n"
-            "    -r <int>      regularization (default: 0)\n"
+            "    -r <float>    regularization (default: 0)\n"
+            "    -P <float>    number of motifs to extract from the negative set used to train a gkmSVM model. \n"
+            "                  when set to 0, gkmPWM will automatically infer this number. (default: 0)\n"
             "    -l <int>      total length of the gapped k-mer. It doesn't have to be the same l from gkmSVM model (default: 10)\n"
             "    -k <int>      the number of ungapped positions. It doesn't have to be the same k from gkmSVM model (default: 6)\n"
+            "    -i <int>      number of training iterations. Recommend at least 10 times the number of motifs (default: 100)\n"
             "    -b            if set, background GC content equal to the average of the \n"
             "                  positive and negative set used to train gkmSVM; else, the GC content \n"
             "                  equal to the negative set (default: false) \n"
             "    -R            consider reverse-complement of k-mer to be the same (default: true) \n"
-            "    -P            PNratio (default: true)\n"
             "\n");
     exit(0);
 }
@@ -75,15 +78,16 @@ int main(int argc, char* argv[]) {
 
     double rCorr = 0.90;
     double reg = 0;
+    double iPNRatio = 0;
     double lSVM = 10;
     double kSVM = 6 ;
+    double numIterations = 100;
     int backgroundGC = 0;
     int reverseCompl = 1;
-    int iPNRatio = 1;
     char * pEnd;
 
 	int c;
-	while ((c = getopt(argc, argv, "bRPc:r:l:k:")) != -1) {
+	while ((c = getopt(argc, argv, "bRc:r:P:l:k:i:")) != -1) {
 		switch (c) {
             case 'b':
                 backgroundGC = 1;
@@ -91,20 +95,23 @@ int main(int argc, char* argv[]) {
             case 'R':
                 reverseCompl = 0;
                 break;
-            case 'P':
-                iPNRatio = 0;
-                break;
             case 'c':
                 rCorr = strtod(optarg, &pEnd);
                 break;            
             case 'r':
                 reg = strtod(optarg, &pEnd);
                 break;
+            case 'P':
+                iPNRatio = strtod(optarg, &pEnd);
+                break;
             case 'l':
                 lSVM = strtod(optarg, &pEnd);
                 break;
             case 'k':
                 kSVM = strtod(optarg, &pEnd);
+                break;
+            case 'i':
+                numIterations = strtod(optarg, &pEnd);
                 break;
 			default:
                 fprintf(stderr, "Unknown option: -%c\n", c);
@@ -118,30 +125,33 @@ int main(int argc, char* argv[]) {
     }
 
 	int index = optind;
-    emxArray_char_T *model_file = allocate_for_charArray(argv[index++]);
-    emxArray_char_T *motif_file = allocate_for_charArray(argv[index++]);
+    emxArray_char_T *model_file  = allocate_for_charArray(argv[index++]);
+    emxArray_char_T *weight_file = allocate_for_charArray(argv[index++]);
+    emxArray_char_T *motif_file  = allocate_for_charArray(argv[index++]);
     double numPWM = strtod(argv[index++], NULL);
-    double iteration = strtod(argv[index++], NULL);
+
     
-    char arr[11][30] = {"model file", "motif file", "number of PWM", "number of iteration", "correlation cutoff", "reg",
-                        "total gapped k-mer length", "number of ungapped positions", "average GC", "reverse complement", "PN ratio"};
-    double arr2[6] = {numPWM, iteration, rCorr, reg, lSVM, kSVM};
-    int arr3[3] = {backgroundGC, reverseCompl, iPNRatio};
+    char arr[12][30] = {"model file", "weight file", "motif file", "number of PWM", "number of iteration", "correlation cutoff", "reg", "PN ratio", 
+                        "total gapped k-mer length", "number of ungapped positions", "average GC", "reverse complement"};
+    double arr2[7] = {numPWM, numIterations, rCorr, reg, iPNRatio, lSVM, kSVM};
+    int arr3[2] = {backgroundGC, reverseCompl};
+    
     printf("\n----Following Are The Command Line Arguments Passed----");
-    for(int counter=1; counter<3; counter++)
+    for(int counter=1; counter<4; counter++)
         printf("\nargv[%d] - %s: %s", counter, arr[counter-1], argv[optind+counter-1]);
-    for(int counter=2; counter<8; counter++)
-        printf("\nargv[%d] - %s: %4.2f", counter+1, arr[counter], arr2[counter-2]);
-    for(int counter=8; counter<11; counter++)
-        printf("\nargv[%d] - %s: %s", counter+1, arr[counter], arr3[counter-8] ? "True" : "False");
+    for(int counter=4; counter<11; counter++)
+        printf("\nargv[%d] - %s: %4.2f", counter, arr[counter-1], arr2[counter-4]);
+    for(int counter=11; counter<13; counter++)
+        printf("\nargv[%d] - %s: %s", counter, arr[counter-1], arr3[counter-11] ? "True" : "False");
     printf("\n");
     
     openblas_set_num_threads(1);
     
     gkmPWM(model_file,
+           weight_file,
            motif_file, 
            numPWM, 
-           iteration,
+           numIterations,
            rCorr,
            reg,
            lSVM,
@@ -150,7 +160,8 @@ int main(int argc, char* argv[]) {
            reverseCompl,
            iPNRatio);
     
-    emxFree_char_T(&model_file);
+    emxFree_char_T(&model_file);    
+    emxFree_char_T(&weight_file);
     emxFree_char_T(&motif_file);
     
     gkmPWM_terminate();
