@@ -10937,12 +10937,12 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   /* 'gkmPWM:91' if ipnr */
   emxFree_real_T(&comb);
   if (ipnr) {
-    /* 'gkmPWM:92' pnr = abs(min(A)/max(A)); */
+    /* 'gkmPWM:92' pnr = abs(max(A)/min(A)); */
     last = cfile->size[0];
     if (cfile->size[0] <= 2) {
       if (cfile->size[0] == 1) {
         nfrac = cfile_data[0];
-      } else if (cfile_data[0] > cfile_data[cfile->size[0] - 1]) {
+      } else if (cfile_data[0] < cfile_data[cfile->size[0] - 1]) {
         nfrac = cfile_data[cfile->size[0] - 1];
       } else {
         nfrac = cfile_data[0];
@@ -10951,7 +10951,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       nfrac = cfile_data[0];
       for (nbytes = 2; nbytes <= last; nbytes++) {
         d = cfile_data[nbytes - 1];
-        if (nfrac > d) {
+        if (nfrac < d) {
           nfrac = d;
         }
       }
@@ -10961,7 +10961,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     if (cfile->size[0] <= 2) {
       if (cfile->size[0] == 1) {
         tot = cfile_data[0];
-      } else if (cfile_data[0] < cfile_data[cfile->size[0] - 1]) {
+      } else if (cfile_data[0] > cfile_data[cfile->size[0] - 1]) {
         tot = cfile_data[cfile->size[0] - 1];
       } else {
         tot = cfile_data[0];
@@ -10970,7 +10970,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       tot = cfile_data[0];
       for (nbytes = 2; nbytes <= last; nbytes++) {
         d = cfile_data[nbytes - 1];
-        if (tot < d) {
+        if (tot > d) {
           tot = d;
         }
       }
