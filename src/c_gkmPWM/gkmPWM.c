@@ -1015,6 +1015,7 @@ static void b_seed_kmers(const emxArray_char_T *fn, double num, const
     /* 'gkmPWM:227' fprintf("ERROR: Weight file cannot be opened.\n") */
     printf("ERROR: Weight file cannot be opened.\n");
     fflush(stdout);
+    exit(1);
   }
 
   /*  a = textscan(fid, '%s\t%f\n'); */
@@ -2486,6 +2487,7 @@ static void createMEME(const emxArray_char_T *fileh_Value, const
     /* 'gkmPWM:153' fprintf("ERROR: Cannot create gkmPWM denovo motif file.\n"); */
     printf("ERROR: Cannot create gkmPWM denovo motif file.\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'gkmPWM:155' fid2 = fopen(sprintf('%s_gkmPWM.out', fileh), 'w'); */
@@ -2497,6 +2499,7 @@ static void createMEME(const emxArray_char_T *fileh_Value, const
     /* 'gkmPWM:157' fprintf("ERROR: Cannot create gkmPWM output file.\n"); */
     printf("ERROR: Cannot create gkmPWM output file.\n");
     fflush(stdout);
+    exit(1);
   }
 
   emxInit_uint32_T(&lenvec);
@@ -9101,6 +9104,7 @@ static void seed_kmers(const emxArray_char_T *fn, double num,
     /* 'gkmPWM:227' fprintf("ERROR: Weight file cannot be opened.\n") */
     printf("ERROR: Weight file cannot be opened.\n");
     fflush(stdout);
+    exit(1);
   }
 
   /*  a = textscan(fid, '%s\t%f\n'); */
@@ -11343,6 +11347,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     /* 'gkmPWM:134' fprintf("ERROR: Cannot create training error log.\n"); */
     printf("ERROR: Cannot create training error log.\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'gkmPWM:137' for idx=1:length(scorevec) */

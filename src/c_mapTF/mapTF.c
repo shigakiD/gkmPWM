@@ -1957,6 +1957,7 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_3 *mat,
     /* 'mapTF:431' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
     printf("ERROR: Cannot open gkmPWM motif files\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'mapTF:433' curr_pos = ftell(fid); */
@@ -2294,6 +2295,7 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_4
     /* 'mapTF:966' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
     printf("ERROR: Cannot open gkmPWM motif files\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'mapTF:968' curr_pos = ftell(fid); */
@@ -3069,6 +3071,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     /* 'mapTF:700' fprintf("ERROR: gkmPWMlasso output file cannot be opened.\n") */
     printf("ERROR: gkmPWMlasso output file cannot be opened.\n");
     fflush(stdout);
+    exit(1);
   }
 
   emxInit_char_T(&b_fileid, 2);
@@ -4074,6 +4077,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     /* 'mapTF:904' fprintf("ERROR: Cannot create the combined motif file\n"); */
     printf("ERROR: Cannot create the combined motif file\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'mapTF:906' a = 1; */
@@ -5001,6 +5005,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     /* 'mapTF:540' fprintf("ERROR: Weight file cannot be opened.\n") */
     printf("ERROR: Weight file cannot be opened.\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'mapTF:543' curr_pos = ftell(fid); */
@@ -5100,6 +5105,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     /* 'mapTF:566' fprintf("ERROR: L must be the same as the length of k-mer in the weight file\n"); */
     printf("ERROR: L must be the same as the length of k-mer in the weight file\n");
     fflush(stdout);
+    exit(1);
   }
 
   emxInit_real_T(&w, 1);
@@ -5236,6 +5242,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     /* 'mapTF:586' fprintf("ERROR: Sequence file (.fa or .fasta) cannot be opened.\n") */
     printf("ERROR: Sequence file (.fa or .fasta) cannot be opened.\n");
     fflush(stdout);
+    exit(1);
   }
 
   /* 'mapTF:589' curr_pos = ftell(fid); */
@@ -5991,6 +5998,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T
     /* 'mapTF:17' fprintf('ERROR: L must be greater or equal to the K\n'); */
     printf("ERROR: L must be greater or equal to the K\n");
     fflush(stdout);
+    exit(1);
   }
 
   emxInit_cell_wrap_0(&P);

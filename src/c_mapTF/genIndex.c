@@ -1736,6 +1736,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
     /* 'genIndex:5' fprintf('ERROR: n_frac must be a fraction in [0,1]\n'); */
     printf("ERROR: n_frac must be a fraction in [0,1]\n");
     fflush(stdout);
+    exit(1);
   }
   /* 'genIndex:7' if n_frac ~= 1 */
   emxInit_real_T(&f, 2);

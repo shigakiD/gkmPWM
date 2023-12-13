@@ -571,6 +571,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
     /* 'gkmPWMlasso:452' fprintf("ERROR: Cannot open motif database.\n"); */
     printf("ERROR: Cannot open motif database.\n");
     fflush(stdout);
+    exit(1);
   }
   /* 'gkmPWMlasso:454' while ~feof(fid) */
   b_NULL = NULL;
@@ -749,6 +750,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
      * file.\n"); */
     printf("ERROR: Cannot create gkmPWMlasso output file.\n");
     fflush(stdout);
+    exit(1);
   }
   /* 'gkmPWMlasso:469' fprintf(fidw, 'Minimum PWM Length:\t%d\n', int32(minL));
    */

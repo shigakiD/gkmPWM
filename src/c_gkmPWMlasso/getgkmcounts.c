@@ -1143,6 +1143,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
           &validatedHoleFilling[1].f1->data[0],
           &validatedHoleFilling[2].f1->data[0]);
       fflush(stdout);
+      exit(1);
       /*  Dummy Initialization to Appease Matlab Coder */
       /* 'getgkmcounts:93' idx = 1; */
       /* 'getgkmcounts:94' alpha = zeros(idx,1); */
