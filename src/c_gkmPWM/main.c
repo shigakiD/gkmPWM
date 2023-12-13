@@ -38,37 +38,44 @@ void display_arguments() {
     printf(
             "\n"
             "gkmPWM: A method to extract compact and interpretable " 
-            "features from gkmSVM models.\n"
+            "features from gkmSVM models, de novo.\n"
             "\n\n"
             "Version:   1.0\n"
             "Code:      https://github.com/shigakiD/gkmPWM/tree/main\n"
-            "Author:    Dustin Shigaki\n"
+            "Author:    Dustin Shigaki, Gary Yang, Michael Beer\n"
             "Contact:   Report issues to the Github page\n"
             "\n\n"
-            "Usage:     gkmPWM [options] <prefix> <weight file> <database> <motif number>\n"
+            "Usage:     gkmPWM [options] <prefix> <weight file> <database> <number of positive motifs>\n"
             "\n"
             "Arguments:\n"
-            "        prefix: prefix of a gkmSVM model, where the model files are either\n"
-            "                *_svseq.fa and *_svalpha.out OR *.model.txt\n"
-            "   weight file: file name to the corresponding ungapped k-mer weight file\n"
-            "      database: file name to a database of transcription factor binding sites\n"
-            "                that is in meme format. An example file is provided.\n"
-            "  motif number: number of position weight matrix (PWM) to extract\n"
+            "                     prefix: prefix of a gkmSVM model, where the model files are either\n"
+            "                             *_svseq.fa and *_svalpha.out OR *.model.txt\n"
+            "                weight file: file name to the corresponding ungapped k-mer weight file\n"
+            "                   database: file name to a database of transcription factor binding sites\n"
+            "                             that is in meme format. An example file (combined_db_v4.meme) is provided.\n"
+            "  number of positive motifs: number of positive position weight matrix (PWM) to extract\n"
             "\n"
             "  Options:\n"
-            "    -c <float>    correlation cutoff for considering two PWMs to be distinct (default: 0.90)\n"
-            "    -r <float>    regularization (default: 0)\n"
-            "    -P <float>    number of motifs to extract from the negative set used to train a gkmSVM model. \n"
-            "                  when set to 0, gkmPWM will automatically infer this number. (default: 0)\n"
-            "    -f <float>    using a fraction of gapped k-mer for PWM extraction; the number must be in (0,1];\n"
-            "                  setting to a smaller value, like 0.2, will significantly speed up the program (default: 1)\n"
-            "    -l <int>      total length of the gapped k-mer. It doesn't have to be the same l from gkmSVM model (default: 10)\n"
-            "    -k <int>      the number of ungapped positions. It doesn't have to be the same k from gkmSVM model (default: 6)\n"
-            "    -i <int>      number of training iterations. Recommend at least 10 times the number of motifs (default: 100)\n"
+            "    -c <float>    pearson correlation cutoff for considering two PWMs to be distinct (default: 0.90)\n"
+            "    -r <float>    regularization. It must be in [0, 1); larger regularization encourages higher \n"
+	    "                  information PWMs (default: 0)\n"
+            "    -P <float>    the ratio of positive to negative motifs, e.g. when set to 2, there will \n"
+	    "                  be twice as many positive motifs seeded as the negative motifs.\n"
+            "                  When set to 0, gkmPWM will automatically infer this number. (default: 0)\n"
+	    "    -f <float>    a fraction of total gapped k-mer for PWM extraction; the number must be in [0,1];\n"
+            "                  setting to a smaller value, like 0.2, will significantly speed up the program.\n"
+            "                  If the total number of gapped k-mer is too large, this value will be set \n"
+	    "                  automatically to a smaller number (default: 1)\n"
+            "    -l <int>      total length of the gapped k-mer. It DOES NOT need to be the same l from \n"
+	    "                  the input gkmSVM model (default: 10)\n"
+            "    -k <int>      the number of ungapped positions. It DOES NOT need to be the same k from \n"
+	    "                  the input gkmSVM model (default: 6)\n"
+            "    -i <int>      number of training iterations (default: 200)\n"
             "    -b            if set, background GC content equal to the average of the \n"
             "                  positive and negative set used to train gkmSVM; else, the GC content \n"
-            "                  equal to the negative set (default: false) \n"
-            "    -R            consider reverse-complement of k-mer to be the same (default: true) \n"
+            "                  equal to the negative set. Use this if the positive and negative sets \n"
+	    "                  both contain regulatory elements \n"
+            "    -R            if set, consider reverse-complements of gapped k-mers to be distinct \n"
             "\n");
     exit(0);
 }
@@ -103,6 +110,10 @@ int main(int argc, char* argv[]) {
                 break;            
             case 'r':
                 reg = strtod(optarg, &pEnd);
+		if (reg >= 1 || reg < 0) {
+		  printf("ERROR: regularization must be greater than or equal to 0 and less than 1\n");
+		  exit(1);
+		}
                 break;
             case 'P':
                 iPNRatio = strtod(optarg, &pEnd);
