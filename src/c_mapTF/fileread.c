@@ -12,8 +12,8 @@
 /* Include files */
 #include "fileread.h"
 #include "fileManager.h"
-#include "mapTF2_ls_emxutil.h"
-#include "mapTF2_ls_types.h"
+#include "mapTF_emxutil.h"
+#include "mapTF_types.h"
 #include "rt_nonfinite.h"
 #include <stddef.h>
 #include <stdio.h>

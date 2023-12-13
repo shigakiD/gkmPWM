@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "str2double1.h"
-#include "gkmPWMlasso4_data.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_data.h"
+#include "gkmPWMlasso_types.h"
 #include <string.h>
 
 /* Function Declarations */

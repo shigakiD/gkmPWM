@@ -5,7 +5,7 @@
  *
  * rtwtypes.h
  *
- * Code generation for function 'gkmPWMlasso4'
+ * Code generation for function 'gkmPWMlasso'
  *
  */
 

@@ -12,8 +12,8 @@
 /* Include files */
 #include "BGkmer.h"
 #include "diff.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include "mod.h"
 #include <math.h>
 #include <string.h>

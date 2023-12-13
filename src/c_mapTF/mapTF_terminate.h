@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_initialize.h
+ * mapTF_terminate.h
  *
- * Code generation for function 'mapTF2_ls_initialize'
+ * Code generation for function 'mapTF_terminate'
  *
  */
 
-#ifndef MAPTF2_LS_INITIALIZE_H
-#define MAPTF2_LS_INITIALIZE_H
+#ifndef MAPTF2_LS_TERMINATE_H
+#define MAPTF2_LS_TERMINATE_H
 
 /* Include files */
 #include "rtwtypes.h"
@@ -23,11 +23,11 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void mapTF2_ls_initialize(void);
+extern void mapTF_terminate(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (mapTF2_ls_initialize.h) */
+/* End of code generation (mapTF_terminate.h) */

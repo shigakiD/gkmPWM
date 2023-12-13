@@ -13,7 +13,7 @@
 #define STRCMP_H
 
 /* Include files */
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>

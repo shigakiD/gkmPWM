@@ -8,10 +8,10 @@
 //
 // Include files
 #include "main.h"
-#include "gkmPWMlasso4.h"
-#include "gkmPWMlasso4_terminate.h"
-#include "gkmPWMlasso4_emxAPI.h"
-#include "gkmPWMlasso4_emxutil.h"
+#include "gkmPWMlasso.h"
+#include "gkmPWMlasso_terminate.h"
+#include "gkmPWMlasso_emxAPI.h"
+#include "gkmPWMlasso_emxutil.h"
 #include "cblas.h"
 #include "lapacke.h"
 #include <string.h>
@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
     
     openblas_set_num_threads(1);
     
-    gkmPWMlasso4(model_file,
+    gkmPWMlasso(model_file,
                  motif_file, 
                  minLength,
                  minInfo,
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
     emxFree_char_T(&model_file);
     emxFree_char_T(&motif_file);
     
-    gkmPWMlasso4_terminate();
+    gkmPWMlasso_terminate();
     return 0;
 }
 

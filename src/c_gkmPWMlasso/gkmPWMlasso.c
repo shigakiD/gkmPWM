@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4.c
+ * gkmPWMlasso.c
  *
- * Code generation for function 'gkmPWMlasso4'
+ * Code generation for function 'gkmPWMlasso'
  *
  */
 
 /* Include files */
-#include "gkmPWMlasso4.h"
+#include "gkmPWMlasso.h"
 #include "BGkmer.h"
 #include "PWM2kmers.h"
 #include "PWM2kmers_norc.h"
@@ -26,11 +26,11 @@
 #include "genIndex.h"
 #include "getgkmcounts.h"
 #include "getmotif.h"
-#include "gkmPWMlasso4_data.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_initialize.h"
-#include "gkmPWMlasso4_rtwutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_data.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_initialize.h"
+#include "gkmPWMlasso_rtwutil.h"
+#include "gkmPWMlasso_types.h"
 #include "graph.h"
 #include "lasso_cvmat.h"
 #include "minOrMax.h"
@@ -113,7 +113,7 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
   bool *b_simmat_data;
   simmat_data = simmat->data;
   emxInit_boolean_T(&b_simmat, 2);
-  /* 'gkmPWMlasso4:481' bin = conncomp(graph(simmat>r)); */
+  /* 'gkmPWMlasso:481' bin = conncomp(graph(simmat>r)); */
   k = b_simmat->size[0] * b_simmat->size[1];
   b_simmat->size[0] = simmat->size[0];
   b_simmat->size[1] = simmat->size[1];
@@ -129,7 +129,7 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
   graph_graph(b_simmat, t0_Underlying_Ir, t0_Underlying_Jc);
   graph_conncomp(t0_Underlying_Ir, t0_Underlying_Jc, bin);
   bin_data = bin->data;
-  /* 'gkmPWMlasso4:482' n = max(bin); */
+  /* 'gkmPWMlasso:482' n = max(bin); */
   last = bin->size[1];
   emxFree_boolean_T(&b_simmat);
   emxFree_int32_T(&t0_Underlying_Jc);
@@ -151,8 +151,8 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
       }
     }
   }
-  /* 'gkmPWMlasso4:483' motclus = cell(n,1); */
-  /* 'gkmPWMlasso4:484' for i = 1:n */
+  /* 'gkmPWMlasso:483' motclus = cell(n,1); */
+  /* 'gkmPWMlasso:484' for i = 1:n */
   k = (int)n;
   i = motclus->size[0];
   motclus->size[0] = (int)n;
@@ -161,7 +161,7 @@ static void b_clus_simmat_eig(const emxArray_real_T *simmat,
   emxInit_int32_T(&b_r, 2);
   emxInit_boolean_T(&b_bin, 2);
   for (b_i = 0; b_i < k; b_i++) {
-    /* 'gkmPWMlasso4:485' motclus{i} = find(bin == i); */
+    /* 'gkmPWMlasso:485' motclus{i} = find(bin == i); */
     i = b_bin->size[0] * b_bin->size[1];
     b_bin->size[0] = 1;
     b_bin->size[1] = bin->size[1];
@@ -311,7 +311,7 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
   bool *b_simmat_data;
   simmat_data = simmat->data;
   emxInit_boolean_T(&b_simmat, 2);
-  /* 'gkmPWMlasso4:481' bin = conncomp(graph(simmat>r)); */
+  /* 'gkmPWMlasso:481' bin = conncomp(graph(simmat>r)); */
   k = b_simmat->size[0] * b_simmat->size[1];
   b_simmat->size[0] = simmat->size[0];
   b_simmat->size[1] = simmat->size[1];
@@ -327,7 +327,7 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
   graph_graph(b_simmat, t1_Underlying_Ir, t1_Underlying_Jc);
   graph_conncomp(t1_Underlying_Ir, t1_Underlying_Jc, bin);
   bin_data = bin->data;
-  /* 'gkmPWMlasso4:482' n = max(bin); */
+  /* 'gkmPWMlasso:482' n = max(bin); */
   last = bin->size[1];
   emxFree_boolean_T(&b_simmat);
   emxFree_int32_T(&t1_Underlying_Jc);
@@ -349,8 +349,8 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
       }
     }
   }
-  /* 'gkmPWMlasso4:483' motclus = cell(n,1); */
-  /* 'gkmPWMlasso4:484' for i = 1:n */
+  /* 'gkmPWMlasso:483' motclus = cell(n,1); */
+  /* 'gkmPWMlasso:484' for i = 1:n */
   k = (int)n;
   i = motclus->size[0];
   motclus->size[0] = (int)n;
@@ -359,7 +359,7 @@ static void clus_simmat_eig(const emxArray_real_T *simmat, double b_r,
   emxInit_int32_T(&c_r, 2);
   emxInit_boolean_T(&b_bin, 2);
   for (b_i = 0; b_i < k; b_i++) {
-    /* 'gkmPWMlasso4:485' motclus{i} = find(bin == i); */
+    /* 'gkmPWMlasso:485' motclus{i} = find(bin == i); */
     i = b_bin->size[0] * b_bin->size[1];
     b_bin->size[0] = 1;
     b_bin->size[1] = bin->size[1];
@@ -490,7 +490,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   pvec_data = pvec->data;
   weigvec_data = weigvec->data;
   emxInit_real_T(&a, 1);
-  /* 'gkmPWMlasso4:437' [a, b] = sort(pvec, 'descend'); */
+  /* 'gkmPWMlasso:437' [a, b] = sort(pvec, 'descend'); */
   i = a->size[0];
   a->size[0] = pvec->size[0];
   emxEnsureCapacity_real_T(a, i);
@@ -504,7 +504,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   sort(a, iidx);
   iidx_data = iidx->data;
   a_data = a->data;
-  /* 'gkmPWMlasso4:438' c = [weigvec(b) a E(b)]; */
+  /* 'gkmPWMlasso:438' c = [weigvec(b) a E(b)]; */
   i = c->size[0] * c->size[1];
   c->size[0] = iidx->size[0];
   c->size[1] = 3;
@@ -525,16 +525,16 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxInit_cell_wrap_1(&ordered_motclus);
   /*  motclus = motclus(b); */
-  /* 'gkmPWMlasso4:440' mylen = length(b); */
-  /* 'gkmPWMlasso4:441' ordered_motclus = cell(mylen, 1); */
-  /* 'gkmPWMlasso4:442' for idx=1:mylen */
+  /* 'gkmPWMlasso:440' mylen = length(b); */
+  /* 'gkmPWMlasso:441' ordered_motclus = cell(mylen, 1); */
+  /* 'gkmPWMlasso:442' for idx=1:mylen */
   i = iidx->size[0];
   i1 = ordered_motclus->size[0];
   ordered_motclus->size[0] = iidx->size[0];
   emxEnsureCapacity_cell_wrap_1(ordered_motclus, i1);
   ordered_motclus_data = ordered_motclus->data;
   for (k = 0; k < i; k++) {
-    /* 'gkmPWMlasso4:443' ordered_motclus{idx} = motclus{b(idx)}; */
+    /* 'gkmPWMlasso:443' ordered_motclus{idx} = motclus{b(idx)}; */
     i1 = ordered_motclus_data[k].f1->size[0] *
          ordered_motclus_data[k].f1->size[1];
     ordered_motclus_data[k].f1->size[0] = 1;
@@ -549,9 +549,9 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxFree_int32_T(&iidx);
   emxInit_cell_wrap_8(&names);
-  /* 'gkmPWMlasso4:445' motclus = ordered_motclus; */
-  /* 'gkmPWMlasso4:446' [rr,cc] = size(c); */
-  /* 'gkmPWMlasso4:447' names = cell(n,1); */
+  /* 'gkmPWMlasso:445' motclus = ordered_motclus; */
+  /* 'gkmPWMlasso:446' [rr,cc] = size(c); */
+  /* 'gkmPWMlasso:447' names = cell(n,1); */
   nbytes = (int)n;
   i = names->size[0];
   names->size[0] = (int)n;
@@ -561,18 +561,18 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
     names_data[i].f1->size[0] = 1;
     names_data[i].f1->size[1] = 0;
   }
-  /* 'gkmPWMlasso4:448' names = coder.nullcopy(names); */
-  /* 'gkmPWMlasso4:449' i = 0; */
+  /* 'gkmPWMlasso:448' names = coder.nullcopy(names); */
+  /* 'gkmPWMlasso:449' i = 0; */
   b_i = 0.0;
-  /* 'gkmPWMlasso4:450' fid = fopen(memefile, 'r'); */
+  /* 'gkmPWMlasso:450' fid = fopen(memefile, 'r'); */
   fileid = cfopen(memefile, "rb");
-  /* 'gkmPWMlasso4:451' if fid == -1 */
+  /* 'gkmPWMlasso:451' if fid == -1 */
   if (fileid == -1) {
-    /* 'gkmPWMlasso4:452' fprintf("ERROR: Cannot open motif database.\n"); */
+    /* 'gkmPWMlasso:452' fprintf("ERROR: Cannot open motif database.\n"); */
     printf("ERROR: Cannot open motif database.\n");
     fflush(stdout);
   }
-  /* 'gkmPWMlasso4:454' while ~feof(fid) */
+  /* 'gkmPWMlasso:454' while ~feof(fid) */
   b_NULL = NULL;
   emxInit_char_T(&line, 2);
   do {
@@ -585,20 +585,20 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       i = ((int)st != 0);
     }
     if (i == 0) {
-      /* 'gkmPWMlasso4:455' line = fgetl(fid); */
+      /* 'gkmPWMlasso:455' line = fgetl(fid); */
       fgetl(fileid, line);
       line_data = line->data;
-      /* 'gkmPWMlasso4:456' if length(line) >= 5 */
+      /* 'gkmPWMlasso:456' if length(line) >= 5 */
       if (line->size[1] >= 5) {
-        /* 'gkmPWMlasso4:457' if strcmp(line(1:5), 'MOTIF') */
+        /* 'gkmPWMlasso:457' if strcmp(line(1:5), 'MOTIF') */
         for (i = 0; i < 5; i++) {
           c_a[i] = line_data[i];
         }
         nbytes = memcmp(&c_a[0], &b[0], 5);
         if (nbytes == 0) {
-          /* 'gkmPWMlasso4:458' i = i+1; */
+          /* 'gkmPWMlasso:458' i = i+1; */
           b_i++;
-          /* 'gkmPWMlasso4:459' [~,name] = strtok(line); */
+          /* 'gkmPWMlasso:459' [~,name] = strtok(line); */
           nbytes = line->size[1];
           k = 1;
           do {
@@ -656,7 +656,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
             i = k - 2;
             i1 = line->size[1];
           }
-          /* 'gkmPWMlasso4:460' names{i} = strtrim(name); */
+          /* 'gkmPWMlasso:460' names{i} = strtrim(name); */
           nbytes = 1;
           exitg7 = false;
           while ((!exitg7) && (nbytes <= (i1 - i) - 1)) {
@@ -699,9 +699,9 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       exitg1 = 1;
     }
   } while (exitg1 == 0);
-  /* 'gkmPWMlasso4:464' fclose(fid); */
+  /* 'gkmPWMlasso:464' fclose(fid); */
   cfclose(fileid);
-  /* 'gkmPWMlasso4:465' fidw = fopen(sprintf('%s_gkmPWMlasso4.out', filename),
+  /* 'gkmPWMlasso:465' fidw = fopen(sprintf('%s_gkmPWMlasso.out', filename),
    * 'w'); */
   i = line->size[0] * line->size[1];
   line->size[0] = 1;
@@ -725,13 +725,13 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxInit_char_T(&charStr, 2);
   charStr_data[filename_Value->size[1]] = '\x00';
-  nbytes = snprintf(NULL, 0, "%s_gkmPWMlasso4.out", &charStr_data[0]);
+  nbytes = snprintf(NULL, 0, "%s_gkmPWMlasso.out", &charStr_data[0]);
   i = charStr->size[0] * charStr->size[1];
   charStr->size[0] = 1;
   charStr->size[1] = nbytes + 1;
   emxEnsureCapacity_char_T(charStr, i);
   charStr_data = charStr->data;
-  snprintf(&charStr_data[0], (size_t)(nbytes + 1), "%s_gkmPWMlasso4.out",
+  snprintf(&charStr_data[0], (size_t)(nbytes + 1), "%s_gkmPWMlasso.out",
            &line_data[0]);
   i = charStr->size[0] * charStr->size[1];
   if (1 > nbytes) {
@@ -741,16 +741,16 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   }
   emxEnsureCapacity_char_T(charStr, i);
   fileid = cfopen(charStr, "wb");
-  /* 'gkmPWMlasso4:466' if fidw == -1 */
+  /* 'gkmPWMlasso:466' if fidw == -1 */
   emxFree_char_T(&varargin_1);
   emxFree_char_T(&charStr);
   if (fileid == -1) {
-    /* 'gkmPWMlasso4:467' fprintf("ERROR: Cannot create gkmPWMlasso output
+    /* 'gkmPWMlasso:467' fprintf("ERROR: Cannot create gkmPWMlasso output
      * file.\n"); */
     printf("ERROR: Cannot create gkmPWMlasso output file.\n");
     fflush(stdout);
   }
-  /* 'gkmPWMlasso4:469' fprintf(fidw, 'Minimum PWM Length:\t%d\n', int32(minL));
+  /* 'gkmPWMlasso:469' fprintf(fidw, 'Minimum PWM Length:\t%d\n', int32(minL));
    */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -760,7 +760,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:470' fprintf(fidw, 'Minimum PWM Information:\t%f\n',
+  /* 'gkmPWMlasso:470' fprintf(fidw, 'Minimum PWM Information:\t%f\n',
    * minInfo); */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -770,7 +770,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:471' fprintf(fidw, 'Correlation with SVM weights:\t%f\n', C);
+  /* 'gkmPWMlasso:471' fprintf(fidw, 'Correlation with SVM weights:\t%f\n', C);
    */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -780,7 +780,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:472' fprintf(fidw, 'Cluster ID\tMotif ID\tMotif
+  /* 'gkmPWMlasso:472' fprintf(fidw, 'Cluster ID\tMotif ID\tMotif
    * Name\tRegression Weight\tZ-score\tImportance\n'); */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &b_a);
@@ -791,16 +791,16 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
       fflush(filestar);
     }
   }
-  /* 'gkmPWMlasso4:473' for j = 1:length(E) */
+  /* 'gkmPWMlasso:473' for j = 1:length(E) */
   i = E->size[0];
   for (k = 0; k < i; k++) {
-    /* 'gkmPWMlasso4:474' for l = 1:length(motclus{j}) */
+    /* 'gkmPWMlasso:474' for l = 1:length(motclus{j}) */
     i1 = ordered_motclus_data[k].f1->size[1];
     if (0 <= ordered_motclus_data[k].f1->size[1] - 1) {
       c_NULL = NULL;
     }
     for (l = 0; l < i1; l++) {
-      /* 'gkmPWMlasso4:475' fprintf(fidw, '%d\t%d\t%s\t%0.3f\t%0.3f\t%0.3f\n',
+      /* 'gkmPWMlasso:475' fprintf(fidw, '%d\t%d\t%s\t%0.3f\t%0.3f\t%0.3f\n',
        * int32(j), int32(motclus{j}(l)), names{motclus{j}(l)}, c(j,1), c(j,2),
        * c(j,3)); */
       i2 = line->size[0] * line->size[1];
@@ -834,7 +834,7 @@ static void gettopmotifs(const emxArray_real_T *weigvec,
   emxFree_cell_wrap_8(&names);
   emxFree_cell_wrap_1(&ordered_motclus);
   emxFree_real_T(&c);
-  /* 'gkmPWMlasso4:478' fclose(fidw); */
+  /* 'gkmPWMlasso:478' fclose(fidw); */
   cfclose(fileid);
 }
 
@@ -864,19 +864,19 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
   int nx;
   int nxout;
   p_data = p->data;
-  /* 'gkmPWMlasso4:489' l = length(p); */
-  /* 'gkmPWMlasso4:490' info = zeros(l, 1); */
+  /* 'gkmPWMlasso:489' l = length(p); */
+  /* 'gkmPWMlasso:490' info = zeros(l, 1); */
   nx = p->size[0];
   i = info->size[0];
   info->size[0] = nx;
   emxEnsureCapacity_real_T(info, i);
   info_data = info->data;
-  /* 'gkmPWMlasso4:491' len = zeros(l,1); */
+  /* 'gkmPWMlasso:491' len = zeros(l,1); */
   i = len->size[0];
   len->size[0] = nx;
   emxEnsureCapacity_real_T(len, i);
   len_data = len->data;
-  /* 'gkmPWMlasso4:492' for i = 1:l */
+  /* 'gkmPWMlasso:492' for i = 1:l */
   i = p->size[0];
   emxInit_real_T(&mat, 2);
   emxInit_real_T(&vec, 1);
@@ -884,7 +884,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
   emxInit_real_T(&b_r, 2);
   emxInit_real_T(&b_mat, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWMlasso4:493' mat = p{i}+(p{i}==0); */
+    /* 'gkmPWMlasso:493' mat = p{i}+(p{i}==0); */
     idx = mat->size[0] * mat->size[1];
     mat->size[0] = p_data[b_i].f1->size[0];
     mat->size[1] = p_data[b_i].f1->size[1];
@@ -895,7 +895,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       mat_data[idx] = p_data[b_i].f1->data[idx] +
                       (double)(p_data[b_i].f1->data[idx] == 0.0);
     }
-    /* 'gkmPWMlasso4:494' vec = 2+sum(mat.*log(mat)/log(2),2); */
+    /* 'gkmPWMlasso:494' vec = 2+sum(mat.*log(mat)/log(2),2); */
     idx = b_r->size[0] * b_r->size[1];
     b_r->size[0] = mat->size[0];
     b_r->size[1] = mat->size[1];
@@ -929,16 +929,16 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
     for (idx = 0; idx < nx; idx++) {
       mat_data[idx] += 2.0;
     }
-    /* 'gkmPWMlasso4:495' mvec = movmean(vec,5); */
+    /* 'gkmPWMlasso:495' mvec = movmean(vec,5); */
     nx = vec->size[0];
     if (2 <= nx) {
       nx = 2;
     }
     vmovfun(vec, vec->size[0], nx, nx, mvec);
     mvec_data = mvec->data;
-    /* 'gkmPWMlasso4:496' while min(vec(1),mvec(1)) < cut && length(vec) > 1 */
+    /* 'gkmPWMlasso:496' while min(vec(1),mvec(1)) < cut && length(vec) > 1 */
     while ((fmin(mat_data[0], mvec_data[0]) < 0.0) && (vec->size[0] > 1)) {
-      /* 'gkmPWMlasso4:497' p{i}(1,:) = []; */
+      /* 'gkmPWMlasso:497' p{i}(1,:) = []; */
       nx = p_data[b_i].f1->size[0] - 2;
       nxout = p_data[b_i].f1->size[1];
       nrows = p_data[b_i].f1->size[0] - 1;
@@ -964,7 +964,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       p_data[b_i].f1->size[0] = nx;
       p_data[b_i].f1->size[1] = nxout + 1;
       emxEnsureCapacity_real_T(p_data[b_i].f1, idx);
-      /* 'gkmPWMlasso4:498' vec(1) = []; */
+      /* 'gkmPWMlasso:498' vec(1) = []; */
       nx = vec->size[0];
       nxout = vec->size[0];
       for (nrows = 0; nrows <= nxout - 2; nrows++) {
@@ -974,7 +974,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       vec->size[0] = nx - 1;
       emxEnsureCapacity_real_T(vec, idx);
       mat_data = vec->data;
-      /* 'gkmPWMlasso4:499' mvec(1)=[]; */
+      /* 'gkmPWMlasso:499' mvec(1)=[]; */
       nx = mvec->size[0];
       nxout = mvec->size[0] - 1;
       for (nrows = 0; nrows < nxout; nrows++) {
@@ -988,7 +988,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       }
       emxEnsureCapacity_real_T(mvec, idx);
       mvec_data = mvec->data;
-      /* 'gkmPWMlasso4:500' mat(1,:) = []; */
+      /* 'gkmPWMlasso:500' mat(1,:) = []; */
       idx = mat->size[0] * mat->size[1];
       if (1 > mat->size[0] - 1) {
         mat->size[0] = 0;
@@ -997,12 +997,12 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       }
       emxEnsureCapacity_real_T(mat, idx);
     }
-    /* 'gkmPWMlasso4:502' while min(mvec(end),vec(end)) < cut && length(vec) > 1
+    /* 'gkmPWMlasso:502' while min(mvec(end),vec(end)) < cut && length(vec) > 1
      */
     while ((fmin(mvec_data[mvec->size[0] - 1], mat_data[vec->size[0] - 1]) <
             0.0) &&
            (vec->size[0] > 1)) {
-      /* 'gkmPWMlasso4:503' vec(end) = []; */
+      /* 'gkmPWMlasso:503' vec(end) = []; */
       idx = vec->size[0];
       nx = vec->size[0];
       nxout = vec->size[0] - 1;
@@ -1013,7 +1013,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       vec->size[0] = nx - 1;
       emxEnsureCapacity_real_T(vec, idx);
       mat_data = vec->data;
-      /* 'gkmPWMlasso4:504' mvec(end)=[]; */
+      /* 'gkmPWMlasso:504' mvec(end)=[]; */
       idx = mvec->size[0];
       nx = mvec->size[0];
       nxout = mvec->size[0] - 1;
@@ -1028,7 +1028,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       }
       emxEnsureCapacity_real_T(mvec, idx);
       mvec_data = mvec->data;
-      /* 'gkmPWMlasso4:505' mat(end,:) = []; */
+      /* 'gkmPWMlasso:505' mat(end,:) = []; */
       idx = mat->size[0] * mat->size[1];
       if (1 > mat->size[0] - 1) {
         mat->size[0] = 0;
@@ -1036,7 +1036,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
         mat->size[0]--;
       }
       emxEnsureCapacity_real_T(mat, idx);
-      /* 'gkmPWMlasso4:506' p{i}(end,:) = []; */
+      /* 'gkmPWMlasso:506' p{i}(end,:) = []; */
       idx = p_data[b_i].f1->size[0];
       nx = p_data[b_i].f1->size[0] - 2;
       nxout = p_data[b_i].f1->size[1];
@@ -1064,9 +1064,9 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
       p_data[b_i].f1->size[1] = nxout + 1;
       emxEnsureCapacity_real_T(p_data[b_i].f1, idx);
     }
-    /* 'gkmPWMlasso4:508' info(i) = sum(vec); */
+    /* 'gkmPWMlasso:508' info(i) = sum(vec); */
     info_data[b_i] = blockedSummation(vec, vec->size[0]);
-    /* 'gkmPWMlasso4:509' [len(i), ~] = size(mat); */
+    /* 'gkmPWMlasso:509' [len(i), ~] = size(mat); */
     len_data[b_i] = mat->size[0];
   }
   emxFree_real_T(&b_mat);
@@ -1074,7 +1074,7 @@ static void trim_pwm(emxArray_cell_wrap_0 *p, emxArray_real_T *info,
   emxFree_real_T(&mvec);
   emxFree_real_T(&vec);
   emxFree_real_T(&mat);
-  /* 'gkmPWMlasso4:511' pp = p; */
+  /* 'gkmPWMlasso:511' pp = p; */
 }
 
 static void u_binary_expand_op(emxArray_real_T *vec, const emxArray_real_T *mat,
@@ -1142,7 +1142,7 @@ static void u_binary_expand_op(emxArray_real_T *vec, const emxArray_real_T *mat,
 /*
  * function gkmPWMlasso(varargin)
  */
-void gkmPWMlasso4(const emxArray_char_T *varargin_1,
+void gkmPWMlasso(const emxArray_char_T *varargin_1,
                   const emxArray_char_T *varargin_2, double varargin_3,
                   double varargin_4, double varargin_5, double varargin_6,
                   double varargin_7, double varargin_8, bool varargin_9,
@@ -1275,24 +1275,24 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   bool empty_non_axis_sizes;
   bool exitg1;
   bool *b_loc_data;
-  if (!isInitialized_gkmPWMlasso4) {
-    gkmPWMlasso4_initialize();
+  if (!isInitialized_gkmPWMlasso) {
+    gkmPWMlasso_initialize();
   }
   /*  if nargin < 2 */
   /*      error('Need at least 3 inputs') */
   /*  end */
-  /* 'gkmPWMlasso4:7' filename = varargin{1}; */
-  /* 'gkmPWMlasso4:8' memefile = varargin{2}; */
-  /* 'gkmPWMlasso4:9' minL = varargin{3}; */
-  /* 'gkmPWMlasso4:10' minInfo = varargin{4}; */
-  /* 'gkmPWMlasso4:11' corrCut = varargin{5}; */
-  /* 'gkmPWMlasso4:12' l_svm = varargin{6}; */
-  /* 'gkmPWMlasso4:13' k_svm = varargin{7}; */
-  /* 'gkmPWMlasso4:14' BG_GC = varargin{8}; */
-  /* 'gkmPWMlasso4:15' RC = varargin{9}; */
-  /* 'gkmPWMlasso4:16' d = varargin{10}; */
-  /* 'gkmPWMlasso4:17' nfrac = varargin{11}; */
-  /* 'gkmPWMlasso4:18' lk = 1; */
+  /* 'gkmPWMlasso:7' filename = varargin{1}; */
+  /* 'gkmPWMlasso:8' memefile = varargin{2}; */
+  /* 'gkmPWMlasso:9' minL = varargin{3}; */
+  /* 'gkmPWMlasso:10' minInfo = varargin{4}; */
+  /* 'gkmPWMlasso:11' corrCut = varargin{5}; */
+  /* 'gkmPWMlasso:12' l_svm = varargin{6}; */
+  /* 'gkmPWMlasso:13' k_svm = varargin{7}; */
+  /* 'gkmPWMlasso:14' BG_GC = varargin{8}; */
+  /* 'gkmPWMlasso:15' RC = varargin{9}; */
+  /* 'gkmPWMlasso:16' d = varargin{10}; */
+  /* 'gkmPWMlasso:17' nfrac = varargin{11}; */
+  /* 'gkmPWMlasso:18' lk = 1; */
   lk_size[0] = 1;
   lk_size[1] = 1;
   lk_data[0] = 1.0;
@@ -1338,9 +1338,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   /*          RC = varargin{f+1}; */
   /*      end */
   /*  end */
-  /* 'gkmPWMlasso4:63' if nfrac ~= 1 */
+  /* 'gkmPWMlasso:63' if nfrac ~= 1 */
   if (varargin_11 != 1.0) {
-    /* 'gkmPWMlasso4:64' lk = [l_svm k_svm]; */
+    /* 'gkmPWMlasso:64' lk = [l_svm k_svm]; */
     lk_size[0] = 1;
     lk_size[1] = 2;
     lk_data[0] = varargin_6;
@@ -1351,12 +1351,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxInit_real_T(&diffc, 1);
   emxInit_real_T(&indc, 1);
   emxInit_real_T(&xc, 2);
-  /* 'gkmPWMlasso4:67' [comb,comb2,diffc,indc,xc,rcnum] =
+  /* 'gkmPWMlasso:67' [comb,comb2,diffc,indc,xc,rcnum] =
    * genIndex(l_svm,k_svm,nfrac); */
   genIndex(varargin_6, varargin_7, varargin_11, comb, comb2, diffc, indc, xc,
            &rcnum);
   /* generate gapped positions, adjusted for reverse complements */
-  /* 'gkmPWMlasso4:69' if length(comb)*4^k_svm > 6*10^5 */
+  /* 'gkmPWMlasso:69' if length(comb)*4^k_svm > 6*10^5 */
   if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
     u1 = 0;
   } else {
@@ -1368,7 +1368,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   c = pow(4.0, varargin_7);
   if ((double)u1 * c > 600000.0) {
-    /* 'gkmPWMlasso4:70' nfrac = round(5*10^7/4^k_svm/length(comb))/100; */
+    /* 'gkmPWMlasso:70' nfrac = round(5*10^7/4^k_svm/length(comb))/100; */
     if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
       u1 = 0;
     } else {
@@ -1379,61 +1379,61 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     nfrac = rt_roundd(5.0E+7 / c / (double)u1) / 100.0;
-    /* 'gkmPWMlasso4:71' fprintf('WARNING: Combination of (l,k) yields too many
+    /* 'gkmPWMlasso:71' fprintf('WARNING: Combination of (l,k) yields too many
      * gapped kmers.  Using %f of the total gapped kmers', nfrac); */
     printf("WARNING: Combination of (l,k) yields too many gapped kmers.  Using "
            "%f of the total gapped kmers",
            nfrac);
     fflush(stdout);
-    /* 'gkmPWMlasso4:72' l_svm2 = l_svm; */
-    /* 'gkmPWMlasso4:73' k_svm2 = k_svm; */
-    /* 'gkmPWMlasso4:74' lk = ([l_svm k_svm]); */
+    /* 'gkmPWMlasso:72' l_svm2 = l_svm; */
+    /* 'gkmPWMlasso:73' k_svm2 = k_svm; */
+    /* 'gkmPWMlasso:74' lk = ([l_svm k_svm]); */
     lk_size[0] = 1;
     lk_size[1] = 2;
     lk_data[0] = varargin_6;
     lk_data[1] = varargin_7;
-    /* 'gkmPWMlasso4:75' [comb,comb2,diffc,indc,xc,rcnum] =
+    /* 'gkmPWMlasso:75' [comb,comb2,diffc,indc,xc,rcnum] =
      * genIndex(l_svm,k_svm,nfrac); */
     genIndex(varargin_6, varargin_7, nfrac, comb, comb2, diffc, indc, xc,
              &rcnum);
   } else {
-    /* 'gkmPWMlasso4:76' else */
-    /* 'gkmPWMlasso4:77' l_svm2 = l_svm; */
-    /* 'gkmPWMlasso4:78' k_svm2 = k_svm; */
+    /* 'gkmPWMlasso:76' else */
+    /* 'gkmPWMlasso:77' l_svm2 = l_svm; */
+    /* 'gkmPWMlasso:78' k_svm2 = k_svm; */
   }
   emxInit_real_T(&cfile2, 1);
-  /* 'gkmPWMlasso4:81' fprintf('Counting gapped kmers\n'); */
+  /* 'gkmPWMlasso:81' fprintf('Counting gapped kmers\n'); */
   printf("Counting gapped kmers\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:83' [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(filename,
+  /* 'gkmPWMlasso:83' [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(filename,
    * l_svm, k_svm, lk, RC, comb,rcnum); */
   getgkmcounts(varargin_1, varargin_6, varargin_7, lk_data, lk_size, varargin_9,
                comb, rcnum, cfile2, &GCpos1, &nfrac, mat, mat2);
   cfile2_data = cfile2->data;
-  /* 'gkmPWMlasso4:84' if BG_GC == 1 */
+  /* 'gkmPWMlasso:84' if BG_GC == 1 */
   if (varargin_8 == 1.0) {
-    /* 'gkmPWMlasso4:85' mat = (mat+mat2)/2; */
+    /* 'gkmPWMlasso:85' mat = (mat+mat2)/2; */
     for (i = 0; i < 16; i++) {
       mat[i] = (mat[i] + mat2[i]) / 2.0;
     }
-    /* 'gkmPWMlasso4:86' GCpos1 = (GCpos1+GCneg1)/2; */
+    /* 'gkmPWMlasso:86' GCpos1 = (GCpos1+GCneg1)/2; */
     GCpos1 = (GCpos1 + nfrac) / 2.0;
-    /* 'gkmPWMlasso4:87' GCneg1 = GCpos1; */
+    /* 'gkmPWMlasso:87' GCneg1 = GCpos1; */
     nfrac = GCpos1;
   }
   emxInit_real_T(&negvec, 1);
   emxInit_char_T(&text, 2);
-  /* 'gkmPWMlasso4:89' fprintf('Generating negative set\n'); */
+  /* 'gkmPWMlasso:89' fprintf('Generating negative set\n'); */
   printf("Generating negative set\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:90' negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
+  /* 'gkmPWMlasso:90' negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
    */
   BGkmer(mat, nfrac, comb, rcnum, varargin_6, varargin_7, varargin_9, negvec);
   negvec_data = negvec->data;
-  /* 'gkmPWMlasso4:92' fprintf('Filtering motifs\n'); */
+  /* 'gkmPWMlasso:92' fprintf('Filtering motifs\n'); */
   printf("Filtering motifs\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:93' num = length(strfind(fileread(memefile),'MOTIF')); */
+  /* 'gkmPWMlasso:93' num = length(strfind(fileread(memefile),'MOTIF')); */
   fileread(varargin_2, text);
   text_data = text->data;
   emxInit_int32_T(&match_out, 2);
@@ -1469,7 +1469,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     emxFree_int32_T(&matches);
     size_tmp_idx_1 = match_out->size[1];
   }
-  /* 'gkmPWMlasso4:94' p = getmotif(memefile,1:num); */
+  /* 'gkmPWMlasso:94' p = getmotif(memefile,1:num); */
   emxInit_real_T(&f, 2);
   if (size_tmp_idx_1 < 1) {
     f->size[0] = 1;
@@ -1488,13 +1488,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxInit_cell_wrap_0(&p);
   getmotif(varargin_2, f, p);
   p_data = p->data;
-  /* 'gkmPWMlasso4:95' for i = 1:num */
+  /* 'gkmPWMlasso:95' for i = 1:num */
   for (b_i = 0; b_i < size_tmp_idx_1; b_i++) {
-    /* 'gkmPWMlasso4:96' [r c] = size(p{i}); */
-    /* 'gkmPWMlasso4:97' for j = 1:r */
+    /* 'gkmPWMlasso:96' [r c] = size(p{i}); */
+    /* 'gkmPWMlasso:97' for j = 1:r */
     i = p_data[b_i].f1->size[0];
     for (j = 0; j < i; j++) {
-      /* 'gkmPWMlasso4:98' a = sum(p{i}(j,:)); */
+      /* 'gkmPWMlasso:98' a = sum(p{i}(j,:)); */
       loop_ub = p_data[b_i].f1->size[1];
       i1 = f->size[0] * f->size[1];
       f->size[0] = 1;
@@ -1505,9 +1505,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         f_data[i1] = p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * i1];
       }
       a = sum(f);
-      /* 'gkmPWMlasso4:99' if abs(a-1)>0 */
+      /* 'gkmPWMlasso:99' if abs(a-1)>0 */
       if (fabs(a - 1.0) > 0.0) {
-        /* 'gkmPWMlasso4:100' [b1 loc] = max(p{i}(j,:)); */
+        /* 'gkmPWMlasso:100' [b1 loc] = max(p{i}(j,:)); */
         loop_ub = p_data[b_i].f1->size[1];
         i1 = f->size[0] * f->size[1];
         f->size[0] = 1;
@@ -1518,7 +1518,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           f_data[i1] = p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * i1];
         }
         b_maximum(f, &nfrac, &match_idx);
-        /* 'gkmPWMlasso4:101' p{i}(j,loc) = b1-a+1; */
+        /* 'gkmPWMlasso:101' p{i}(j,loc) = b1-a+1; */
         p_data[b_i].f1->data[j + p_data[b_i].f1->size[0] * (match_idx - 1)] =
             (nfrac - a) + 1.0;
       }
@@ -1526,12 +1526,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   emxInit_real_T(&Z, 1);
   emxInit_real_T(&loc, 1);
-  /* 'gkmPWMlasso4:105' [p, info, lenvec] = trim_pwm(p,0.0); */
+  /* 'gkmPWMlasso:105' [p, info, lenvec] = trim_pwm(p,0.0); */
   trim_pwm(p, loc, Z);
   Z_data = Z->data;
   loc_data = loc->data;
   p_data = p->data;
-  /* 'gkmPWMlasso4:106' indvec =
+  /* 'gkmPWMlasso:106' indvec =
    * intersect(find(info./lenvec>=minInfo),find(lenvec>=minL)); */
   emxInit_int32_T(&idx, 1);
   emxInit_boolean_T(&b_loc, 1);
@@ -1582,11 +1582,11 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxInit_real_T(&indvec, 1);
   do_vectors(BY, A, indvec, idx, ib);
   indvec_data = indvec->data;
-  /* 'gkmPWMlasso4:107' n = length(indvec); */
-  /* 'gkmPWMlasso4:108' fprintf('Mapping PWMs to gkm space\n'); */
+  /* 'gkmPWMlasso:107' n = length(indvec); */
+  /* 'gkmPWMlasso:108' fprintf('Mapping PWMs to gkm space\n'); */
   printf("Mapping PWMs to gkm space\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:109' lcnum = length(comb); */
+  /* 'gkmPWMlasso:109' lcnum = length(comb); */
   emxFree_int32_T(&ib);
   if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
     u1 = 0;
@@ -1598,7 +1598,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
   }
   emxInit_real_T(&b_A, 2);
-  /* 'gkmPWMlasso4:110' A=zeros(lcnum*4^k_svm,n); */
+  /* 'gkmPWMlasso:110' A=zeros(lcnum*4^k_svm,n); */
   i = (int)((double)u1 * c);
   i1 = b_A->size[0] * b_A->size[1];
   b_A->size[0] = i;
@@ -1610,7 +1610,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     A_data[i1] = 0.0;
   }
   emxInit_real_T(&AA, 2);
-  /* 'gkmPWMlasso4:111' AA=zeros(lcnum*4^k_svm,n); */
+  /* 'gkmPWMlasso:111' AA=zeros(lcnum*4^k_svm,n); */
   i1 = AA->size[0] * AA->size[1];
   AA->size[0] = i;
   AA->size[1] = indvec->size[0];
@@ -1622,7 +1622,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   emxInit_real_T(&GCmat, 2);
   emxInit_real_T(&normvec, 1);
-  /* 'gkmPWMlasso4:112' GCmat = repmat([0.5-GCpos1/2 GCpos1/2 GCpos1/2
+  /* 'gkmPWMlasso:112' GCmat = repmat([0.5-GCpos1/2 GCpos1/2 GCpos1/2
    * 0.5-GCpos1/2],l_svm-1,1); */
   c = 0.5 - GCpos1 / 2.0;
   dv[0] = c;
@@ -1631,22 +1631,22 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   dv[3] = c;
   b_repmat(dv, varargin_6 - 1.0, GCmat);
   GCmat_data = GCmat->data;
-  /* 'gkmPWMlasso4:113' per = 10; */
+  /* 'gkmPWMlasso:113' per = 10; */
   GCpos1 = 10.0;
-  /* 'gkmPWMlasso4:114' normvec = zeros(n,1); */
-  /* 'gkmPWMlasso4:115' for j = 1:n */
+  /* 'gkmPWMlasso:114' normvec = zeros(n,1); */
+  /* 'gkmPWMlasso:115' for j = 1:n */
   i1 = indvec->size[0];
   emxInit_real_T(&b_GCmat, 2);
   for (j = 0; j < i1; j++) {
-    /* 'gkmPWMlasso4:116' if mod(j, floor(n/10))==0 */
+    /* 'gkmPWMlasso:116' if mod(j, floor(n/10))==0 */
     if (b_mod((double)j + 1.0, floor((double)indvec->size[0] / 10.0)) == 0.0) {
-      /* 'gkmPWMlasso4:117' fprintf('%d...', int32(per)); */
+      /* 'gkmPWMlasso:117' fprintf('%d...', int32(per)); */
       printf("%d...", (int)GCpos1);
       fflush(stdout);
-      /* 'gkmPWMlasso4:118' per = per+10; */
+      /* 'gkmPWMlasso:118' per = per+10; */
       GCpos1 += 10.0;
     }
-    /* 'gkmPWMlasso4:120' loc = zeros(l_svm*2-2+lenvec(indvec(j)), 1); */
+    /* 'gkmPWMlasso:120' loc = zeros(l_svm*2-2+lenvec(indvec(j)), 1); */
     i2 = (int)indvec_data[j] - 1;
     c = Z_data[i2];
     loop_ub = (int)((varargin_6 * 2.0 - 2.0) + c);
@@ -1657,7 +1657,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (b_i = 0; b_i < loop_ub; b_i++) {
       loc_data[b_i] = 0.0;
     }
-    /* 'gkmPWMlasso4:121' loc(l_svm:lenvec(indvec(j))+l_svm-1) = 1; */
+    /* 'gkmPWMlasso:121' loc(l_svm:lenvec(indvec(j))+l_svm-1) = 1; */
     nfrac = (c + varargin_6) - 1.0;
     if (varargin_6 > nfrac) {
       b_i = -1;
@@ -1670,9 +1670,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i3 = 0; i3 < loop_ub; i3++) {
       loc_data[(b_i + i3) + 1] = 1.0;
     }
-    /* 'gkmPWMlasso4:122' if RC */
+    /* 'gkmPWMlasso:122' if RC */
     if (varargin_9) {
-      /* 'gkmPWMlasso4:123' A(:,j) =
+      /* 'gkmPWMlasso:123' A(:,j) =
        * PWM2kmers([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
        */
       if (GCmat->size[0] != 0) {
@@ -1732,8 +1732,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         A_data[i2 + b_A->size[0] * j] = xc_data[i2];
       }
     } else {
-      /* 'gkmPWMlasso4:124' else */
-      /* 'gkmPWMlasso4:125' A(:,j) =
+      /* 'gkmPWMlasso:124' else */
+      /* 'gkmPWMlasso:125' A(:,j) =
        * PWM2kmers_norc([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
        */
       if (GCmat->size[0] != 0) {
@@ -1793,7 +1793,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         A_data[i2 + b_A->size[0] * j] = xc_data[i2];
       }
     }
-    /* 'gkmPWMlasso4:127' A(:,j) = A(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
+    /* 'gkmPWMlasso:127' A(:,j) = A(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
      */
     c += varargin_6 - 1.0;
     if (b_A->size[0] == negvec->size[0]) {
@@ -1813,7 +1813,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       binary_expand_op(b_A, j, negvec, c);
       A_data = b_A->data;
     }
-    /* 'gkmPWMlasso4:128' normvec(j) = (A(:,j)'*A(:,j))^0.5; */
+    /* 'gkmPWMlasso:128' normvec(j) = (A(:,j)'*A(:,j))^0.5; */
     loop_ub = b_A->size[0];
     i2 = loc->size[0];
     loc->size[0] = b_A->size[0];
@@ -1836,7 +1836,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                      &BY_data[0], (blasint)1);
     }
     c = sqrt(c);
-    /* 'gkmPWMlasso4:129' AA(:,j) = A(:,j)/normvec(j); */
+    /* 'gkmPWMlasso:129' AA(:,j) = A(:,j)/normvec(j); */
     for (i2 = 0; i2 < loop_ub; i2++) {
       f_data[i2 + AA->size[0] * j] = A_data[i2 + b_A->size[0] * j] / c;
     }
@@ -1844,26 +1844,26 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxFree_real_T(&GCmat);
   emxFree_cell_wrap_0(&p);
   emxInit_cell_wrap_1(&motclus);
-  /* 'gkmPWMlasso4:131' fprintf('\n'); */
+  /* 'gkmPWMlasso:131' fprintf('\n'); */
   printf("\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:132' fprintf('Clustering motifs\n'); */
+  /* 'gkmPWMlasso:132' fprintf('Clustering motifs\n'); */
   printf("Clustering motifs\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:133' simmat = AA'*AA; */
+  /* 'gkmPWMlasso:133' simmat = AA'*AA; */
   b_mtimes(AA, AA, comb);
   /*  clear AA */
-  /* 'gkmPWMlasso4:135' motclus = clus_simmat_eig(simmat,corrCut); */
+  /* 'gkmPWMlasso:135' motclus = clus_simmat_eig(simmat,corrCut); */
   clus_simmat_eig(comb, varargin_5, motclus);
   motclus_data = motclus->data;
-  /* 'gkmPWMlasso4:136' fprintf('Number of motif clusters: %d\n',
+  /* 'gkmPWMlasso:136' fprintf('Number of motif clusters: %d\n',
    * int32(length(motclus))); */
   printf("Number of motif clusters: %d\n", motclus->size[0]);
   fflush(stdout);
-  /* 'gkmPWMlasso4:138' fprintf('Selecting Motifs\n'); */
+  /* 'gkmPWMlasso:138' fprintf('Selecting Motifs\n'); */
   printf("Selecting Motifs\n");
   fflush(stdout);
-  /* 'gkmPWMlasso4:139' cfile2 = cfile-negvec/sum(negvec)*sum(cfile); */
+  /* 'gkmPWMlasso:139' cfile2 = cfile-negvec/sum(negvec)*sum(cfile); */
   c = blockedSummation(cfile2, cfile2->size[0]);
   nfrac = blockedSummation(negvec, negvec->size[0]);
   emxFree_real_T(&AA);
@@ -1876,14 +1876,14 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     d_binary_expand_op(cfile2, negvec, nfrac, c);
     cfile2_data = cfile2->data;
   }
-  /* 'gkmPWMlasso4:140' cfile2 = cfile2/std(cfile2); */
+  /* 'gkmPWMlasso:140' cfile2 = cfile2/std(cfile2); */
   c = b_std(cfile2);
   loop_ub = cfile2->size[0];
   for (i1 = 0; i1 < loop_ub; i1++) {
     cfile2_data[i1] /= c;
   }
   emxInit_real_T(&B, 2);
-  /* 'gkmPWMlasso4:141' B = zeros((4^k_svm)*lcnum, length(motclus)); */
+  /* 'gkmPWMlasso:141' B = zeros((4^k_svm)*lcnum, length(motclus)); */
   i1 = B->size[0] * B->size[1];
   B->size[0] = i;
   B->size[1] = motclus->size[0];
@@ -1893,9 +1893,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   for (i = 0; i < loop_ub; i++) {
     B_data[i] = 0.0;
   }
-  /* 'gkmPWMlasso4:142' corrvec = zeros(n,1); */
-  /* 'gkmPWMlasso4:143' zvec = zeros(n,1); */
-  /* 'gkmPWMlasso4:144' Z = zeros(length(motclus),1); */
+  /* 'gkmPWMlasso:142' corrvec = zeros(n,1); */
+  /* 'gkmPWMlasso:143' zvec = zeros(n,1); */
+  /* 'gkmPWMlasso:144' Z = zeros(length(motclus),1); */
   i = Z->size[0];
   Z->size[0] = motclus->size[0];
   emxEnsureCapacity_real_T(Z, i);
@@ -1904,7 +1904,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   for (i = 0; i < loop_ub; i++) {
     Z_data[i] = 0.0;
   }
-  /* 'gkmPWMlasso4:145' for i = 1:n */
+  /* 'gkmPWMlasso:145' for i = 1:n */
   i = indvec->size[0];
   i1 = normvec->size[0];
   normvec->size[0] = indvec->size[0];
@@ -1932,7 +1932,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   for (b_i = 0; b_i < i; b_i++) {
     /*  [~,I] = sort(A(:,i),'descend'); */
     /*  zvec(i) = mean(cfile2(I(1:lcnum))); */
-    /* 'gkmPWMlasso4:148' [~,I2] = maxk(A(:,i), lcnum*10); */
+    /* 'gkmPWMlasso:148' [~,I2] = maxk(A(:,i), lcnum*10); */
     i1 = A->size[0];
     A->size[0] = i4;
     emxEnsureCapacity_real_T(A, i1);
@@ -1950,7 +1950,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i1 = 0; i1 < loop_ub; i1++) {
       loc_data[i1] = matches_data[i1];
     }
-    /* 'gkmPWMlasso4:149' zvec(i) = mean(cfile2(I2(1:lcnum))); */
+    /* 'gkmPWMlasso:149' zvec(i) = mean(cfile2(I2(1:lcnum))); */
     i1 = BY->size[0];
     BY->size[0] = d_loop_ub;
     emxEnsureCapacity_real_T(BY, i1);
@@ -1960,13 +1960,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     c = blockedSummation(BY, d_loop_ub) / (double)d_loop_ub;
     normvec_data[b_i] = c;
-    /* 'gkmPWMlasso4:150' if zvec(i) < 0 */
+    /* 'gkmPWMlasso:150' if zvec(i) < 0 */
     if (c < 0.0) {
       /*  Alternative to corr */
       /*  corrvec(i) = -1*corr(A(I(1:lcnum*10),i), cfile2(I(1:lcnum*10))); */
-      /* 'gkmPWMlasso4:153' correlation_matrix = -1*corrcoef(A(I2,i),
+      /* 'gkmPWMlasso:153' correlation_matrix = -1*corrcoef(A(I2,i),
        * cfile2(I2)); */
-      /* 'gkmPWMlasso4:154' corrvec(i) = correlation_matrix(1,2); */
+      /* 'gkmPWMlasso:154' corrvec(i) = correlation_matrix(1,2); */
       i1 = A->size[0];
       A->size[0] = loc->size[0];
       emxEnsureCapacity_real_T(A, i1);
@@ -1986,12 +1986,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       corrcoef(A, BY, dv);
       GCmat_data[b_i] = -dv[2];
     } else {
-      /* 'gkmPWMlasso4:155' else */
+      /* 'gkmPWMlasso:155' else */
       /*  Alternative to corr */
       /*  corrvec(i) = corr(A(I(1:lcnum*10),i), cfile2(I(1:lcnum*10))); */
-      /* 'gkmPWMlasso4:158' correlation_matrix = corrcoef(A(I2,i), cfile2(I2));
+      /* 'gkmPWMlasso:158' correlation_matrix = corrcoef(A(I2,i), cfile2(I2));
        */
-      /* 'gkmPWMlasso4:159' corrvec(i) = correlation_matrix(1,2); */
+      /* 'gkmPWMlasso:159' corrvec(i) = correlation_matrix(1,2); */
       i1 = A->size[0];
       A->size[0] = loc->size[0];
       emxEnsureCapacity_real_T(A, i1);
@@ -2013,10 +2013,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
   }
   emxFree_real_T(&A);
-  /* 'gkmPWMlasso4:162' for i = 1:length(motclus) */
+  /* 'gkmPWMlasso:162' for i = 1:length(motclus) */
   i = motclus->size[0];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'gkmPWMlasso4:163' [a,b] = sort(zvec(motclus{i}),'descend'); */
+    /* 'gkmPWMlasso:163' [a,b] = sort(zvec(motclus{i}),'descend'); */
     i1 = loc->size[0];
     loc->size[0] = motclus_data[b_i].f1->size[1];
     emxEnsureCapacity_real_T(loc, i1);
@@ -2036,7 +2036,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i1 = 0; i1 < loop_ub; i1++) {
       BY_data[i1] = matches_data[i1];
     }
-    /* 'gkmPWMlasso4:164' f = find(a == a(1)); */
+    /* 'gkmPWMlasso:164' f = find(a == a(1)); */
     i1 = b_loc->size[0];
     b_loc->size[0] = loc->size[0];
     emxEnsureCapacity_boolean_T(b_loc, i1);
@@ -2055,9 +2055,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i1 = 0; i1 < loop_ub; i1++) {
       negvec_data[i1] = matches_data[i1];
     }
-    /* 'gkmPWMlasso4:165' if length(f) > 1 */
+    /* 'gkmPWMlasso:165' if length(f) > 1 */
     if (negvec->size[0] > 1) {
-      /* 'gkmPWMlasso4:166' [~,bb] = sort(abs(corrvec(motclus{i}(b(f)))),
+      /* 'gkmPWMlasso:166' [~,bb] = sort(abs(corrvec(motclus{i}(b(f)))),
        * 'descend'); */
       i1 = f->size[0] * f->size[1];
       f->size[0] = 1;
@@ -2079,7 +2079,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       sort(indc, idx);
       matches_data = idx->data;
-      /* 'gkmPWMlasso4:167' b(1:length(f)) = b(bb); */
+      /* 'gkmPWMlasso:167' b(1:length(f)) = b(bb); */
       i1 = f->size[0] * f->size[1];
       f->size[0] = 1;
       f->size[1] = negvec->size[0];
@@ -2094,13 +2094,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         BY_data[i1] = f_data[i1];
       }
     }
-    /* 'gkmPWMlasso4:169' B(:,i) = A(:,motclus{i}(b(1))); */
+    /* 'gkmPWMlasso:169' B(:,i) = A(:,motclus{i}(b(1))); */
     nx = (int)motclus_data[b_i].f1->data[(int)BY_data[0] - 1];
     loop_ub = b_A->size[0];
     for (i1 = 0; i1 < loop_ub; i1++) {
       B_data[i1 + B->size[0] * b_i] = A_data[i1 + b_A->size[0] * (nx - 1)];
     }
-    /* 'gkmPWMlasso4:170' motclus{i} = motclus{i}(b); */
+    /* 'gkmPWMlasso:170' motclus{i} = motclus{i}(b); */
     i1 = f->size[0] * f->size[1];
     f->size[0] = 1;
     f->size[1] = BY->size[0];
@@ -2118,11 +2118,11 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i1 = 0; i1 < loop_ub; i1++) {
       motclus_data[b_i].f1->data[i1] = f_data[i1];
     }
-    /* 'gkmPWMlasso4:171' Z(i) = zvec(motclus{i}(1)); */
+    /* 'gkmPWMlasso:171' Z(i) = zvec(motclus{i}(1)); */
     Z_data[b_i] = normvec_data[(int)motclus_data[b_i].f1->data[0] - 1];
   }
   emxFree_real_T(&b_A);
-  /* 'gkmPWMlasso4:173' f = find(abs(Z)>1); */
+  /* 'gkmPWMlasso:173' f = find(abs(Z)>1); */
   nx = Z->size[0];
   i = indc->size[0];
   indc->size[0] = Z->size[0];
@@ -2149,7 +2149,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   for (i = 0; i < loop_ub; i++) {
     negvec_data[i] = matches_data[i];
   }
-  /* 'gkmPWMlasso4:174' B = B(:,f); */
+  /* 'gkmPWMlasso:174' B = B(:,f); */
   nx = B->size[0] - 1;
   i = b_GCmat->size[0] * b_GCmat->size[1];
   b_GCmat->size[0] = B->size[0];
@@ -2172,7 +2172,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   for (i = 0; i < loop_ub; i++) {
     B_data[i] = normvec_data[i];
   }
-  /* 'gkmPWMlasso4:175' B = B/std(B(:))'; */
+  /* 'gkmPWMlasso:175' B = B/std(B(:))'; */
   nx = B->size[0] * B->size[1];
   b_B = *B;
   b_motclus = nx;
@@ -2185,7 +2185,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   }
   emxInit_cell_wrap_1(&tmp_motclus);
   /*  motclus = motclus(f); */
-  /* 'gkmPWMlasso4:177' tmp_motclus = cell(length(f),1); */
+  /* 'gkmPWMlasso:177' tmp_motclus = cell(length(f),1); */
   match_idx = negvec->size[0];
   i = tmp_motclus->size[0];
   tmp_motclus->size[0] = negvec->size[0];
@@ -2195,11 +2195,11 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     tmp_motclus_data[i].f1->size[0] = 1;
     tmp_motclus_data[i].f1->size[1] = 0;
   }
-  /* 'gkmPWMlasso4:178' tmp_motclus = coder.nullcopy(tmp_motclus); */
-  /* 'gkmPWMlasso4:179' for idx = 1:length(f) */
+  /* 'gkmPWMlasso:178' tmp_motclus = coder.nullcopy(tmp_motclus); */
+  /* 'gkmPWMlasso:179' for idx = 1:length(f) */
   i = negvec->size[0];
   for (b_loop_ub = 0; b_loop_ub < i; b_loop_ub++) {
-    /* 'gkmPWMlasso4:180' tmp_motclus{idx} = motclus{f(idx)}; */
+    /* 'gkmPWMlasso:180' tmp_motclus{idx} = motclus{f(idx)}; */
     i1 = tmp_motclus_data[b_loop_ub].f1->size[0] *
          tmp_motclus_data[b_loop_ub].f1->size[1];
     tmp_motclus_data[b_loop_ub].f1->size[0] = 1;
@@ -2213,7 +2213,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
   }
   emxInit_cell_wrap_1(&c_motclus);
-  /* 'gkmPWMlasso4:182' motclus = cell(length(f),1); */
+  /* 'gkmPWMlasso:182' motclus = cell(length(f),1); */
   match_idx = negvec->size[0];
   i = c_motclus->size[0];
   c_motclus->size[0] = negvec->size[0];
@@ -2223,15 +2223,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     b_motclus_data[i].f1->size[0] = 1;
     b_motclus_data[i].f1->size[1] = 0;
   }
-  /* 'gkmPWMlasso4:183' motclus = coder.nullcopy(motclus); */
+  /* 'gkmPWMlasso:183' motclus = coder.nullcopy(motclus); */
   i = motclus->size[0];
   motclus->size[0] = c_motclus->size[0];
   emxEnsureCapacity_cell_wrap_1(motclus, i);
   motclus_data = motclus->data;
-  /* 'gkmPWMlasso4:184' for idx = 1:length(motclus) */
+  /* 'gkmPWMlasso:184' for idx = 1:length(motclus) */
   i = c_motclus->size[0];
   for (b_loop_ub = 0; b_loop_ub < i; b_loop_ub++) {
-    /* 'gkmPWMlasso4:185' motclus{idx} = tmp_motclus{idx}; */
+    /* 'gkmPWMlasso:185' motclus{idx} = tmp_motclus{idx}; */
     i1 = motclus_data[b_loop_ub].f1->size[0] *
          motclus_data[b_loop_ub].f1->size[1];
     motclus_data[b_loop_ub].f1->size[0] = 1;
@@ -2244,7 +2244,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           tmp_motclus_data[b_loop_ub].f1->data[i1];
     }
   }
-  /* 'gkmPWMlasso4:187' Z = Z(f); */
+  /* 'gkmPWMlasso:187' Z = Z(f); */
   i = BY->size[0];
   BY->size[0] = negvec->size[0];
   emxEnsureCapacity_real_T(BY, i);
@@ -2262,16 +2262,16 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     Z_data[i] = BY_data[i];
   }
   /*  clear A AA loc mat GMmat */
-  /* 'gkmPWMlasso4:190' if d == 0 */
+  /* 'gkmPWMlasso:190' if d == 0 */
   emxInit_real_T(&OLS, 1);
   emxInit_real_T(&BB, 2);
   if (varargin_10 == 0.0) {
-    /* 'gkmPWMlasso4:191' fprintf('Running LASSO\n'); */
+    /* 'gkmPWMlasso:191' fprintf('Running LASSO\n'); */
     printf("Running LASSO\n");
     fflush(stdout);
     /*  [weigmat, FitInfo] = lasso_cvmat(B, cfile2,'DFmax',
      * length(Z),'Standardize', false, 'NumLambda', 20); */
-    /* 'gkmPWMlasso4:193' [weigmat, FitInfo] = lasso_cvmat(B, cfile2, length(Z),
+    /* 'gkmPWMlasso:193' [weigmat, FitInfo] = lasso_cvmat(B, cfile2, length(Z),
      * false, 20); */
     i = comb->size[0] * comb->size[1];
     comb->size[0] = B->size[0];
@@ -2295,7 +2295,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                 b_expl_temp_data, expl_temp_size, &nfrac, a__3_DF_data,
                 a__3_DF_size, c_expl_temp_data, b_expl_temp_size);
     xc_data = weigmat->data;
-    /* 'gkmPWMlasso4:194' MSE = zeros(length(FitInfo.DF),1); */
+    /* 'gkmPWMlasso:194' MSE = zeros(length(FitInfo.DF),1); */
     if (a__3_DF_size[1] == 0) {
       u1 = 0;
     } else {
@@ -2304,7 +2304,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     if (0 <= u1 - 1) {
       memset(&MSE_data[0], 0, u1 * sizeof(double));
     }
-    /* 'gkmPWMlasso4:195' cnorm = cfile2'*cfile2; */
+    /* 'gkmPWMlasso:195' cnorm = cfile2'*cfile2; */
     if (cfile2->size[0] < 1) {
       nfrac = 0.0;
     } else {
@@ -2312,7 +2312,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                          &cfile2_data[0], (blasint)1);
     }
     emxInit_cell_wrap_3_20(&F);
-    /* 'gkmPWMlasso4:196' F = cell(numel(FitInfo.DF),1); */
+    /* 'gkmPWMlasso:196' F = cell(numel(FitInfo.DF),1); */
     match_idx = a__3_DF_size[1];
     i = F.size[0];
     F.size[0] = a__3_DF_size[1];
@@ -2320,8 +2320,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < match_idx; i++) {
       F.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:197' F = coder.nullcopy(F); */
-    /* 'gkmPWMlasso4:199' f = find(weigmat(:,1)~=0); */
+    /* 'gkmPWMlasso:197' F = coder.nullcopy(F); */
+    /* 'gkmPWMlasso:199' f = find(weigmat(:,1)~=0); */
     loop_ub = weigmat->size[0];
     i = b_loc->size[0];
     b_loc->size[0] = weigmat->size[0];
@@ -2340,7 +2340,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:200' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    /* 'gkmPWMlasso:200' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
@@ -2422,7 +2422,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     i = OLS->size[0];
     OLS->size[0] = loc->size[0];
     emxEnsureCapacity_real_T(OLS, i);
-    /* 'gkmPWMlasso4:202' for i = 1:length(FitInfo.DF) */
+    /* 'gkmPWMlasso:202' for i = 1:length(FitInfo.DF) */
     if (a__3_DF_size[1] == 0) {
       b_loop_ub = 0;
     } else {
@@ -2439,7 +2439,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       i7 = B->size[0];
     }
     for (b_i = 0; b_i < b_loop_ub; b_i++) {
-      /* 'gkmPWMlasso4:203' f = find(weigmat(:,i)~=0); */
+      /* 'gkmPWMlasso:203' f = find(weigmat(:,i)~=0); */
       i = b_loc->size[0];
       b_loc->size[0] = i5;
       emxEnsureCapacity_boolean_T(b_loc, i);
@@ -2457,7 +2457,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < loop_ub; i++) {
         negvec_data[i] = matches_data[i];
       }
-      /* 'gkmPWMlasso4:204' F{i} = f; */
+      /* 'gkmPWMlasso:204' F{i} = f; */
       i = F.data[b_i].f1->size[0];
       F.data[b_i].f1->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(F.data[b_i].f1, i);
@@ -2465,7 +2465,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < loop_ub; i++) {
         F.data[b_i].f1->data[i] = negvec_data[i];
       }
-      /* 'gkmPWMlasso4:205' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+      /* 'gkmPWMlasso:205' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
       i = b_GCmat->size[0] * b_GCmat->size[1];
       b_GCmat->size[0] = f_loop_ub;
       b_GCmat->size[1] = negvec->size[0];
@@ -2546,7 +2546,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
             (blasint)comb2->size[0], &indc_data[0], (blasint)indc->size[0], 0.0,
             &OLS_data[0], (blasint)comb2->size[0]);
       }
-      /* 'gkmPWMlasso4:206' res = B(:,f)*OLS; */
+      /* 'gkmPWMlasso:206' res = B(:,f)*OLS; */
       i = comb2->size[0] * comb2->size[1];
       comb2->size[0] = i_loop_ub;
       comb2->size[1] = negvec->size[0];
@@ -2579,7 +2579,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                     (blasint)OLS->size[0], 0.0, &loc_data[0],
                     (blasint)B->size[0]);
       }
-      /* 'gkmPWMlasso4:207' if sum(abs(res)>0) */
+      /* 'gkmPWMlasso:207' if sum(abs(res)>0) */
       nx = loc->size[0];
       i = indc->size[0];
       indc->size[0] = loc->size[0];
@@ -2606,7 +2606,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         }
       }
       if (match_idx != 0) {
-        /* 'gkmPWMlasso4:208' MSE(i) = (cfile2'*res)^2/(res'*res)/cnorm; */
+        /* 'gkmPWMlasso:208' MSE(i) = (cfile2'*res)^2/(res'*res)/cnorm; */
         if (cfile2->size[0] < 1) {
           a = 0.0;
         } else {
@@ -2624,7 +2624,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     emxFree_real_T(&weigmat);
     emxInit_cell_wrap_3_1x19(&FF);
-    /* 'gkmPWMlasso4:211' FF = cell(1,length(MSE)-1); */
+    /* 'gkmPWMlasso:211' FF = cell(1,length(MSE)-1); */
     match_idx = u1 - 1;
     i = FF.size[0] * FF.size[1];
     FF.size[0] = 1;
@@ -2633,37 +2633,37 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < match_idx; i++) {
       FF.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:212' FF = coder.nullcopy(FF); */
-    /* 'gkmPWMlasso4:213' MSE2 = zeros(1,length(MSE)-1); */
+    /* 'gkmPWMlasso:212' FF = coder.nullcopy(FF); */
+    /* 'gkmPWMlasso:213' MSE2 = zeros(1,length(MSE)-1); */
     MSE2_size[0] = 1;
     if (0 <= match_idx - 1) {
       memset(&MSE2_data[0], 0, match_idx * sizeof(double));
     }
-    /* 'gkmPWMlasso4:214' count = 1; */
+    /* 'gkmPWMlasso:214' count = 1; */
     nx = 0;
-    /* 'gkmPWMlasso4:215' for i = 1:length(MSE)-1 */
+    /* 'gkmPWMlasso:215' for i = 1:length(MSE)-1 */
     for (b_i = 0; b_i <= u1 - 2; b_i++) {
-      /* 'gkmPWMlasso4:216' if numel(setdiff(F{i}, F{i+1})) > 0 */
+      /* 'gkmPWMlasso:216' if numel(setdiff(F{i}, F{i+1})) > 0 */
       b_do_vectors(F.data[b_i].f1, F.data[b_i + 1].f1, loc, idx, &match_idx);
       if (loc->size[0] > 0) {
-        /* 'gkmPWMlasso4:217' FF{count} = setdiff(F{i}, F{i+1}); */
+        /* 'gkmPWMlasso:217' FF{count} = setdiff(F{i}, F{i+1}); */
         b_do_vectors(F.data[b_i].f1, F.data[b_i + 1].f1, FF.data[nx].f1, idx,
                      &match_idx);
-        /* 'gkmPWMlasso4:218' MSE2(count) = (MSE(i)-MSE(i+1)); */
+        /* 'gkmPWMlasso:218' MSE2(count) = (MSE(i)-MSE(i+1)); */
         MSE2_data[nx] = MSE_data[b_i] - MSE_data[b_i + 1];
-        /* 'gkmPWMlasso4:219' count = count +1; */
+        /* 'gkmPWMlasso:219' count = count +1; */
         nx++;
       }
     }
     emxFree_cell_wrap_3_20(&F);
     emxInit_cell_wrap_3_1x19(&newFF);
-    /* 'gkmPWMlasso4:222' MSE2 = MSE2(1:count-1); */
+    /* 'gkmPWMlasso:222' MSE2 = MSE2(1:count-1); */
     if (1 > nx) {
       MSE2_size[1] = 0;
     } else {
       MSE2_size[1] = nx;
     }
-    /* 'gkmPWMlasso4:223' newFF = cell(1,count-1); */
+    /* 'gkmPWMlasso:223' newFF = cell(1,count-1); */
     i = newFF.size[0] * newFF.size[1];
     newFF.size[0] = 1;
     newFF.size[1] = nx;
@@ -2671,10 +2671,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < nx; i++) {
       newFF.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:224' newFF = coder.nullcopy(newFF); */
-    /* 'gkmPWMlasso4:225' for idx = 1:count-1 */
+    /* 'gkmPWMlasso:224' newFF = coder.nullcopy(newFF); */
+    /* 'gkmPWMlasso:225' for idx = 1:count-1 */
     for (b_loop_ub = 0; b_loop_ub < nx; b_loop_ub++) {
-      /* 'gkmPWMlasso4:226' newFF{idx} = FF{idx}; */
+      /* 'gkmPWMlasso:226' newFF{idx} = FF{idx}; */
       loop_ub = FF.data[b_loop_ub].f1->size[0];
       i = newFF.data[b_loop_ub].f1->size[0];
       newFF.data[b_loop_ub].f1->size[0] = FF.data[b_loop_ub].f1->size[0];
@@ -2684,7 +2684,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     emxInit_cell_wrap_3_1x19(&b_FF);
-    /* 'gkmPWMlasso4:228' FF = cell(1,count-1); */
+    /* 'gkmPWMlasso:228' FF = cell(1,count-1); */
     i = b_FF.size[0] * b_FF.size[1];
     b_FF.size[0] = 1;
     b_FF.size[1] = nx;
@@ -2692,15 +2692,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < nx; i++) {
       b_FF.data[i].f1->size[0] = 0;
     }
-    /* 'gkmPWMlasso4:229' FF = coder.nullcopy(FF); */
+    /* 'gkmPWMlasso:229' FF = coder.nullcopy(FF); */
     i = FF.size[0] * FF.size[1];
     FF.size[0] = 1;
     FF.size[1] = b_FF.size[1];
     emxEnsureCapacity_cell_wrap_31(FF.data, FF.size, i);
-    /* 'gkmPWMlasso4:230' for idx = 1:count-1 */
+    /* 'gkmPWMlasso:230' for idx = 1:count-1 */
     emxFree_cell_wrap_3_1x19(&b_FF);
     for (b_loop_ub = 0; b_loop_ub < nx; b_loop_ub++) {
-      /* 'gkmPWMlasso4:231' FF{idx} = newFF{idx}; */
+      /* 'gkmPWMlasso:231' FF{idx} = newFF{idx}; */
       loop_ub = newFF.data[b_loop_ub].f1->size[0];
       i = FF.data[b_loop_ub].f1->size[0];
       FF.data[b_loop_ub].f1->size[0] = newFF.data[b_loop_ub].f1->size[0];
@@ -2710,7 +2710,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     emxFree_cell_wrap_3_1x19(&newFF);
-    /* 'gkmPWMlasso4:234' res = B*((B.'*B)^-1*(B.'*cfile2)); */
+    /* 'gkmPWMlasso:234' res = B*((B.'*B)^-1*(B.'*cfile2)); */
     b_mtimes(B, B, comb);
     if ((B->size[0] == 0) || (B->size[1] == 0) || (cfile2->size[0] == 0)) {
       i = indc->size[0];
@@ -2774,7 +2774,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   &B_data[0], (blasint)B->size[0], &BY_data[0],
                   (blasint)BY->size[0], 0.0, &loc_data[0], (blasint)B->size[0]);
     }
-    /* 'gkmPWMlasso4:235' csm = (cfile2'*res)^2/(res'*res)/cnorm; */
+    /* 'gkmPWMlasso:235' csm = (cfile2'*res)^2/(res'*res)/cnorm; */
     if (cfile2->size[0] < 1) {
       a = 0.0;
     } else {
@@ -2788,16 +2788,16 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                      &loc_data[0], (blasint)1);
     }
     nfrac = a * a / c / nfrac;
-    /* 'gkmPWMlasso4:236' [a,b] = sort(MSE2,'descend'); */
+    /* 'gkmPWMlasso:236' [a,b] = sort(MSE2,'descend'); */
     e_sort(MSE2_data, MSE2_size, iidx_data, lk_size);
-    /* 'gkmPWMlasso4:237' cs = cumsum(a); */
+    /* 'gkmPWMlasso:237' cs = cumsum(a); */
     useConstantDim(MSE2_data, MSE2_size);
-    /* 'gkmPWMlasso4:238' cs = cs/csm; */
+    /* 'gkmPWMlasso:238' cs = cs/csm; */
     loop_ub = MSE2_size[1] - 1;
     for (i = 0; i <= loop_ub; i++) {
       MSE2_data[i] /= nfrac;
     }
-    /* 'gkmPWMlasso4:239' f = find(cs>0.9); */
+    /* 'gkmPWMlasso:239' f = find(cs>0.9); */
     b_MSE2_size[0] = 1;
     b_MSE2_size[1] = MSE2_size[1];
     loop_ub = MSE2_size[1];
@@ -2820,10 +2820,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       f_data[i] = match_out_data[i];
     }
-    /* 'gkmPWMlasso4:241' if isempty(f) */
+    /* 'gkmPWMlasso:241' if isempty(f) */
     emxInit_real_T(&b_f, 2);
     if (f->size[1] == 0) {
-      /* 'gkmPWMlasso4:242' f = 1:length(OLS); */
+      /* 'gkmPWMlasso:242' f = 1:length(OLS); */
       if (OLS->size[0] < 1) {
         f->size[0] = 1;
         f->size[1] = 0;
@@ -2849,10 +2849,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     } else {
       emxInit_cell_wrap_3(&b_newFF, 2);
-      /* 'gkmPWMlasso4:243' else */
+      /* 'gkmPWMlasso:243' else */
       /*  FF = FF(b(1:f(1))); */
-      /* 'gkmPWMlasso4:245' endIdx = f(1); */
-      /* 'gkmPWMlasso4:246' newFF = cell(1, endIdx); */
+      /* 'gkmPWMlasso:245' endIdx = f(1); */
+      /* 'gkmPWMlasso:246' newFF = cell(1, endIdx); */
       match_idx = (int)f_data[0];
       i = b_newFF->size[0] * b_newFF->size[1];
       b_newFF->size[0] = 1;
@@ -2862,10 +2862,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < match_idx; i++) {
         newFF_data[i].f1->size[0] = 0;
       }
-      /* 'gkmPWMlasso4:247' newFF = coder.nullcopy(newFF); */
-      /* 'gkmPWMlasso4:248' for idx = 1:endIdx */
+      /* 'gkmPWMlasso:247' newFF = coder.nullcopy(newFF); */
+      /* 'gkmPWMlasso:248' for idx = 1:endIdx */
       for (b_loop_ub = 0; b_loop_ub < match_idx; b_loop_ub++) {
-        /* 'gkmPWMlasso4:249' newFF{idx} = FF{b(idx)}; */
+        /* 'gkmPWMlasso:249' newFF{idx} = FF{b(idx)}; */
         i = newFF_data[b_loop_ub].f1->size[0];
         i1 = iidx_data[b_loop_ub];
         newFF_data[b_loop_ub].f1->size[0] = FF.data[i1 - 1].f1->size[0];
@@ -2876,13 +2876,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
               FF.data[iidx_data[b_loop_ub] - 1].f1->data[i];
         }
       }
-      /* 'gkmPWMlasso4:251' FF = newFF; */
-      /* 'gkmPWMlasso4:253' f = []; */
+      /* 'gkmPWMlasso:251' FF = newFF; */
+      /* 'gkmPWMlasso:253' f = []; */
       negvec->size[0] = 0;
-      /* 'gkmPWMlasso4:254' for i = 1:length(FF) */
+      /* 'gkmPWMlasso:254' for i = 1:length(FF) */
       i = b_newFF->size[1];
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'gkmPWMlasso4:255' f = [f;FF{i}]; */
+        /* 'gkmPWMlasso:255' f = [f;FF{i}]; */
         i1 = negvec->size[0];
         loop_ub = newFF_data[b_i].f1->size[0];
         i2 = negvec->size[0];
@@ -2894,7 +2894,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         }
       }
       emxFree_cell_wrap_3(&b_newFF);
-      /* 'gkmPWMlasso4:257' f=unique(f); */
+      /* 'gkmPWMlasso:257' f=unique(f); */
       unique_vector(negvec, loc);
       loc_data = loc->data;
       i = b_f->size[0] * b_f->size[1];
@@ -2909,13 +2909,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     emxFree_cell_wrap_3_1x19(&FF);
     /* f = find(weigmat(:,1)~=0); */
-    /* 'gkmPWMlasso4:262' F = length(f); */
-    /* 'gkmPWMlasso4:263' fprintf('Selecting top motifs\n'); */
+    /* 'gkmPWMlasso:262' F = length(f); */
+    /* 'gkmPWMlasso:263' fprintf('Selecting top motifs\n'); */
     printf("Selecting top motifs\n");
     fflush(stdout);
-    /* 'gkmPWMlasso4:264' ind = true; */
+    /* 'gkmPWMlasso:264' ind = true; */
     empty_non_axis_sizes = true;
-    /* 'gkmPWMlasso4:265' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    /* 'gkmPWMlasso:265' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
     match_idx = b_f->size[0] * b_f->size[1];
     nx = b_f->size[0] * b_f->size[1];
     loop_ub = B->size[0];
@@ -3001,7 +3001,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)comb2->size[0]);
     }
     emxInit_real_T(&Pweig, 2);
-    /* 'gkmPWMlasso4:266' Pweig = Z(f); */
+    /* 'gkmPWMlasso:266' Pweig = Z(f); */
     i = Pweig->size[0] * Pweig->size[1];
     Pweig->size[0] = b_f->size[0];
     Pweig->size[1] = b_f->size[1];
@@ -3011,11 +3011,11 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       Pweig_data[i] = Z_data[(int)A_data[i] - 1];
     }
-    /* 'gkmPWMlasso4:267' while ind */
+    /* 'gkmPWMlasso:267' while ind */
     while (empty_non_axis_sizes) {
-      /* 'gkmPWMlasso4:268' ff = []; */
+      /* 'gkmPWMlasso:268' ff = []; */
       loc->size[0] = 0;
-      /* 'gkmPWMlasso4:269' for i = 1:length(f) */
+      /* 'gkmPWMlasso:269' for i = 1:length(f) */
       if ((b_f->size[0] == 0) || (b_f->size[1] == 0)) {
         u1 = 0;
       } else {
@@ -3026,7 +3026,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         }
       }
       for (b_i = 0; b_i < u1; b_i++) {
-        /* 'gkmPWMlasso4:270' if sign(OLS(i)) ~= sign(Pweig(i)) */
+        /* 'gkmPWMlasso:270' if sign(OLS(i)) ~= sign(Pweig(i)) */
         GCpos1 = OLS_data[b_i];
         if (OLS_data[b_i] < 0.0) {
           GCpos1 = -1.0;
@@ -3040,7 +3040,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           nfrac = 1.0;
         }
         if (GCpos1 != nfrac) {
-          /* 'gkmPWMlasso4:271' ff = [ff;i]; */
+          /* 'gkmPWMlasso:271' ff = [ff;i]; */
           i = loc->size[0];
           i1 = loc->size[0];
           loc->size[0]++;
@@ -3049,9 +3049,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           loc_data[i] = (double)b_i + 1.0;
         }
       }
-      /* 'gkmPWMlasso4:274' if length(ff) > 0 */
+      /* 'gkmPWMlasso:274' if length(ff) > 0 */
       if (loc->size[0] > 0) {
-        /* 'gkmPWMlasso4:275' f(ff) = []; */
+        /* 'gkmPWMlasso:275' f(ff) = []; */
         i = idx->size[0];
         idx->size[0] = loc->size[0];
         emxEnsureCapacity_int32_T(idx, i);
@@ -3062,7 +3062,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         }
         c_nullAssignment(b_f, idx);
         A_data = b_f->data;
-        /* 'gkmPWMlasso4:276' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+        /* 'gkmPWMlasso:276' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
         match_idx = b_f->size[0] * b_f->size[1];
         nx = b_f->size[0] * b_f->size[1];
         loop_ub = B->size[0];
@@ -3149,7 +3149,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                       (blasint)indc->size[0], 0.0, &OLS_data[0],
                       (blasint)comb2->size[0]);
         }
-        /* 'gkmPWMlasso4:277' Pweig = Z(f); */
+        /* 'gkmPWMlasso:277' Pweig = Z(f); */
         i = Pweig->size[0] * Pweig->size[1];
         Pweig->size[0] = b_f->size[0];
         Pweig->size[1] = b_f->size[1];
@@ -3160,12 +3160,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           Pweig_data[i] = Z_data[(int)A_data[i] - 1];
         }
       } else {
-        /* 'gkmPWMlasso4:278' else */
-        /* 'gkmPWMlasso4:279' ind = false; */
+        /* 'gkmPWMlasso:278' else */
+        /* 'gkmPWMlasso:279' ind = false; */
         empty_non_axis_sizes = false;
       }
     }
-    /* 'gkmPWMlasso4:282' BB = B(:,f); */
+    /* 'gkmPWMlasso:282' BB = B(:,f); */
     match_idx = b_f->size[0] * b_f->size[1];
     loop_ub = B->size[0];
     i = BB->size[0] * BB->size[1];
@@ -3179,7 +3179,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
             B_data[i1 + B->size[0] * ((int)A_data[i] - 1)];
       }
     }
-    /* 'gkmPWMlasso4:283' BX = B(:,f)'*B(:,f); */
+    /* 'gkmPWMlasso:283' BX = B(:,f)'*B(:,f); */
     match_idx = b_f->size[0] * b_f->size[1];
     nx = b_f->size[0] * b_f->size[1];
     loop_ub = B->size[0];
@@ -3208,7 +3208,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     b_mtimes(b_GCmat, comb2, xc);
     xc_data = xc->data;
-    /* 'gkmPWMlasso4:284' BY = B(:,f)'*cfile2; */
+    /* 'gkmPWMlasso:284' BY = B(:,f)'*cfile2; */
     match_idx = b_f->size[0] * b_f->size[1];
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
@@ -3243,7 +3243,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   &cfile2_data[0], (blasint)cfile2->size[0], 0.0, &BY_data[0],
                   (blasint)(b_f->size[0] * b_f->size[1]));
     }
-    /* 'gkmPWMlasso4:285' E = zeros(length(f),1); */
+    /* 'gkmPWMlasso:285' E = zeros(length(f),1); */
     if ((b_f->size[0] == 0) || (b_f->size[1] == 0)) {
       u1 = 0;
     } else {
@@ -3260,7 +3260,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < u1; i++) {
       normvec_data[i] = 0.0;
     }
-    /* 'gkmPWMlasso4:286' for i = 1:length(f) */
+    /* 'gkmPWMlasso:286' for i = 1:length(f) */
     if ((b_f->size[0] == 0) || (b_f->size[1] == 0)) {
       u1 = 0;
     } else {
@@ -3275,14 +3275,14 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       l_loop_ub = BB->size[0] * BB->size[1];
     }
     for (b_i = 0; b_i < u1; b_i++) {
-      /* 'gkmPWMlasso4:287' B = BB; */
-      /* 'gkmPWMlasso4:288' BBX = BX; */
-      /* 'gkmPWMlasso4:289' BBY = BY; */
-      /* 'gkmPWMlasso4:290' B(:,i) = []; */
-      /* 'gkmPWMlasso4:291' BBX(:,i) = []; */
-      /* 'gkmPWMlasso4:292' BBX(i,:) = []; */
-      /* 'gkmPWMlasso4:293' BBY(i) = []; */
-      /* 'gkmPWMlasso4:294' res = cfile2-B*(BBX^-1*BBY); */
+      /* 'gkmPWMlasso:287' B = BB; */
+      /* 'gkmPWMlasso:288' BBX = BX; */
+      /* 'gkmPWMlasso:289' BBY = BY; */
+      /* 'gkmPWMlasso:290' B(:,i) = []; */
+      /* 'gkmPWMlasso:291' BBX(:,i) = []; */
+      /* 'gkmPWMlasso:292' BBX(i,:) = []; */
+      /* 'gkmPWMlasso:293' BBY(i) = []; */
+      /* 'gkmPWMlasso:294' res = cfile2-B*(BBX^-1*BBY); */
       i = comb->size[0] * comb->size[1];
       comb->size[0] = xc->size[0];
       comb->size[1] = xc->size[1];
@@ -3379,7 +3379,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         minus(loc, cfile2);
         loc_data = loc->data;
       }
-      /* 'gkmPWMlasso4:295' E(i) = sqrt(res'*res); */
+      /* 'gkmPWMlasso:295' E(i) = sqrt(res'*res); */
       if (loc->size[0] < 1) {
         c = 0.0;
       } else {
@@ -3388,7 +3388,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       normvec_data[b_i] = sqrt(c);
     }
-    /* 'gkmPWMlasso4:297' res = cfile2-BB*OLS; */
+    /* 'gkmPWMlasso:297' res = cfile2-BB*OLS; */
     if ((B->size[0] == 0) || (b_f->size[0] * b_f->size[1] == 0) ||
         (OLS->size[0] == 0)) {
       loop_ub = B->size[0];
@@ -3423,7 +3423,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       minus(loc, cfile2);
       loc_data = loc->data;
     }
-    /* 'gkmPWMlasso4:298' EE = sqrt(res'*res); */
+    /* 'gkmPWMlasso:298' EE = sqrt(res'*res); */
     if (loc->size[0] < 1) {
       c = 0.0;
     } else {
@@ -3431,13 +3431,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                      &loc_data[0], (blasint)1);
     }
     nfrac = sqrt(c);
-    /* 'gkmPWMlasso4:299' E = (E-EE)/EE; */
+    /* 'gkmPWMlasso:299' E = (E-EE)/EE; */
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = (normvec_data[i] - nfrac) / nfrac;
     }
     /*  motclus = motclus(f); */
-    /* 'gkmPWMlasso4:301' mylen = length(f); */
+    /* 'gkmPWMlasso:301' mylen = length(f); */
     if ((b_f->size[0] == 0) || (b_f->size[1] == 0)) {
       u1 = 0;
     } else {
@@ -3447,14 +3447,14 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         u1 = nx;
       }
     }
-    /* 'gkmPWMlasso4:302' newMotclus = cell(mylen, 1); */
-    /* 'gkmPWMlasso4:303' for idx=1:mylen */
+    /* 'gkmPWMlasso:302' newMotclus = cell(mylen, 1); */
+    /* 'gkmPWMlasso:303' for idx=1:mylen */
     i = c_motclus->size[0];
     c_motclus->size[0] = u1;
     emxEnsureCapacity_cell_wrap_1(c_motclus, i);
     b_motclus_data = c_motclus->data;
     for (b_loop_ub = 0; b_loop_ub < u1; b_loop_ub++) {
-      /* 'gkmPWMlasso4:304' newMotclus{idx} = motclus{f(idx)}; */
+      /* 'gkmPWMlasso:304' newMotclus{idx} = motclus{f(idx)}; */
       i = b_motclus_data[b_loop_ub].f1->size[0] *
           b_motclus_data[b_loop_ub].f1->size[1];
       b_motclus_data[b_loop_ub].f1->size[0] = 1;
@@ -3468,8 +3468,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     emxFree_real_T(&b_f);
-    /* 'gkmPWMlasso4:306' motclus = newMotclus; */
-    /* 'gkmPWMlasso4:308' f = find(E/max(E) >= 0.01); */
+    /* 'gkmPWMlasso:306' motclus = newMotclus; */
+    /* 'gkmPWMlasso:308' f = find(E/max(E) >= 0.01); */
     nfrac = maximum(normvec);
     i = b_loc->size[0];
     b_loc->size[0] = normvec->size[0];
@@ -3489,7 +3489,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:309' B = BB; */
+    /* 'gkmPWMlasso:309' B = BB; */
     i = B->size[0] * B->size[1];
     B->size[0] = BB->size[0];
     B->size[1] = BB->size[1];
@@ -3499,7 +3499,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       B_data[i] = f_data[i];
     }
-    /* 'gkmPWMlasso4:310' BB = B(:,f); */
+    /* 'gkmPWMlasso:310' BB = B(:,f); */
     match_idx = BB->size[0] - 1;
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = BB->size[0];
@@ -3522,7 +3522,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       f_data[i] = normvec_data[i];
     }
-    /* 'gkmPWMlasso4:311' BX = B(:,f)'*B(:,f); */
+    /* 'gkmPWMlasso:311' BX = B(:,f)'*B(:,f); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
@@ -3551,7 +3551,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     b_mtimes(b_GCmat, comb2, xc);
     xc_data = xc->data;
-    /* 'gkmPWMlasso4:312' BY = B(:,f)'*cfile2; */
+    /* 'gkmPWMlasso:312' BY = B(:,f)'*cfile2; */
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
@@ -3585,7 +3585,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)cfile2->size[0], 0.0, &BY_data[0],
                   (blasint)negvec->size[0]);
     }
-    /* 'gkmPWMlasso4:313' E = zeros(length(f),1); */
+    /* 'gkmPWMlasso:313' E = zeros(length(f),1); */
     i = normvec->size[0];
     normvec->size[0] = negvec->size[0];
     emxEnsureCapacity_real_T(normvec, i);
@@ -3594,7 +3594,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = 0.0;
     }
-    /* 'gkmPWMlasso4:314' for i = 1:length(f) */
+    /* 'gkmPWMlasso:314' for i = 1:length(f) */
     i = negvec->size[0];
     if (0 <= negvec->size[0] - 1) {
       m_loop_ub = xc->size[0] * xc->size[1];
@@ -3603,14 +3603,14 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       o_loop_ub = BB->size[0] * BB->size[1];
     }
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:315' B = BB; */
-      /* 'gkmPWMlasso4:316' BBX = BX; */
-      /* 'gkmPWMlasso4:317' BBY = BY; */
-      /* 'gkmPWMlasso4:318' B(:,i) = []; */
-      /* 'gkmPWMlasso4:319' BBX(:,i) = []; */
-      /* 'gkmPWMlasso4:320' BBX(i,:) = []; */
-      /* 'gkmPWMlasso4:321' BBY(i) = []; */
-      /* 'gkmPWMlasso4:322' res = cfile2-B*(BBX^-1*BBY); */
+      /* 'gkmPWMlasso:315' B = BB; */
+      /* 'gkmPWMlasso:316' BBX = BX; */
+      /* 'gkmPWMlasso:317' BBY = BY; */
+      /* 'gkmPWMlasso:318' B(:,i) = []; */
+      /* 'gkmPWMlasso:319' BBX(:,i) = []; */
+      /* 'gkmPWMlasso:320' BBX(i,:) = []; */
+      /* 'gkmPWMlasso:321' BBY(i) = []; */
+      /* 'gkmPWMlasso:322' res = cfile2-B*(BBX^-1*BBY); */
       i1 = comb->size[0] * comb->size[1];
       comb->size[0] = xc->size[0];
       comb->size[1] = xc->size[1];
@@ -3707,7 +3707,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         minus(loc, cfile2);
         loc_data = loc->data;
       }
-      /* 'gkmPWMlasso4:323' E(i) = sqrt(res'*res); */
+      /* 'gkmPWMlasso:323' E(i) = sqrt(res'*res); */
       if (loc->size[0] < 1) {
         c = 0.0;
       } else {
@@ -3716,7 +3716,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       normvec_data[b_i] = sqrt(c);
     }
-    /* 'gkmPWMlasso4:325' OLS = (BB.'*BB)^-1*(BB.'*cfile2); */
+    /* 'gkmPWMlasso:325' OLS = (BB.'*BB)^-1*(BB.'*cfile2); */
     b_mtimes(BB, BB, comb);
     if ((BB->size[0] == 0) || (BB->size[1] == 0) || (cfile2->size[0] == 0)) {
       i = indc->size[0];
@@ -3761,8 +3761,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)indc->size[0], 0.0, &OLS_data[0],
                   (blasint)comb2->size[0]);
     }
-    /* 'gkmPWMlasso4:326' Pweig = Pweig(f); */
-    /* 'gkmPWMlasso4:327' res = cfile2-BB*OLS; */
+    /* 'gkmPWMlasso:326' Pweig = Pweig(f); */
+    /* 'gkmPWMlasso:327' res = cfile2-BB*OLS; */
     if ((BB->size[0] == 0) || (BB->size[1] == 0) || (OLS->size[0] == 0)) {
       i = loc->size[0];
       loc->size[0] = BB->size[0];
@@ -3796,7 +3796,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       minus(loc, cfile2);
       loc_data = loc->data;
     }
-    /* 'gkmPWMlasso4:328' EE = sqrt(res'*res); */
+    /* 'gkmPWMlasso:328' EE = sqrt(res'*res); */
     if (loc->size[0] < 1) {
       c = 0.0;
     } else {
@@ -3804,15 +3804,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                      &loc_data[0], (blasint)1);
     }
     nfrac = sqrt(c);
-    /* 'gkmPWMlasso4:329' E = (E-EE)/EE; */
+    /* 'gkmPWMlasso:329' E = (E-EE)/EE; */
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = (normvec_data[i] - nfrac) / nfrac;
     }
-    /* 'gkmPWMlasso4:330' for i = 1:length(motclus) */
+    /* 'gkmPWMlasso:330' for i = 1:length(motclus) */
     i = c_motclus->size[0];
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:331' motclus{i} = indvec(motclus{i})'; */
+      /* 'gkmPWMlasso:331' motclus{i} = indvec(motclus{i})'; */
       i1 = b_motclus_data[b_i].f1->size[0] * b_motclus_data[b_i].f1->size[1];
       b_motclus_data[b_i].f1->size[0] = 1;
       emxEnsureCapacity_real_T(b_motclus_data[b_i].f1, i1);
@@ -3823,16 +3823,16 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     /*  motclus = motclus(f); */
-    /* 'gkmPWMlasso4:334' mylen = length(f); */
-    /* 'gkmPWMlasso4:335' newMotclus = cell(mylen, 1); */
-    /* 'gkmPWMlasso4:336' for idx=1:mylen */
+    /* 'gkmPWMlasso:334' mylen = length(f); */
+    /* 'gkmPWMlasso:335' newMotclus = cell(mylen, 1); */
+    /* 'gkmPWMlasso:336' for idx=1:mylen */
     i = negvec->size[0];
     i1 = tmp_motclus->size[0];
     tmp_motclus->size[0] = negvec->size[0];
     emxEnsureCapacity_cell_wrap_1(tmp_motclus, i1);
     tmp_motclus_data = tmp_motclus->data;
     for (b_loop_ub = 0; b_loop_ub < i; b_loop_ub++) {
-      /* 'gkmPWMlasso4:337' newMotclus{idx} = motclus{f(idx)}; */
+      /* 'gkmPWMlasso:337' newMotclus{idx} = motclus{f(idx)}; */
       i1 = tmp_motclus_data[b_loop_ub].f1->size[0] *
            tmp_motclus_data[b_loop_ub].f1->size[1];
       tmp_motclus_data[b_loop_ub].f1->size[0] = 1;
@@ -3845,8 +3845,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
             b_motclus_data[(int)negvec_data[b_loop_ub] - 1].f1->data[i1];
       }
     }
-    /* 'gkmPWMlasso4:339' motclus = newMotclus; */
-    /* 'gkmPWMlasso4:341' correlation = corrcoef(cfile2, BB*OLS); */
+    /* 'gkmPWMlasso:339' motclus = newMotclus; */
+    /* 'gkmPWMlasso:341' correlation = corrcoef(cfile2, BB*OLS); */
     if ((BB->size[0] == 0) || (BB->size[1] == 0) || (OLS->size[0] == 0)) {
       i = indc->size[0];
       indc->size[0] = BB->size[0];
@@ -3867,7 +3867,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)OLS->size[0], 0.0, &indc_data[0],
                   (blasint)BB->size[0]);
     }
-    /* 'gkmPWMlasso4:342' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
+    /* 'gkmPWMlasso:342' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
      * sprintf("%s_%d_%d_%d", filename, int32(l_svm2), int32(k_svm2), int32(d)),
      * memefile,num,minL, minInfo, correlation(1,2)); */
     nfrac = maximum(OLS);
@@ -3895,12 +3895,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     gettopmotifs(OLS, BY, normvec, tmp_motclus, text, varargin_2,
                  size_tmp_idx_1, varargin_3, varargin_4, dv[2]);
   } else {
-    /* 'gkmPWMlasso4:344' else */
-    /* 'gkmPWMlasso4:346' fprintf('Running LASSO (1)\n'); */
+    /* 'gkmPWMlasso:344' else */
+    /* 'gkmPWMlasso:346' fprintf('Running LASSO (1)\n'); */
     printf("Running LASSO (1)\n");
     fflush(stdout);
     /*  weigmat = lasso_cvmat(B, cfile2,'DFmax', d,'Standardize', false); */
-    /* 'gkmPWMlasso4:348' [weigmat, ~] = lasso_cvmat(B, cfile2, d, false, 100);
+    /* 'gkmPWMlasso:348' [weigmat, ~] = lasso_cvmat(B, cfile2, d, false, 100);
      */
     i = comb->size[0] * comb->size[1];
     comb->size[0] = B->size[0];
@@ -3924,7 +3924,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   b_expl_temp_data, expl_temp_size, &nfrac, a__3_DF_data,
                   a__3_DF_size, c_expl_temp_data, b_expl_temp_size);
     xc_data = weigmat->data;
-    /* 'gkmPWMlasso4:350' f = find(weigmat(:,1)~=0); */
+    /* 'gkmPWMlasso:350' f = find(weigmat(:,1)~=0); */
     loop_ub = weigmat->size[0];
     i = b_loc->size[0];
     b_loc->size[0] = weigmat->size[0];
@@ -3943,7 +3943,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:351' cfile3 = cfile2 -
+    /* 'gkmPWMlasso:351' cfile3 = cfile2 -
      * B(:,f)*((B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2)); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
@@ -4060,11 +4060,11 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   1.0, &GCmat_data[0], (blasint)B->size[0], &BY_data[0],
                   (blasint)BY->size[0], 0.0, &loc_data[0], (blasint)B->size[0]);
     }
-    /* 'gkmPWMlasso4:353' fprintf('Running LASSO (2)\n'); */
+    /* 'gkmPWMlasso:353' fprintf('Running LASSO (2)\n'); */
     printf("Running LASSO (2)\n");
     fflush(stdout);
     /*  weigmat2 = lasso_cvmat(B, cfile3,'DFmax', d,'Standardize', false); */
-    /* 'gkmPWMlasso4:355' [weigmat2, ~] = lasso_cvmat(B, cfile3, d, false, 100);
+    /* 'gkmPWMlasso:355' [weigmat2, ~] = lasso_cvmat(B, cfile3, d, false, 100);
      */
     emxInit_real_T(&b_f, 2);
     if (cfile2->size[0] == loc->size[0]) {
@@ -4097,8 +4097,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                          b_expl_temp_size);
       f_data = b_f->data;
     }
-    /* 'gkmPWMlasso4:357' weigmat = abs(weigmat(:,1)) + abs(weigmat2(:,1)); */
-    /* 'gkmPWMlasso4:358' f = find(weigmat~=0); */
+    /* 'gkmPWMlasso:357' weigmat = abs(weigmat(:,1)) + abs(weigmat2(:,1)); */
+    /* 'gkmPWMlasso:358' f = find(weigmat~=0); */
     nx = weigmat->size[0] - 1;
     i = indc->size[0];
     indc->size[0] = weigmat->size[0];
@@ -4140,7 +4140,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       negvec_data[i] = matches_data[i];
     }
-    /* 'gkmPWMlasso4:359' motclus2 = clus_simmat_eig(corrcoef(B(:,f)),0.6); */
+    /* 'gkmPWMlasso:359' motclus2 = clus_simmat_eig(corrcoef(B(:,f)),0.6); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
@@ -4157,9 +4157,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     b_corrcoef(b_GCmat, comb);
     b_clus_simmat_eig(comb, tmp_motclus);
     tmp_motclus_data = tmp_motclus->data;
-    /* 'gkmPWMlasso4:360' if length(length(motclus2)) ~= length(f) */
+    /* 'gkmPWMlasso:360' if length(length(motclus2)) ~= length(f) */
     if (1 != negvec->size[0]) {
-      /* 'gkmPWMlasso4:361' f2 = f; */
+      /* 'gkmPWMlasso:361' f2 = f; */
       i = loc->size[0];
       loc->size[0] = negvec->size[0];
       emxEnsureCapacity_real_T(loc, i);
@@ -4168,7 +4168,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < loop_ub; i++) {
         loc_data[i] = negvec_data[i];
       }
-      /* 'gkmPWMlasso4:362' f = zeros(length(motclus2),1); */
+      /* 'gkmPWMlasso:362' f = zeros(length(motclus2),1); */
       i = negvec->size[0];
       negvec->size[0] = tmp_motclus->size[0];
       emxEnsureCapacity_real_T(negvec, i);
@@ -4177,12 +4177,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < loop_ub; i++) {
         negvec_data[i] = 0.0;
       }
-      /* 'gkmPWMlasso4:363' for i = 1:length(motclus2) */
+      /* 'gkmPWMlasso:363' for i = 1:length(motclus2) */
       i = tmp_motclus->size[0];
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'gkmPWMlasso4:364' if length(motclus2{i}) > 1 */
+        /* 'gkmPWMlasso:364' if length(motclus2{i}) > 1 */
         if (tmp_motclus_data[b_i].f1->size[1] > 1) {
-          /* 'gkmPWMlasso4:365' [~,f3] = max(abs(Z(f2(motclus2{i})))); */
+          /* 'gkmPWMlasso:365' [~,f3] = max(abs(Z(f2(motclus2{i})))); */
           nx = tmp_motclus_data[b_i].f1->size[1];
           i1 = BY->size[0];
           BY->size[0] = tmp_motclus_data[b_i].f1->size[1];
@@ -4195,18 +4195,18 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                        1]);
           }
           d_maximum(BY, &nfrac, &match_idx);
-          /* 'gkmPWMlasso4:366' f(i) = f2(motclus2{i}(f3)); */
+          /* 'gkmPWMlasso:366' f(i) = f2(motclus2{i}(f3)); */
           negvec_data[b_i] =
               loc_data[(int)tmp_motclus_data[b_i].f1->data[match_idx - 1] - 1];
         } else {
-          /* 'gkmPWMlasso4:367' else */
-          /* 'gkmPWMlasso4:368' f(i) = f2(motclus2{i}(1)); */
+          /* 'gkmPWMlasso:367' else */
+          /* 'gkmPWMlasso:368' f(i) = f2(motclus2{i}(1)); */
           negvec_data[b_i] =
               loc_data[(int)tmp_motclus_data[b_i].f1->data[0] - 1];
         }
       }
     }
-    /* 'gkmPWMlasso4:372' [a,b] = sort(abs(Z(f)), 'descend'); */
+    /* 'gkmPWMlasso:372' [a,b] = sort(abs(Z(f)), 'descend'); */
     nx = negvec->size[0];
     i = indc->size[0];
     indc->size[0] = negvec->size[0];
@@ -4217,7 +4217,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     sort(indc, idx);
     matches_data = idx->data;
-    /* 'gkmPWMlasso4:373' f = f(b); */
+    /* 'gkmPWMlasso:373' f = f(b); */
     i = BY->size[0];
     BY->size[0] = idx->size[0];
     emxEnsureCapacity_real_T(BY, i);
@@ -4234,13 +4234,13 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       negvec_data[i] = BY_data[i];
     }
-    /* 'gkmPWMlasso4:374' F = length(f); */
+    /* 'gkmPWMlasso:374' F = length(f); */
     nfrac = negvec->size[0];
-    /* 'gkmPWMlasso4:375' fprintf('Selecting top motifs\n') */
+    /* 'gkmPWMlasso:375' fprintf('Selecting top motifs\n') */
     printf("Selecting top motifs\n");
     fflush(stdout);
-    /* 'gkmPWMlasso4:376' ind = true; */
-    /* 'gkmPWMlasso4:377' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
+    /* 'gkmPWMlasso:376' ind = true; */
+    /* 'gkmPWMlasso:377' OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
@@ -4324,7 +4324,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)indc->size[0], 0.0, &OLS_data[0],
                   (blasint)comb2->size[0]);
     }
-    /* 'gkmPWMlasso4:378' Pweig = Z(f); */
+    /* 'gkmPWMlasso:378' Pweig = Z(f); */
     i = diffc->size[0];
     diffc->size[0] = negvec->size[0];
     emxEnsureCapacity_real_T(diffc, i);
@@ -4333,10 +4333,10 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       GCmat_data[i] = Z_data[(int)negvec_data[i] - 1];
     }
-    /* 'gkmPWMlasso4:379' while ind && F >= d */
+    /* 'gkmPWMlasso:379' while ind && F >= d */
     exitg1 = false;
     while ((!exitg1) && (nfrac >= varargin_10)) {
-      /* 'gkmPWMlasso4:380' OLS =
+      /* 'gkmPWMlasso:380' OLS =
        * (B(:,f(1:d)).'*B(:,f(1:d)))^-1*(B(:,f(1:d)).'*cfile2); */
       if (1.0 > varargin_10) {
         loop_ub = 0;
@@ -4426,7 +4426,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
             (blasint)comb2->size[0], &indc_data[0], (blasint)indc->size[0], 0.0,
             &OLS_data[0], (blasint)comb2->size[0]);
       }
-      /* 'gkmPWMlasso4:381' Pweig = Z(f(1:d)); */
+      /* 'gkmPWMlasso:381' Pweig = Z(f(1:d)); */
       if (1.0 > varargin_10) {
         loop_ub = 0;
       } else {
@@ -4439,12 +4439,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       for (i = 0; i < loop_ub; i++) {
         GCmat_data[i] = Z_data[(int)negvec_data[i] - 1];
       }
-      /* 'gkmPWMlasso4:382' ff = []; */
+      /* 'gkmPWMlasso:382' ff = []; */
       loc->size[0] = 0;
-      /* 'gkmPWMlasso4:383' for i = 1:d */
+      /* 'gkmPWMlasso:383' for i = 1:d */
       i = (int)varargin_10;
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'gkmPWMlasso4:384' if sign(OLS(i)) ~= sign(Pweig(i)) */
+        /* 'gkmPWMlasso:384' if sign(OLS(i)) ~= sign(Pweig(i)) */
         GCpos1 = OLS_data[b_i];
         if (OLS_data[b_i] < 0.0) {
           GCpos1 = -1.0;
@@ -4458,7 +4458,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           c = 1.0;
         }
         if (GCpos1 != c) {
-          /* 'gkmPWMlasso4:385' ff = [ff;i]; */
+          /* 'gkmPWMlasso:385' ff = [ff;i]; */
           i1 = loc->size[0];
           i2 = loc->size[0];
           loc->size[0]++;
@@ -4467,9 +4467,9 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
           loc_data[i1] = (double)b_i + 1.0;
         }
       }
-      /* 'gkmPWMlasso4:388' if length(ff) > 0 && F - length(ff) >= d */
+      /* 'gkmPWMlasso:388' if length(ff) > 0 && F - length(ff) >= d */
       if ((loc->size[0] > 0) && (nfrac - (double)loc->size[0] >= varargin_10)) {
-        /* 'gkmPWMlasso4:389' f(ff) = []; */
+        /* 'gkmPWMlasso:389' f(ff) = []; */
         i = idx->size[0];
         idx->size[0] = loc->size[0];
         emxEnsureCapacity_int32_T(idx, i);
@@ -4480,12 +4480,12 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         }
         e_nullAssignment(negvec, idx);
         negvec_data = negvec->data;
-        /* 'gkmPWMlasso4:390' F = F - length(ff); */
+        /* 'gkmPWMlasso:390' F = F - length(ff); */
         nfrac -= (double)loc->size[0];
       } else {
-        /* 'gkmPWMlasso4:391' else */
-        /* 'gkmPWMlasso4:392' ind = false; */
-        /* 'gkmPWMlasso4:393' f = f(1:d); */
+        /* 'gkmPWMlasso:391' else */
+        /* 'gkmPWMlasso:392' ind = false; */
+        /* 'gkmPWMlasso:393' f = f(1:d); */
         i = negvec->size[0];
         if (1.0 > varargin_10) {
           negvec->size[0] = 0;
@@ -4501,7 +4501,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     /*      OLS = (B(:,f).'*B(:,f))^-1*(B(:,f).'*cfile2); */
     /*      Pweig = Z(f); */
     /*  end */
-    /* 'gkmPWMlasso4:400' BB = B(:,f); */
+    /* 'gkmPWMlasso:400' BB = B(:,f); */
     loop_ub = B->size[0];
     i = BB->size[0] * BB->size[1];
     BB->size[0] = B->size[0];
@@ -4515,7 +4515,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
             B_data[i1 + B->size[0] * ((int)negvec_data[i] - 1)];
       }
     }
-    /* 'gkmPWMlasso4:401' BX = B(:,f)'*B(:,f); */
+    /* 'gkmPWMlasso:401' BX = B(:,f)'*B(:,f); */
     loop_ub = B->size[0];
     i = b_GCmat->size[0] * b_GCmat->size[1];
     b_GCmat->size[0] = B->size[0];
@@ -4544,7 +4544,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     }
     b_mtimes(b_GCmat, comb2, xc);
     xc_data = xc->data;
-    /* 'gkmPWMlasso4:402' BY = B(:,f)'*cfile2; */
+    /* 'gkmPWMlasso:402' BY = B(:,f)'*cfile2; */
     loop_ub = B->size[0];
     i = comb2->size[0] * comb2->size[1];
     comb2->size[0] = B->size[0];
@@ -4578,7 +4578,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)cfile2->size[0], 0.0, &BY_data[0],
                   (blasint)negvec->size[0]);
     }
-    /* 'gkmPWMlasso4:403' E = zeros(length(f),1); */
+    /* 'gkmPWMlasso:403' E = zeros(length(f),1); */
     i = normvec->size[0];
     normvec->size[0] = negvec->size[0];
     emxEnsureCapacity_real_T(normvec, i);
@@ -4587,7 +4587,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = 0.0;
     }
-    /* 'gkmPWMlasso4:404' for i = 1:length(f) */
+    /* 'gkmPWMlasso:404' for i = 1:length(f) */
     i = negvec->size[0];
     if (0 <= negvec->size[0] - 1) {
       e_loop_ub = xc->size[0] * xc->size[1];
@@ -4596,14 +4596,14 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       g_loop_ub = BB->size[0] * BB->size[1];
     }
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:405' B = BB; */
-      /* 'gkmPWMlasso4:406' BBX = BX; */
-      /* 'gkmPWMlasso4:407' BBY = BY; */
-      /* 'gkmPWMlasso4:408' B(:,i) = []; */
-      /* 'gkmPWMlasso4:409' BBX(:,i) = []; */
-      /* 'gkmPWMlasso4:410' BBX(i,:) = []; */
-      /* 'gkmPWMlasso4:411' BBY(i) = []; */
-      /* 'gkmPWMlasso4:412' res = cfile2-B*(BBX^-1*BBY); */
+      /* 'gkmPWMlasso:405' B = BB; */
+      /* 'gkmPWMlasso:406' BBX = BX; */
+      /* 'gkmPWMlasso:407' BBY = BY; */
+      /* 'gkmPWMlasso:408' B(:,i) = []; */
+      /* 'gkmPWMlasso:409' BBX(:,i) = []; */
+      /* 'gkmPWMlasso:410' BBX(i,:) = []; */
+      /* 'gkmPWMlasso:411' BBY(i) = []; */
+      /* 'gkmPWMlasso:412' res = cfile2-B*(BBX^-1*BBY); */
       i1 = comb->size[0] * comb->size[1];
       comb->size[0] = xc->size[0];
       comb->size[1] = xc->size[1];
@@ -4700,7 +4700,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
         minus(loc, cfile2);
         loc_data = loc->data;
       }
-      /* 'gkmPWMlasso4:413' E(i) = sqrt(res'*res); */
+      /* 'gkmPWMlasso:413' E(i) = sqrt(res'*res); */
       if (loc->size[0] < 1) {
         c = 0.0;
       } else {
@@ -4709,7 +4709,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
       normvec_data[b_i] = sqrt(c);
     }
-    /* 'gkmPWMlasso4:415' res = cfile2-BB*OLS; */
+    /* 'gkmPWMlasso:415' res = cfile2-BB*OLS; */
     if ((B->size[0] == 0) || (negvec->size[0] == 0) || (OLS->size[0] == 0)) {
       loop_ub = B->size[0];
       i = loc->size[0];
@@ -4743,7 +4743,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       minus(loc, cfile2);
       loc_data = loc->data;
     }
-    /* 'gkmPWMlasso4:416' EE = sqrt(res'*res); */
+    /* 'gkmPWMlasso:416' EE = sqrt(res'*res); */
     if (loc->size[0] < 1) {
       c = 0.0;
     } else {
@@ -4751,15 +4751,15 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                      &loc_data[0], (blasint)1);
     }
     nfrac = sqrt(c);
-    /* 'gkmPWMlasso4:417' E = (E-EE)/EE; */
+    /* 'gkmPWMlasso:417' E = (E-EE)/EE; */
     loop_ub = normvec->size[0];
     for (i = 0; i < loop_ub; i++) {
       normvec_data[i] = (normvec_data[i] - nfrac) / nfrac;
     }
-    /* 'gkmPWMlasso4:418' for i = 1:length(motclus) */
+    /* 'gkmPWMlasso:418' for i = 1:length(motclus) */
     i = motclus->size[0];
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'gkmPWMlasso4:419' motclus{i} = indvec(motclus{i})'; */
+      /* 'gkmPWMlasso:419' motclus{i} = indvec(motclus{i})'; */
       i1 = motclus_data[b_i].f1->size[0] * motclus_data[b_i].f1->size[1];
       motclus_data[b_i].f1->size[0] = 1;
       emxEnsureCapacity_real_T(motclus_data[b_i].f1, i1);
@@ -4770,16 +4770,16 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
       }
     }
     /*  motclus = motclus(f); */
-    /* 'gkmPWMlasso4:422' mylen = length(f); */
-    /* 'gkmPWMlasso4:423' newMotclus = cell(mylen, 1); */
-    /* 'gkmPWMlasso4:424' for idx=1:mylen */
+    /* 'gkmPWMlasso:422' mylen = length(f); */
+    /* 'gkmPWMlasso:423' newMotclus = cell(mylen, 1); */
+    /* 'gkmPWMlasso:424' for idx=1:mylen */
     i = negvec->size[0];
     i1 = c_motclus->size[0];
     c_motclus->size[0] = negvec->size[0];
     emxEnsureCapacity_cell_wrap_1(c_motclus, i1);
     b_motclus_data = c_motclus->data;
     for (b_loop_ub = 0; b_loop_ub < i; b_loop_ub++) {
-      /* 'gkmPWMlasso4:425' newMotclus{idx} = motclus{f(idx)}; */
+      /* 'gkmPWMlasso:425' newMotclus{idx} = motclus{f(idx)}; */
       i1 = b_motclus_data[b_loop_ub].f1->size[0] *
            b_motclus_data[b_loop_ub].f1->size[1];
       b_motclus_data[b_loop_ub].f1->size[0] = 1;
@@ -4792,8 +4792,8 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
             motclus_data[(int)negvec_data[b_loop_ub] - 1].f1->data[i1];
       }
     }
-    /* 'gkmPWMlasso4:427' motclus = newMotclus; */
-    /* 'gkmPWMlasso4:429' correlation = corrcoef(cfile2, BB*OLS); */
+    /* 'gkmPWMlasso:427' motclus = newMotclus; */
+    /* 'gkmPWMlasso:429' correlation = corrcoef(cfile2, BB*OLS); */
     if ((B->size[0] == 0) || (negvec->size[0] == 0) || (OLS->size[0] == 0)) {
       loop_ub = B->size[0];
       i = indc->size[0];
@@ -4814,7 +4814,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
                   (blasint)OLS->size[0], 0.0, &indc_data[0],
                   (blasint)B->size[0]);
     }
-    /* 'gkmPWMlasso4:430' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
+    /* 'gkmPWMlasso:430' gettopmotifs(OLS/max(OLS), Pweig, E/max(E), motclus,
      * sprintf("%s_%d_%d", filename, int32(l_svm2),
      * int32(k_svm2)),memefile,num,minL, minInfo, correlation(1,2)); */
     nfrac = maximum(OLS);
@@ -4857,7 +4857,7 @@ void gkmPWMlasso4(const emxArray_char_T *varargin_1,
   emxFree_real_T(&diffc);
   emxFree_real_T(&comb2);
   emxFree_real_T(&comb);
-  /* 'gkmPWMlasso4:434' fprintf('Done\n'); */
+  /* 'gkmPWMlasso:434' fprintf('Done\n'); */
   printf("Done\n");
   fflush(stdout);
 }
@@ -4904,4 +4904,4 @@ void minus(emxArray_real_T *loc, const emxArray_real_T *cfile2)
   emxFree_real_T(&b_cfile2);
 }
 
-/* End of code generation (gkmPWMlasso4.c) */
+/* End of code generation (gkmPWMlasso.c) */

@@ -11,7 +11,7 @@
 
 /* Include files */
 #include "tic.h"
-#include "mapTF2_ls_data.h"
+#include "mapTF_data.h"
 #include "rt_nonfinite.h"
 #include "timeKeeper.h"
 #include "coder_posix_time.h"

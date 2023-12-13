@@ -5,7 +5,7 @@
  *
  * rt_nonfinite.c
  *
- * Code generation for function 'mapTF2_ls'
+ * Code generation for function 'mapTF'
  *
  */
 

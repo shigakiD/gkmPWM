@@ -11,8 +11,8 @@
 
 /* Include files */
 #include "extremeKElements.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include "sortedInsertion.h"
 #include <string.h>
 

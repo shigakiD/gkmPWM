@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_emxutil.h
+ * mapTF_emxutil.h
  *
- * Code generation for function 'mapTF2_ls_emxutil'
+ * Code generation for function 'mapTF_emxutil'
  *
  */
 
@@ -13,7 +13,7 @@
 #define MAPTF2_LS_EMXUTIL_H
 
 /* Include files */
-#include "mapTF2_ls_types.h"
+#include "mapTF_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -158,4 +158,4 @@ extern void emxTrim_cell_wrap_4(emxArray_cell_wrap_4 *emxArray, int fromIndex,
 #endif
 
 #endif
-/* End of code generation (mapTF2_ls_emxutil.h) */
+/* End of code generation (mapTF_emxutil.h) */

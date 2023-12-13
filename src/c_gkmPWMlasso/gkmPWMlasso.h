@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4.h
+ * gkmPWMlasso.h
  *
- * Code generation for function 'gkmPWMlasso4'
+ * Code generation for function 'gkmPWMlasso'
  *
  */
 
@@ -13,7 +13,7 @@
 #define GKMPWMLASSO4_H
 
 /* Include files */
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void gkmPWMlasso4(const emxArray_char_T *varargin_1,
+extern void gkmPWMlasso(const emxArray_char_T *varargin_1,
                          const emxArray_char_T *varargin_2, double varargin_3,
                          double varargin_4, double varargin_5,
                          double varargin_6, double varargin_7,
@@ -38,4 +38,4 @@ void minus(emxArray_real_T *loc, const emxArray_real_T *cfile2);
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso4.h) */
+/* End of code generation (gkmPWMlasso.h) */

@@ -11,9 +11,9 @@
 
 /* Include files */
 #include "fileManager.h"
-#include "mapTF2_ls_emxutil.h"
-#include "mapTF2_ls_rtwutil.h"
-#include "mapTF2_ls_types.h"
+#include "mapTF_emxutil.h"
+#include "mapTF_rtwutil.h"
+#include "mapTF_types.h"
 #include "rt_nonfinite.h"
 #include <stdio.h>
 #include <string.h>

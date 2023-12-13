@@ -12,8 +12,8 @@
 /* Include files */
 #include "PWM2kmers_norc.h"
 #include "PWM2kmers.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include <math.h>
 #include <string.h>
 

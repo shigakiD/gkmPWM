@@ -11,9 +11,9 @@
 
 /* Include files */
 #include "conncomp.h"
-#include "gkmPWMlasso4_data.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_data.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include "list.h"
 #include <string.h>
 

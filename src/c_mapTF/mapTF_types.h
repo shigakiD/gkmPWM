@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_types.h
+ * mapTF_types.h
  *
- * Code generation for function 'mapTF2_ls'
+ * Code generation for function 'mapTF'
  *
  */
 
@@ -197,4 +197,4 @@ typedef struct emxArray_uint32_T emxArray_uint32_T;
 #endif /* typedef_emxArray_uint32_T */
 
 #endif
-/* End of code generation (mapTF2_ls_types.h) */
+/* End of code generation (mapTF_types.h) */

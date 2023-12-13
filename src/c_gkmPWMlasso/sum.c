@@ -12,8 +12,8 @@
 /* Include files */
 #include "sum.h"
 #include "blockedSummation.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include <string.h>
 
 /* Function Definitions */

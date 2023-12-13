@@ -8,10 +8,10 @@
 //
 // Include files
 #include "main.h"
-#include "mapTF2_ls.h"
-#include "mapTF2_ls_terminate.h"
-#include "mapTF2_ls_emxAPI.h"
-#include "mapTF2_ls_emxutil.h"
+#include "mapTF.h"
+#include "mapTF_terminate.h"
+#include "mapTF_emxAPI.h"
+#include "mapTF_emxutil.h"
 #include "cblas.h"
 #include "lapacke.h"
 #include <string.h>
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
     
     openblas_set_num_threads(1);
     
-    mapTF2_ls(seq_file,
+    mapTF(seq_file,
                  weight_file, 
                  denovo_file,
                  lasso_file,
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     emxFree_char_T(&motif_file);
     emxFree_char_T(&output_prefix);
     
-    mapTF2_ls_terminate();
+    mapTF_terminate();
     return 0;
 }
 

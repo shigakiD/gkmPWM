@@ -12,8 +12,8 @@
 /* Include files */
 #include "fileread.h"
 #include "fileManager.h"
-#include "gkmPWMlasso4_emxutil.h"
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>

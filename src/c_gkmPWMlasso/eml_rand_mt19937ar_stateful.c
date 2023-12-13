@@ -11,7 +11,7 @@
 
 /* Include files */
 #include "eml_rand_mt19937ar_stateful.h"
-#include "gkmPWMlasso4_data.h"
+#include "gkmPWMlasso_data.h"
 #include <string.h>
 
 /* Function Definitions */

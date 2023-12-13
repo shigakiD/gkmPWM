@@ -3,26 +3,26 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4_initialize.c
+ * gkmPWMlasso_initialize.c
  *
- * Code generation for function 'gkmPWMlasso4_initialize'
+ * Code generation for function 'gkmPWMlasso_initialize'
  *
  */
 
 /* Include files */
-#include "gkmPWMlasso4_initialize.h"
+#include "gkmPWMlasso_initialize.h"
 #include "eml_rand_mt19937ar_stateful.h"
 #include "fileManager.h"
-#include "gkmPWMlasso4_data.h"
+#include "gkmPWMlasso_data.h"
 #include <string.h>
 
 /* Function Definitions */
-void gkmPWMlasso4_initialize(void)
+void gkmPWMlasso_initialize(void)
 {
-  omp_init_nest_lock(&gkmPWMlasso4_nestLockGlobal);
+  omp_init_nest_lock(&gkmPWMlasso_nestLockGlobal);
   c_eml_rand_mt19937ar_stateful_i();
   filedata_init();
-  isInitialized_gkmPWMlasso4 = true;
+  isInitialized_gkmPWMlasso = true;
 }
 
-/* End of code generation (gkmPWMlasso4_initialize.c) */
+/* End of code generation (gkmPWMlasso_initialize.c) */

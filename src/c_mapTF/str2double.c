@@ -11,9 +11,9 @@
 
 /* Include files */
 #include "str2double.h"
-#include "mapTF2_ls_data.h"
-#include "mapTF2_ls_emxutil.h"
-#include "mapTF2_ls_types.h"
+#include "mapTF_data.h"
+#include "mapTF_emxutil.h"
+#include "mapTF_types.h"
 #include "rt_nonfinite.h"
 #include "str2double1.h"
 #include <stdio.h>

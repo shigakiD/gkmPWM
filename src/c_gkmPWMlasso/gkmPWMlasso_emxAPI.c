@@ -3,17 +3,16 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_emxAPI.c
+ * gkmPWMlasso_emxAPI.c
  *
- * Code generation for function 'mapTF2_ls_emxAPI'
+ * Code generation for function 'gkmPWMlasso_emxAPI'
  *
  */
 
 /* Include files */
-#include "mapTF2_ls_emxAPI.h"
-#include "mapTF2_ls_emxutil.h"
-#include "mapTF2_ls_types.h"
-#include "rt_nonfinite.h"
+#include "gkmPWMlasso_emxAPI.h"
+#include "gkmPWMlasso_emxutil.h"
+#include "gkmPWMlasso_types.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -91,4 +90,4 @@ void emxInitArray_char_T(emxArray_char_T **pEmxArray, int numDimensions)
   emxInit_char_T(pEmxArray, numDimensions);
 }
 
-/* End of code generation (mapTF2_ls_emxAPI.c) */
+/* End of code generation (gkmPWMlasso_emxAPI.c) */

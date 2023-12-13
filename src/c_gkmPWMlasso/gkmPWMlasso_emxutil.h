@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4_emxutil.h
+ * gkmPWMlasso_emxutil.h
  *
- * Code generation for function 'gkmPWMlasso4_emxutil'
+ * Code generation for function 'gkmPWMlasso_emxutil'
  *
  */
 
@@ -13,7 +13,7 @@
 #define GKMPWMLASSO4_EMXUTIL_H
 
 /* Include files */
-#include "gkmPWMlasso4_types.h"
+#include "gkmPWMlasso_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>
@@ -215,4 +215,4 @@ extern void emxTrim_cell_wrap_9(emxArray_cell_wrap_9 *emxArray, int fromIndex,
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso4_emxutil.h) */
+/* End of code generation (gkmPWMlasso_emxutil.h) */

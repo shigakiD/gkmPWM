@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4_types.h
+ * gkmPWMlasso_types.h
  *
- * Code generation for function 'gkmPWMlasso4'
+ * Code generation for function 'gkmPWMlasso'
  *
  */
 
@@ -264,4 +264,4 @@ typedef struct {
 #endif /* typedef_emxArray_cell_wrap_8 */
 
 #endif
-/* End of code generation (gkmPWMlasso4_types.h) */
+/* End of code generation (gkmPWMlasso_types.h) */

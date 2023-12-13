@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4_rtwutil.h
+ * mapTF_initialize.h
  *
- * Code generation for function 'gkmPWMlasso4_rtwutil'
+ * Code generation for function 'mapTF_initialize'
  *
  */
 
-#ifndef GKMPWMLASSO4_RTWUTIL_H
-#define GKMPWMLASSO4_RTWUTIL_H
+#ifndef MAPTF2_LS_INITIALIZE_H
+#define MAPTF2_LS_INITIALIZE_H
 
 /* Include files */
 #include "rtwtypes.h"
@@ -23,11 +23,11 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern double rt_roundd(double u);
+extern void mapTF_initialize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso4_rtwutil.h) */
+/* End of code generation (mapTF_initialize.h) */

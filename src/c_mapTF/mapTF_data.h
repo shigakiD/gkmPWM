@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_data.h
+ * mapTF_data.h
  *
- * Code generation for function 'mapTF2_ls_data'
+ * Code generation for function 'mapTF_data'
  *
  */
 
@@ -22,9 +22,9 @@
 extern unsigned int state[625];
 extern double freq;
 extern bool freq_not_empty;
-extern omp_nest_lock_t mapTF2_ls_nestLockGlobal;
+extern omp_nest_lock_t mapTF_nestLockGlobal;
 extern const bool bv[128];
-extern bool isInitialized_mapTF2_ls;
+extern bool isInitialized_mapTF;
 
 #endif
-/* End of code generation (mapTF2_ls_data.h) */
+/* End of code generation (mapTF_data.h) */

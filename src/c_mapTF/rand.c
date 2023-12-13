@@ -11,7 +11,7 @@
 
 /* Include files */
 #include "rand.h"
-#include "mapTF2_ls_data.h"
+#include "mapTF_data.h"
 #include "rt_nonfinite.h"
 #include <string.h>
 

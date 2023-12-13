@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * gkmPWMlasso4_terminate.h
+ * gkmPWMlasso_terminate.h
  *
- * Code generation for function 'gkmPWMlasso4_terminate'
+ * Code generation for function 'gkmPWMlasso_terminate'
  *
  */
 
@@ -23,11 +23,11 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void gkmPWMlasso4_terminate(void);
+extern void gkmPWMlasso_terminate(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (gkmPWMlasso4_terminate.h) */
+/* End of code generation (gkmPWMlasso_terminate.h) */

@@ -13,7 +13,7 @@
 #define GETMOTIF_H
 
 /* Include files */
-#include "mapTF2_ls_types.h"
+#include "mapTF_types.h"
 #include "rtwtypes.h"
 #include "omp.h"
 #include <stddef.h>

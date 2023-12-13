@@ -5,7 +5,7 @@
  *
  * rtwtypes.h
  *
- * Code generation for function 'mapTF2_ls'
+ * Code generation for function 'mapTF'
  *
  */
 

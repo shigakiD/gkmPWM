@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_terminate.h
+ * gkmPWMlasso_initialize.h
  *
- * Code generation for function 'mapTF2_ls_terminate'
+ * Code generation for function 'gkmPWMlasso_initialize'
  *
  */
 
-#ifndef MAPTF2_LS_TERMINATE_H
-#define MAPTF2_LS_TERMINATE_H
+#ifndef GKMPWMLASSO4_INITIALIZE_H
+#define GKMPWMLASSO4_INITIALIZE_H
 
 /* Include files */
 #include "rtwtypes.h"
@@ -23,11 +23,11 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void mapTF2_ls_terminate(void);
+extern void gkmPWMlasso_initialize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (mapTF2_ls_terminate.h) */
+/* End of code generation (gkmPWMlasso_initialize.h) */

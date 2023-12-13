@@ -3,14 +3,14 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * mapTF2_ls_rtwutil.c
+ * mapTF_rtwutil.c
  *
- * Code generation for function 'mapTF2_ls_rtwutil'
+ * Code generation for function 'mapTF_rtwutil'
  *
  */
 
 /* Include files */
-#include "mapTF2_ls_rtwutil.h"
+#include "mapTF_rtwutil.h"
 #include "rt_nonfinite.h"
 #include "rt_nonfinite.h"
 #include <math.h>
@@ -79,4 +79,4 @@ double rt_roundd_snf(double u)
   return y;
 }
 
-/* End of code generation (mapTF2_ls_rtwutil.c) */
+/* End of code generation (mapTF_rtwutil.c) */

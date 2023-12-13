@@ -11,7 +11,7 @@
 
 /* Include files */
 #include "rand.h"
-#include "gkmPWMlasso4_data.h"
+#include "gkmPWMlasso_data.h"
 #include <string.h>
 
 /* Function Definitions */
