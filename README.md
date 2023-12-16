@@ -133,6 +133,7 @@ python plotMotif.py --denovo --info gkmPWMfile --meme memefile --output outprefi
 python plotMotif.py --denovo --info GM12878_10_6_0_15_gkmPWM.out --meme GM12878_10_6_0_15_denovo.meme --output GM12878_10_6_0_15_gkmPWM
  ```
  This will create _GM12878_10_6_0_15_gkmPWM.pdf_
+ ![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_10_6_0_15_gkmPWM.png)
 ## Running mapTF 
 
 This function maps PWMS from both gkmPWM and gkmPWMlasso to sequences at base-pair resolution.  The required parameters are:
