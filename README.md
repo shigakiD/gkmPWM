@@ -70,6 +70,7 @@ python plotMotif.py --info lassofile --meme memefile --output outprefix
 python plotMotif.py --info GM12878_10_6_30_gkmPWMlasso.out --meme combined_db_v4.meme --output GM12878_10_6_30_gkmPWMlasso
 ```
 This will create _GM12878_10_6_30_gkmPWMlasso.pdf_
+![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_10_6_30_gkmPWMlasso.png)
 A quick note:  for the optional parameters <i>l</i> and <i>k</i>, these <b>do not</b> need to be the same as the <i>l</i> and <i>k</i> from the gkmSVM model.  In fact, if <i>l</i> and <i>k</i> generate too many gapped k-mers, gkmPWMlasso will take only a subset of the gapped k-mer to use as features.  This is also true for gkmPWM.
 
 ## Running gkmPWM (de novo PWMs)
