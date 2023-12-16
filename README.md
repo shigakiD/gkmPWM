@@ -12,7 +12,9 @@ git clone https://github.com/dshigaki/gkmPWM.git
 This repository is organized into 4 directories.  Two of them, matlab and src contain the code to run:
 
 <b>gkmPWMlasso</b>: an algorithm to extract known PWMs from a sequence based model.  
+
 <b>gkmPWM</b>: an algorithm to learn <i>de novo</i> PWMs from a sequence based model.  
+
 <b>mapTF</b>: a method to map the PWMs from gkmPWMlasso and gkmPWM to a set of sequences.  
 
 To run the matlab code, include <i>addpath('dir/gkmPWM/matlab')</i> in one of your lines.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
