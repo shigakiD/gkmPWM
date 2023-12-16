@@ -14,6 +14,7 @@
 #include "blockedSummation.h"
 #include "find.h"
 #include "flip.h"
+#include "gkmPWMlasso_data.h"
 #include "gkmPWMlasso_emxutil.h"
 #include "gkmPWMlasso_rtwutil.h"
 #include "gkmPWMlasso_types.h"
@@ -161,15 +162,15 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   bool exitg1;
   bool *x_data;
   c_data = c->data;
-  /* 'genIndex:157' L = numel(c)/k; */
+  /* 'genIndex:158' L = numel(c)/k; */
   L = (double)(c->size[0] * c->size[1]) / k;
-  /* 'genIndex:158' x = zeros(L, l); */
-  /* 'genIndex:159' for i = 1:L */
-  /* 'genIndex:163' M = l/2; */
+  /* 'genIndex:159' x = zeros(L, l); */
+  /* 'genIndex:160' for i = 1:L */
+  /* 'genIndex:164' M = l/2; */
   M = l / 2.0;
-  /* 'genIndex:164' y = sum(x==2,2); */
-  /* 'genIndex:165' nind = true; */
-  /* 'genIndex:166' ind = 1:L; */
+  /* 'genIndex:165' y = sum(x==2,2); */
+  /* 'genIndex:166' nind = true; */
+  /* 'genIndex:167' ind = 1:L; */
   emxInit_real_T(&ind, 2);
   ind_data = ind->data;
   if (L < 1.0) {
@@ -187,7 +188,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
     }
   }
   emxInit_real_T(&X, 1);
-  /* 'genIndex:167' X = zeros(L,1); */
+  /* 'genIndex:168' X = zeros(L,1); */
   i = X->size[0];
   nxin = (int)L;
   X->size[0] = (int)L;
@@ -196,10 +197,10 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   for (i = 0; i < nxin; i++) {
     X_data[i] = 0.0;
   }
-  /* 'genIndex:168' count = 0; */
+  /* 'genIndex:169' count = 0; */
   count = 0U;
-  /* 'genIndex:169' i = 0; */
-  /* 'genIndex:170' while count == 0 || count < Lfrac */
+  /* 'genIndex:170' i = 0; */
+  /* 'genIndex:171' while count == 0 || count < Lfrac */
   emxInit_real_T(&x, 2);
   emxInit_real_T(&cvec, 2);
   emxInit_real_T(&C, 2);
@@ -212,13 +213,13 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   emxInit_int32_T(&c_f, 1);
   while ((((int)count == 0) || (count < Lfrac)) &&
          (Lfrac - (double)count >= ((double)count + M) - Lfrac)) {
-    /* 'genIndex:171' if Lfrac-count < count+M-Lfrac */
-    /* 'genIndex:174' count = count + 1; */
+    /* 'genIndex:172' if Lfrac-count < count+M-Lfrac */
+    /* 'genIndex:175' count = count + 1; */
     count++;
-    /* 'genIndex:175' r = randi(L-count); */
+    /* 'genIndex:176' r = randi(L-count); */
     c_r = b_rand();
     c_r = floor(c_r * (L - (double)count));
-    /* 'genIndex:176' cvec = c(ind(r),:); */
+    /* 'genIndex:177' cvec = c(ind(r),:); */
     xtmp = ind_data[(int)(c_r + 1.0) - 1];
     nxin = c->size[1];
     i = cvec->size[0] * cvec->size[1];
@@ -229,9 +230,9 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
     for (i = 0; i < nxin; i++) {
       cvec_data[i] = c_data[((int)xtmp + c->size[0] * i) - 1];
     }
-    /* 'genIndex:177' X(count) = ind(r); */
+    /* 'genIndex:178' X(count) = ind(r); */
     X_data[(int)count - 1] = xtmp;
-    /* 'genIndex:178' ind(r) = []; */
+    /* 'genIndex:179' ind(r) = []; */
     vlen = (int)(c_r + 1.0);
     nxin = ind->size[1];
     nxout = ind->size[1] - 1;
@@ -246,7 +247,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
     }
     emxEnsureCapacity_real_T(ind, i);
     ind_data = ind->data;
-    /* 'genIndex:179' num = sum(cvec<M+1); */
+    /* 'genIndex:180' num = sum(cvec<M+1); */
     i = b_x->size[0] * b_x->size[1];
     b_x->size[0] = 1;
     b_x->size[1] = cvec->size[1];
@@ -265,11 +266,11 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         nz += x_data[b_k - 1];
       }
     }
-    /* 'genIndex:180' for j = 1:M-1 */
+    /* 'genIndex:181' for j = 1:M-1 */
     j = 0;
     exitg1 = false;
     while ((!exitg1) && (j <= (int)(M - 1.0) - 1)) {
-      /* 'genIndex:181' C = zeros(1,k); */
+      /* 'genIndex:182' C = zeros(1,k); */
       i = C->size[0] * C->size[1];
       C->size[0] = 1;
       vlen = (int)k;
@@ -279,7 +280,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
       for (i = 0; i < vlen; i++) {
         C_data[i] = 0.0;
       }
-      /* 'genIndex:182' C(1:num) = sort(mod(cvec(1:num)+(j-1),M)+1); */
+      /* 'genIndex:183' C(1:num) = sort(mod(cvec(1:num)+(j-1),M)+1); */
       if (1 > nz) {
         nxin = 0;
       } else {
@@ -308,7 +309,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
       for (i = 0; i < nxin; i++) {
         C_data[i] = r2[i];
       }
-      /* 'genIndex:183' C(num+1:end) = sort(l-mod(l+1-cvec(num+1:end)+(j-1),M));
+      /* 'genIndex:184' C(num+1:end) = sort(l-mod(l+1-cvec(num+1:end)+(j-1),M));
        */
       if ((double)nz + 1.0 > cvec->size[1]) {
         i = 0;
@@ -346,7 +347,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
       for (i = 0; i < nxin; i++) {
         C_data[nxout + i] = r2[i];
       }
-      /* 'genIndex:184' mat = repmat(C, L-count,1); */
+      /* 'genIndex:185' mat = repmat(C, L-count,1); */
       c_r = L - (double)count;
       i = (int)c_r;
       b_k = mat->size[0] * mat->size[1];
@@ -361,7 +362,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
           mat_data[nxin + b_k] = C_data[nxout];
         }
       }
-      /* 'genIndex:185' f = find(sum(abs(c(ind,:)-mat),2)==0); */
+      /* 'genIndex:186' f = find(sum(abs(c(ind,:)-mat),2)==0); */
       b_k = r1->size[0];
       r1->size[0] = ind->size[1];
       emxEnsureCapacity_real_T(r1, b_k);
@@ -418,9 +419,9 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
       for (b_k = 0; b_k < nxin; b_k++) {
         mat_data[b_k] = f_data[b_k];
       }
-      /* 'genIndex:186' if isempty(f) */
+      /* 'genIndex:187' if isempty(f) */
       if (f->size[0] == 0) {
-        /* 'genIndex:187' R = l+1-fliplr(C); */
+        /* 'genIndex:188' R = l+1-fliplr(C); */
         vlen = C->size[1] - 1;
         nxin = C->size[1] >> 1;
         for (b_k = 0; b_k < nxin; b_k++) {
@@ -429,7 +430,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
           C_data[b_k] = C_data[nxout];
           C_data[nxout] = xtmp;
         }
-        /* 'genIndex:188' mat = repmat(R,L-count,1); */
+        /* 'genIndex:189' mat = repmat(R,L-count,1); */
         b_k = C->size[0] * C->size[1];
         C->size[0] = 1;
         emxEnsureCapacity_real_T(C, b_k);
@@ -450,7 +451,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
             mat_data[nxin + b_k] = C_data[nxout];
           }
         }
-        /* 'genIndex:189' f = find(sum(abs(c(ind,:)-mat),2)==0); */
+        /* 'genIndex:190' f = find(sum(abs(c(ind,:)-mat),2)==0); */
         if ((r1->size[0] == mat->size[0]) && (c->size[1] == mat->size[1])) {
           nxin = c->size[1];
           i = x->size[0] * x->size[1];
@@ -499,16 +500,16 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         for (i = 0; i < nxin; i++) {
           mat_data[i] = f_data[i];
         }
-        /* 'genIndex:190' if isempty(f) */
+        /* 'genIndex:191' if isempty(f) */
         if (f->size[0] == 0) {
           exitg1 = true;
         } else {
-          /* 'genIndex:192' else */
-          /* 'genIndex:193' count = count + 1; */
+          /* 'genIndex:193' else */
+          /* 'genIndex:194' count = count + 1; */
           count++;
-          /* 'genIndex:194' X(count)=ind(f); */
+          /* 'genIndex:195' X(count)=ind(f); */
           X_data[(int)count - 1] = ind_data[(int)mat_data[0] - 1];
-          /* 'genIndex:195' ind(f)=[]; */
+          /* 'genIndex:196' ind(f)=[]; */
           i = c_f->size[0];
           c_f->size[0] = f->size[0];
           emxEnsureCapacity_int32_T(c_f, i);
@@ -522,12 +523,12 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
           j++;
         }
       } else {
-        /* 'genIndex:197' else */
-        /* 'genIndex:198' count = count + 1; */
+        /* 'genIndex:198' else */
+        /* 'genIndex:199' count = count + 1; */
         count++;
-        /* 'genIndex:199' X(count)=ind(f); */
+        /* 'genIndex:200' X(count)=ind(f); */
         X_data[(int)count - 1] = ind_data[(int)mat_data[0] - 1];
-        /* 'genIndex:200' ind(f)=[]; */
+        /* 'genIndex:201' ind(f)=[]; */
         i = c_f->size[0];
         c_f->size[0] = f->size[0];
         emxEnsureCapacity_int32_T(c_f, i);
@@ -553,7 +554,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   emxFree_real_T(&cvec);
   emxFree_real_T(&ind);
   emxFree_real_T(&x);
-  /* 'genIndex:204' X = X(1:count); */
+  /* 'genIndex:205' X = X(1:count); */
   i = X->size[0];
   if (1 > (int)count) {
     X->size[0] = 0;
@@ -561,10 +562,10 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
     X->size[0] = (int)count;
   }
   emxEnsureCapacity_real_T(X, i);
-  /* 'genIndex:205' X = sort(X); */
+  /* 'genIndex:206' X = sort(X); */
   c_sort(X);
   X_data = X->data;
-  /* 'genIndex:206' mat = c(X,:); */
+  /* 'genIndex:207' mat = c(X,:); */
   nxin = c->size[1];
   i = mat->size[0] * mat->size[1];
   mat->size[0] = X->size[0];
@@ -755,9 +756,9 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   bool *b_e_data;
   c_data = c->data;
   emxInit_real_T(&d, 1);
-  /* 'genIndex:57' L = numel(c)/k; */
+  /* 'genIndex:58' L = numel(c)/k; */
   L = (double)(c->size[0] * c->size[1]) / k;
-  /* 'genIndex:58' d = ones(L,1); */
+  /* 'genIndex:59' d = ones(L,1); */
   i = d->size[0];
   loop_ub = (int)L;
   d->size[0] = (int)L;
@@ -769,7 +770,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   emxInit_int32_T(&e, 2);
   /*  Alternative to continual growth */
   /*  e = []; */
-  /* 'genIndex:62' e = ones(1,length(d)-1) * -1; */
+  /* 'genIndex:63' e = ones(1,length(d)-1) * -1; */
   i = e->size[0] * e->size[1];
   e->size[0] = 1;
   nx = (int)L - 1;
@@ -779,15 +780,15 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < nx; i++) {
     e_data[i] = -1;
   }
-  /* 'genIndex:64' a = 1; */
+  /* 'genIndex:65' a = 1; */
   a = 1.0;
-  /* 'genIndex:65' for i = 1:length(d)-1 */
+  /* 'genIndex:66' for i = 1:length(d)-1 */
   emxInit_real_T(&vec, 2);
   emxInit_real_T(&y, 2);
   y_data = y->data;
   emxInit_real_T(&x, 2);
   for (b_i = 0; b_i <= loop_ub - 2; b_i++) {
-    /* 'genIndex:66' vec = l+1-fliplr(c(i,:)); */
+    /* 'genIndex:67' vec = l+1-fliplr(c(i,:)); */
     nx = c->size[1];
     i = vec->size[0] * vec->size[1];
     vec->size[0] = 1;
@@ -812,9 +813,9 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     for (i = 0; i <= nx; i++) {
       vec_data[i] = (l + 1.0) - vec_data[i];
     }
-    /* 'genIndex:67' if d(i) ~= 0 */
+    /* 'genIndex:68' if d(i) ~= 0 */
     if (d_data[b_i] != 0.0) {
-      /* 'genIndex:68' if sum(abs(c(i,:)-vec))==0 */
+      /* 'genIndex:69' if sum(abs(c(i,:)-vec))==0 */
       if (c->size[1] == vec->size[1]) {
         nx = c->size[1];
         i = x->size[0] * x->size[1];
@@ -839,19 +840,19 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
         y_data[j2] = fabs(x_data[j2]);
       }
       if (sum(y) == 0.0) {
-        /* 'genIndex:69' e(a) = i; */
+        /* 'genIndex:70' e(a) = i; */
         e_data[(int)a - 1] = b_i + 1;
-        /* 'genIndex:70' d(i) = 0; */
+        /* 'genIndex:71' d(i) = 0; */
         d_data[b_i] = 0.0;
-        /* 'genIndex:71' a = a+1; */
+        /* 'genIndex:72' a = a+1; */
         a++;
       } else {
-        /* 'genIndex:72' else */
-        /* 'genIndex:73' for j = i+1:length(d) */
+        /* 'genIndex:73' else */
+        /* 'genIndex:74' for j = i+1:length(d) */
         i = d->size[0] - b_i;
         for (j = 0; j <= i - 2; j++) {
           b_j = ((unsigned int)b_i + j) + 2U;
-          /* 'genIndex:74' if sum(abs(c(j,:)-vec))==0 */
+          /* 'genIndex:75' if sum(abs(c(j,:)-vec))==0 */
           if (c->size[1] == vec->size[1]) {
             nx = c->size[1];
             i1 = x->size[0] * x->size[1];
@@ -877,7 +878,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
             y_data[j2] = fabs(x_data[j2]);
           }
           if (sum(y) == 0.0) {
-            /* 'genIndex:75' d(j) = 0; */
+            /* 'genIndex:76' d(j) = 0; */
             d_data[(int)b_j - 1] = 0.0;
           }
         }
@@ -886,7 +887,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   }
   emxInit_boolean_T(&b_e, 2);
   /*  Remove all trailing -1 */
-  /* 'genIndex:82' first_occ = find(e==-1); */
+  /* 'genIndex:83' first_occ = find(e==-1); */
   i = b_e->size[0] * b_e->size[1];
   b_e->size[0] = 1;
   b_e->size[1] = e->size[1];
@@ -911,7 +912,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   }
   emxFree_int32_T(&b_r);
   emxInit_boolean_T(&b_d, 1);
-  /* 'genIndex:83' e = e(1:first_occ(1)-1); */
+  /* 'genIndex:84' e = e(1:first_occ(1)-1); */
   if (1.0 > (double)(int)vec_data[0] - 1.0) {
     nd2 = 0;
   } else {
@@ -925,9 +926,9 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   }
   emxEnsureCapacity_int32_T(e, i);
   e_data = e->data;
-  /* 'genIndex:85' rcnum = a-1; */
+  /* 'genIndex:86' rcnum = a-1; */
   *rcnum = a - 1.0;
-  /* 'genIndex:86' f = find(d==1); */
+  /* 'genIndex:87' f = find(d==1); */
   i = b_d->size[0];
   b_d->size[0] = d->size[0];
   emxEnsureCapacity_boolean_T(b_d, i);
@@ -948,7 +949,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     f_data[i] = iidx_data[i];
   }
-  /* 'genIndex:87' c=[c(f,:);c(e,:)]; */
+  /* 'genIndex:88' c=[c(f,:);c(e,:)]; */
   i = b_d->size[0];
   b_d->size[0] = d->size[0];
   emxEnsureCapacity_boolean_T(b_d, i);
@@ -1025,7 +1026,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
       c_data[(i1 + nx) + c->size[0] * i] = x_data[i1 + nd2 * i];
     }
   }
-  /* 'genIndex:88' C = c; */
+  /* 'genIndex:89' C = c; */
   i = C->size[0] * C->size[1];
   C->size[0] = c->size[0];
   C->size[1] = c->size[1];
@@ -1035,12 +1036,12 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     C_data[i] = c_data[i];
   }
-  /* 'genIndex:89' L = numel(c)/k; */
+  /* 'genIndex:90' L = numel(c)/k; */
   L = (double)(c->size[0] * c->size[1]) / k;
-  /* 'genIndex:90' for i = 1:L */
+  /* 'genIndex:91' for i = 1:L */
   loop_ub_tmp = (int)L;
   for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-    /* 'genIndex:91' c2 = l+1-fliplr(c(i,:)); */
+    /* 'genIndex:92' c2 = l+1-fliplr(c(i,:)); */
     loop_ub = c->size[1];
     i = vec->size[0] * vec->size[1];
     vec->size[0] = 1;
@@ -1065,7 +1066,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     for (i = 0; i <= loop_ub; i++) {
       vec_data[i] = (l + 1.0) - vec_data[i];
     }
-    /* 'genIndex:92' if sum(0.5.^c(i,:)) < sum(0.5.^c2) */
+    /* 'genIndex:93' if sum(0.5.^c(i,:)) < sum(0.5.^c2) */
     loop_ub = c->size[1];
     i = y->size[0] * y->size[1];
     y->size[0] = 1;
@@ -1087,7 +1088,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
       x_data[i] = pow(0.5, a);
     }
     if (sum(y) < sum(x)) {
-      /* 'genIndex:93' C(i,:) = c2; */
+      /* 'genIndex:94' C(i,:) = c2; */
       loop_ub = vec->size[1];
       for (i = 0; i < loop_ub; i++) {
         C_data[b_i + C->size[0] * i] = vec_data[i];
@@ -1095,7 +1096,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     }
   }
   emxFree_real_T(&vec);
-  /* 'genIndex:96' c=C; */
+  /* 'genIndex:97' c=C; */
   i = c->size[0] * c->size[1];
   c->size[0] = C->size[0];
   c->size[1] = C->size[1];
@@ -1108,7 +1109,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
       c_data[i1 + c->size[0] * i] = C_data[i1 + C->size[0] * i];
     }
   }
-  /* 'genIndex:97' [~,ind] = sort(sum(0.5.^C,2),'descend'); */
+  /* 'genIndex:98' [~,ind] = sort(sum(0.5.^C,2),'descend'); */
   i = varargin_1->size[0] * varargin_1->size[1];
   varargin_1->size[0] = C->size[0];
   varargin_1->size[1] = C->size[1];
@@ -1131,7 +1132,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     e_data[i] = iidx_data[i];
   }
-  /* 'genIndex:98' C = C(ind,:); */
+  /* 'genIndex:99' C = C(ind,:); */
   nx = C->size[1] - 1;
   i = varargin_2->size[0] * varargin_2->size[1];
   varargin_2->size[0] = b_ind->size[0];
@@ -1154,7 +1155,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     C_data[i] = x_data[i];
   }
-  /* 'genIndex:99' f = find(C(:,1)==1); */
+  /* 'genIndex:100' f = find(C(:,1)==1); */
   loop_ub = C->size[0];
   i = b_d->size[0];
   b_d->size[0] = C->size[0];
@@ -1173,8 +1174,8 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     f_data[i] = iidx_data[i];
   }
-  /* 'genIndex:100' S = length(f); */
-  /* 'genIndex:101' ff = find(C(f,end)~=l); */
+  /* 'genIndex:101' S = length(f); */
+  /* 'genIndex:102' ff = find(C(f,end)~=l); */
   i = b_d->size[0];
   b_d->size[0] = f->size[0];
   emxEnsureCapacity_boolean_T(b_d, i);
@@ -1194,14 +1195,14 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     d_data[i] = iidx_data[i];
   }
-  /* 'genIndex:102' for i = 1:length(ff)-1 */
+  /* 'genIndex:103' for i = 1:length(ff)-1 */
   i = d->size[0];
   for (b_i = 0; b_i <= i - 2; b_i++) {
-    /* 'genIndex:103' for j = i+1:length(ff) */
+    /* 'genIndex:104' for j = i+1:length(ff) */
     i1 = d->size[0] - b_i;
     for (j = 0; j <= i1 - 2; j++) {
       b_j = ((unsigned int)b_i + j) + 2U;
-      /* 'genIndex:104' if
+      /* 'genIndex:105' if
        * sum(abs(C(f(ff(i)),:)+1-fliplr(l+1-C(f(ff(j)),:))))==0 */
       loop_ub = C->size[1];
       nd2 = x->size[0] * x->size[1];
@@ -1250,7 +1251,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
         y_data[j2] = fabs(x_data[j2]);
       }
       if (sum(y) == 0.0) {
-        /* 'genIndex:105' C(f(ff(j)),:) = fliplr(l+1-C(f(ff(j)),:)); */
+        /* 'genIndex:106' C(f(ff(j)),:) = fliplr(l+1-C(f(ff(j)),:)); */
         loop_ub = C->size[1];
         nd2 = x->size[0] * x->size[1];
         x->size[0] = 1;
@@ -1279,7 +1280,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
       }
     }
   }
-  /* 'genIndex:109' [~,ind2] = sort(sum(0.5.^C,2),'descend'); */
+  /* 'genIndex:110' [~,ind2] = sort(sum(0.5.^C,2),'descend'); */
   i = varargin_1->size[0] * varargin_1->size[1];
   varargin_1->size[0] = C->size[0];
   varargin_1->size[1] = C->size[1];
@@ -1303,7 +1304,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     f_data[i] = iidx_data[i];
   }
   emxFree_int32_T(&iidx);
-  /* 'genIndex:110' C = C(ind2,:); */
+  /* 'genIndex:111' C = C(ind2,:); */
   nx = C->size[1] - 1;
   i = varargin_2->size[0] * varargin_2->size[1];
   varargin_2->size[0] = f->size[0];
@@ -1326,7 +1327,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     C_data[i] = x_data[i];
   }
-  /* 'genIndex:111' ind = ind(ind2); */
+  /* 'genIndex:112' ind = ind(ind2); */
   i = ind->size[0];
   ind->size[0] = f->size[0];
   emxEnsureCapacity_real_T(ind, i);
@@ -1335,9 +1336,9 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub; i++) {
     vec_data[i] = e_data[f_data[i] - 1];
   }
-  /* 'genIndex:112' if n_frac == 1 */
+  /* 'genIndex:113' if n_frac == 1 */
   if (n_frac == 1.0) {
-    /* 'genIndex:113' S = sum(C(:,1)==1); */
+    /* 'genIndex:114' S = sum(C(:,1)==1); */
     loop_ub = C->size[0];
     i = b_d->size[0];
     b_d->size[0] = C->size[0];
@@ -1355,7 +1356,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
         nd2 += b_e_data[j2 - 1];
       }
     }
-    /* 'genIndex:114' mat = zeros(S, max(c(:,1))-1); */
+    /* 'genIndex:115' mat = zeros(S, max(c(:,1))-1); */
     loop_ub = c->size[0];
     i = d->size[0];
     d->size[0] = loop_ub;
@@ -1374,11 +1375,11 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     for (i = 0; i < loop_ub; i++) {
       vec_data[i] = 0.0;
     }
-    /* 'genIndex:115' for i = 1:S */
+    /* 'genIndex:116' for i = 1:S */
     for (b_i = 0; b_i < nd2; b_i++) {
-      /* 'genIndex:116' if C(i,end) ~= l */
+      /* 'genIndex:117' if C(i,end) ~= l */
       if (C_data[b_i + C->size[0] * (C->size[1] - 1)] != l) {
-        /* 'genIndex:117' for j = 2:max(c(:,1)) */
+        /* 'genIndex:118' for j = 2:max(c(:,1)) */
         loop_ub = c->size[0];
         i = d->size[0];
         d->size[0] = loop_ub;
@@ -1389,9 +1390,9 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
         }
         i = (int)(maximum(d) + -1.0);
         for (j = 0; j < i; j++) {
-          /* 'genIndex:118' a = S+1; */
+          /* 'genIndex:119' a = S+1; */
           a = (double)nd2 + 1.0;
-          /* 'genIndex:119' while sum(abs(C(i,:)+j-1-C(a,:))) ~= 0 */
+          /* 'genIndex:120' while sum(abs(C(i,:)+j-1-C(a,:))) ~= 0 */
           do {
             exitg1 = 0;
             loop_ub = C->size[1];
@@ -1415,9 +1416,9 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
               y_data[j2] = fabs(x_data[j2]);
             }
             if (sum(y) != 0.0) {
-              /* 'genIndex:120' a = a + 1; */
+              /* 'genIndex:121' a = a + 1; */
               a++;
-              /* 'genIndex:121' if a > L */
+              /* 'genIndex:122' if a > L */
               if (a > L) {
                 exitg1 = 1;
               }
@@ -1425,15 +1426,15 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
               exitg1 = 1;
             }
           } while (exitg1 == 0);
-          /* 'genIndex:125' if a <= L */
+          /* 'genIndex:126' if a <= L */
           if (a <= L) {
-            /* 'genIndex:126' mat(i,j-1) = a; */
+            /* 'genIndex:127' mat(i,j-1) = a; */
             vec_data[b_i + mat->size[0] * j] = a;
           }
         }
       }
     }
-    /* 'genIndex:131' mat = [(1:S)' mat]; */
+    /* 'genIndex:132' mat = [(1:S)' mat]; */
     if (nd2 < 1) {
       y->size[0] = 1;
       y->size[1] = 0;
@@ -1504,8 +1505,8 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
       vec_data[i] = x_data[i];
     }
   } else {
-    /* 'genIndex:132' else */
-    /* 'genIndex:133' mat = (1:L)'; */
+    /* 'genIndex:133' else */
+    /* 'genIndex:134' mat = (1:L)'; */
     if (L < 1.0) {
       y->size[0] = 1;
       y->size[1] = 0;
@@ -1541,7 +1542,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   emxFree_boolean_T(&b_d);
   emxFree_real_T(&varargin_2);
   emxFree_real_T(&d);
-  /* 'genIndex:135' I = zeros(L,1); */
+  /* 'genIndex:136' I = zeros(L,1); */
   i = b_I->size[0];
   b_I->size[0] = (int)L;
   emxEnsureCapacity_real_T(b_I, i);
@@ -1549,28 +1550,28 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   for (i = 0; i < loop_ub_tmp; i++) {
     vec_data[i] = 0.0;
   }
-  /* 'genIndex:136' I(1)=2; */
+  /* 'genIndex:137' I(1)=2; */
   vec_data[0] = 2.0;
-  /* 'genIndex:137' for i=2:length(I) */
+  /* 'genIndex:138' for i=2:length(I) */
   for (b_i = 0; b_i <= loop_ub_tmp - 2; b_i++) {
-    /* 'genIndex:138' a = 1; */
-    /* 'genIndex:139' while C(i-1,a)==C(i,a) */
+    /* 'genIndex:139' a = 1; */
+    /* 'genIndex:140' while C(i-1,a)==C(i,a) */
     for (a = 1.0; C_data[b_i + C->size[0] * ((int)a - 1)] ==
                   C_data[(b_i + C->size[0] * ((int)a - 1)) + 1];
          a++) {
-      /* 'genIndex:140' a = a+1; */
+      /* 'genIndex:141' a = a+1; */
     }
-    /* 'genIndex:142' I(i) = a; */
+    /* 'genIndex:143' I(i) = a; */
     vec_data[b_i + 1] = a;
-    /* 'genIndex:143' if I(i) < 2 */
+    /* 'genIndex:144' if I(i) < 2 */
     if (a < 2.0) {
-      /* 'genIndex:144' I(i)=2; */
+      /* 'genIndex:145' I(i)=2; */
       vec_data[b_i + 1] = 2.0;
     }
   }
-  /* 'genIndex:147' for i = 1:L */
+  /* 'genIndex:148' for i = 1:L */
   for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-    /* 'genIndex:148' if sum(abs(c(ind(i),:)-C(i,:)))~=0 */
+    /* 'genIndex:149' if sum(abs(c(ind(i),:)-C(i,:)))~=0 */
     if (c->size[1] == C->size[1]) {
       loop_ub = c->size[1];
       i = x->size[0] * x->size[1];
@@ -1596,7 +1597,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
       y_data[j2] = fabs(x_data[j2]);
     }
     if (sum(y) != 0.0) {
-      /* 'genIndex:149' c(ind(i),:) = l+1-fliplr(c(ind(i),:)); */
+      /* 'genIndex:150' c(ind(i),:) = l+1-fliplr(c(ind(i),:)); */
       loop_ub = c->size[1];
       i = x->size[0] * x->size[1];
       x->size[0] = 1;
@@ -1679,7 +1680,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
               emxArray_real_T *mat, double *rcnum)
 {
   emxArray_boolean_T *c_c1;
-  emxArray_int32_T *b_r;
+  emxArray_int32_T *c_r;
   emxArray_int32_T *r4;
   emxArray_real_T *a__2;
   emxArray_real_T *a__3;
@@ -1699,6 +1700,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
   double *f_data;
   double *r3;
   int b_i;
+  unsigned int b_r;
   int i;
   int i1;
   int j2;
@@ -1719,7 +1721,15 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
   /* 'genIndex:7' if n_frac ~= 1 */
   emxInit_real_T(&f, 2);
   if (n_frac != 1.0) {
-    /* 'genIndex:8' if mod(l,2) == 0 */
+    /* 'genIndex:8' rng(1); */
+    b_r = 1U;
+    state[0] = 1U;
+    for (nd2 = 0; nd2 < 623; nd2++) {
+      b_r = ((b_r ^ b_r >> 30U) * 1812433253U + nd2) + 1U;
+      state[nd2 + 1] = b_r;
+    }
+    state[624] = 624U;
+    /* 'genIndex:9' if mod(l,2) == 0 */
     if (l == 0.0) {
       xtmp = 0.0;
     } else {
@@ -1733,7 +1743,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
     emxInit_real_T(&c2, 2);
     if (xtmp == 0.0) {
       /*  c = combnk(1:l,k); */
-      /* 'genIndex:10' c = flip(nchoosek(1:l,k)); */
+      /* 'genIndex:11' c = flip(nchoosek(1:l,k)); */
       if (l < 1.0) {
         f->size[0] = 1;
         f->size[1] = 0;
@@ -1750,19 +1760,19 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       }
       nchoosek(f, k, c2);
       flip(c2);
-      /* 'genIndex:11' L = numel(c)/k; */
-      /* 'genIndex:12' [c,C,I,ind,mat,rcnum] = sort_comb(c,l,k,n_frac); */
+      /* 'genIndex:12' L = numel(c)/k; */
+      /* 'genIndex:13' [c,C,I,ind,mat,rcnum] = sort_comb(c,l,k,n_frac); */
       sort_comb(c2, l, k, n_frac, C, b_I, ind, mat, rcnum);
-      /* 'genIndex:13' L = numel(c)/k; */
-      /* 'genIndex:14' c = genIndex_frac(l,k,c,rcnum,L*n_frac); */
+      /* 'genIndex:14' L = numel(c)/k; */
+      /* 'genIndex:15' c = genIndex_frac(l,k,c,rcnum,L*n_frac); */
       genIndex_frac(l, k, c2, (double)(c2->size[0] * c2->size[1]) / k * n_frac,
                     c);
-      /* 'genIndex:15' [c,C,I,ind,mat,rcnum] = sort_comb(c,l,k,n_frac); */
+      /* 'genIndex:16' [c,C,I,ind,mat,rcnum] = sort_comb(c,l,k,n_frac); */
       sort_comb(c, l, k, n_frac, C, b_I, ind, mat, rcnum);
     } else {
-      /* 'genIndex:16' else */
+      /* 'genIndex:17' else */
       /*  c = combnk(1:l,k); */
-      /* 'genIndex:18' c = flip(nchoosek(1:l,k)); */
+      /* 'genIndex:19' c = flip(nchoosek(1:l,k)); */
       if (l < 1.0) {
         f->size[0] = 1;
         f->size[1] = 0;
@@ -1782,10 +1792,10 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       emxInit_real_T(&a__4, 2);
       nchoosek(f, k, c);
       flip(c);
-      /* 'genIndex:19' [c,~,~,~,~,rcnum1] = sort_comb(c,l,k,n_frac); */
+      /* 'genIndex:20' [c,~,~,~,~,rcnum1] = sort_comb(c,l,k,n_frac); */
       sort_comb(c, l, k, n_frac, c2, a__2, a__3, a__4, &xtmp);
       /*  c1 = combnk(1:(l-1),k-1); */
-      /* 'genIndex:21' c1 = flip(nchoosek(1:(l-1),(k-1))); */
+      /* 'genIndex:22' c1 = flip(nchoosek(1:(l-1),(k-1))); */
       if (l - 1.0 < 1.0) {
         f->size[0] = 1;
         f->size[1] = 0;
@@ -1804,17 +1814,17 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       emxInit_real_T(&b_c1, 2);
       nchoosek(f, k - 1.0, b_c1);
       flip(b_c1);
-      /* 'genIndex:22' [c1,~,~,~,~,rcnum1] = sort_comb(c1,l-1,k-1,n_frac); */
+      /* 'genIndex:23' [c1,~,~,~,~,rcnum1] = sort_comb(c1,l-1,k-1,n_frac); */
       sort_comb(b_c1, l - 1.0, k - 1.0, n_frac, c2, a__2, a__3, a__4, &xtmp);
-      /* 'genIndex:23' L1 = numel(c1)/(k-1); */
-      /* 'genIndex:24' c1 = genIndex_frac(l-1,k-1,c1,rcnum1,L1*n_frac); */
+      /* 'genIndex:24' L1 = numel(c1)/(k-1); */
+      /* 'genIndex:25' c1 = genIndex_frac(l-1,k-1,c1,rcnum1,L1*n_frac); */
       genIndex_frac(
           l - 1.0, k - 1.0, b_c1,
           (double)(b_c1->size[0] * b_c1->size[1]) / (k - 1.0) * n_frac, c1);
       c1_data = c1->data;
-      /* 'genIndex:25' L1 = numel(c1)/(k-1); */
+      /* 'genIndex:26' L1 = numel(c1)/(k-1); */
       L1 = (double)(c1->size[0] * c1->size[1]) / (k - 1.0);
-      /* 'genIndex:26' x = zeros(L1, l-1); */
+      /* 'genIndex:27' x = zeros(L1, l-1); */
       i = (int)L1;
       i1 = c2->size[0] * c2->size[1];
       c2->size[0] = (int)L1;
@@ -1825,16 +1835,16 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       for (i1 = 0; i1 < nd2; i1++) {
         c2_data[i1] = 0.0;
       }
-      /* 'genIndex:27' for i = 1:L1 */
-      emxInit_int32_T(&b_r, 1);
+      /* 'genIndex:28' for i = 1:L1 */
+      emxInit_int32_T(&c_r, 1);
       emxInit_real_T(&r1, 2);
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'genIndex:28' x(i,c1(i,:)) = x(i,c1(i,:))+1; */
+        /* 'genIndex:29' x(i,c1(i,:)) = x(i,c1(i,:))+1; */
         nd2 = c1->size[1];
-        i1 = b_r->size[0];
-        b_r->size[0] = c1->size[1];
-        emxEnsureCapacity_int32_T(b_r, i1);
-        r2 = b_r->data;
+        i1 = c_r->size[0];
+        c_r->size[0] = c1->size[1];
+        emxEnsureCapacity_int32_T(c_r, i1);
+        r2 = c_r->data;
         i1 = r1->size[0] * r1->size[1];
         r1->size[0] = 1;
         r1->size[1] = c1->size[1];
@@ -1849,7 +1859,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
         for (i1 = 0; i1 < nd2; i1++) {
           c2_data[b_i + c2->size[0] * r2[i1]] = r3[i1] + 1.0;
         }
-        /* 'genIndex:29' x(i,l-fliplr(c1(i,:))) = x(i,l-fliplr(c1(i,:)))+1; */
+        /* 'genIndex:30' x(i,l-fliplr(c1(i,:))) = x(i,l-fliplr(c1(i,:)))+1; */
         nd2 = c1->size[1];
         i1 = f->size[0] * f->size[1];
         f->size[0] = 1;
@@ -1866,10 +1876,10 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
           f_data[sizes_idx_0] = f_data[j2];
           f_data[j2] = xtmp;
         }
-        i1 = b_r->size[0];
-        b_r->size[0] = f->size[1];
-        emxEnsureCapacity_int32_T(b_r, i1);
-        r2 = b_r->data;
+        i1 = c_r->size[0];
+        c_r->size[0] = f->size[1];
+        emxEnsureCapacity_int32_T(c_r, i1);
+        r2 = c_r->data;
         nd2 = f->size[1];
         for (i1 = 0; i1 < nd2; i1++) {
           r2[i1] = (int)(l - f_data[i1]) - 1;
@@ -1904,9 +1914,9 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
           c2_data[b_i + c2->size[0] * r2[i1]] = r3[i1] + 1.0;
         }
       }
-      /* 'genIndex:31' L2 = round((L1*(l-1)*2-sum(sum(x)))/k/2); */
+      /* 'genIndex:32' L2 = round((L1*(l-1)*2-sum(sum(x)))/k/2); */
       /*  c2 = combnk(1:(l-1),k); */
-      /* 'genIndex:33' c2 = flip(nchoosek(1:(l-1),k)); */
+      /* 'genIndex:34' c2 = flip(nchoosek(1:(l-1),k)); */
       if (l - 1.0 < 1.0) {
         f->size[0] = 1;
         f->size[1] = 0;
@@ -1924,9 +1934,9 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       emxInit_real_T(&b_c2, 2);
       nchoosek(f, k, b_c2);
       flip(b_c2);
-      /* 'genIndex:34' [c2,~,~,~,~,rcnum2] = sort_comb(c2,l-1,k,n_frac); */
+      /* 'genIndex:35' [c2,~,~,~,~,rcnum2] = sort_comb(c2,l-1,k,n_frac); */
       sort_comb(b_c2, l - 1.0, k, n_frac, a__4, a__2, a__3, b_c1, &xtmp);
-      /* 'genIndex:35' c2 = genIndex_frac(l-1,k,c2,rcnum2,L2); */
+      /* 'genIndex:36' c2 = genIndex_frac(l-1,k,c2,rcnum2,L2); */
       emxFree_real_T(&b_c1);
       emxFree_real_T(&a__4);
       emxFree_real_T(&a__3);
@@ -1947,21 +1957,21 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       genIndex_frac(l - 1.0, k, b_c2,
                     rt_roundd((L1 * (l - 1.0) * 2.0 - sum(f)) / k / 2.0), c2);
       c2_data = c2->data;
-      /* 'genIndex:36' L2 = numel(c2)/k; */
-      /* 'genIndex:37' cc1 = zeros(L1,k); */
+      /* 'genIndex:37' L2 = numel(c2)/k; */
+      /* 'genIndex:38' cc1 = zeros(L1,k); */
       i1 = cc1->size[0] * cc1->size[1];
       cc1->size[0] = (int)L1;
       cc1->size[1] = (int)k;
       emxEnsureCapacity_real_T(cc1, i1);
       cc1_data = cc1->data;
-      /* 'genIndex:38' M = ceil(l/2); */
+      /* 'genIndex:39' M = ceil(l/2); */
       xtmp = ceil(l / 2.0);
-      /* 'genIndex:39' for i = 1:L1 */
+      /* 'genIndex:40' for i = 1:L1 */
       emxFree_real_T(&b_c2);
       emxInit_int32_T(&r4, 2);
       emxInit_boolean_T(&c_c1, 2);
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'genIndex:40' f = find(c1(i,:)>=M); */
+        /* 'genIndex:41' f = find(c1(i,:)>=M); */
         nd2 = c1->size[1];
         i1 = c_c1->size[0] * c_c1->size[1];
         c_c1->size[0] = 1;
@@ -1982,11 +1992,11 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
         for (i1 = 0; i1 < nd2; i1++) {
           f_data[i1] = r2[i1];
         }
-        /* 'genIndex:41' c1(i,f) = c1(i,f)+1; */
-        i1 = b_r->size[0];
-        b_r->size[0] = f->size[1];
-        emxEnsureCapacity_int32_T(b_r, i1);
-        r2 = b_r->data;
+        /* 'genIndex:42' c1(i,f) = c1(i,f)+1; */
+        i1 = c_r->size[0];
+        c_r->size[0] = f->size[1];
+        emxEnsureCapacity_int32_T(c_r, i1);
+        r2 = c_r->data;
         nd2 = f->size[1];
         for (i1 = 0; i1 < nd2; i1++) {
           r2[i1] = (int)f_data[i1] - 1;
@@ -2004,7 +2014,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
         for (i1 = 0; i1 < nd2; i1++) {
           c1_data[b_i + c1->size[0] * r2[i1]] = r3[i1] + 1.0;
         }
-        /* 'genIndex:42' cc1(i,:) = sort([c1(i,:) M]); */
+        /* 'genIndex:43' cc1(i,:) = sort([c1(i,:) M]); */
         nd2 = c1->size[1];
         i1 = r1->size[0] * r1->size[1];
         r1->size[0] = 1;
@@ -2023,13 +2033,13 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
         }
       }
       emxFree_real_T(&r1);
-      emxFree_int32_T(&b_r);
+      emxFree_int32_T(&c_r);
       emxFree_real_T(&c1);
-      /* 'genIndex:44' for i = 1:L2 */
+      /* 'genIndex:45' for i = 1:L2 */
       i = (int)((double)(c2->size[0] * c2->size[1]) / k);
       for (b_i = 0; b_i < i; b_i++) {
-        /* 'genIndex:45' f = find(c2(i,:)>=M); */
-        /* 'genIndex:46' c2(i,f) = c2(i,f)+1; */
+        /* 'genIndex:46' f = find(c2(i,:)>=M); */
+        /* 'genIndex:47' c2(i,f) = c2(i,f)+1; */
         nd2 = c2->size[1];
         i1 = c_c1->size[0] * c_c1->size[1];
         c_c1->size[0] = 1;
@@ -2067,7 +2077,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
       emxFree_boolean_T(&c_c1);
       emxFree_int32_T(&r4);
       emxFree_real_T(&a__2);
-      /* 'genIndex:48' [c,C,I,ind,mat,rcnum] = sort_comb([cc1;c2],l,k,n_frac);
+      /* 'genIndex:49' [c,C,I,ind,mat,rcnum] = sort_comb([cc1;c2],l,k,n_frac);
        */
       if ((cc1->size[0] != 0) && (cc1->size[1] != 0)) {
         nd2 = cc1->size[1];
@@ -2111,9 +2121,9 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
     }
     emxFree_real_T(&c2);
   } else {
-    /* 'genIndex:50' else */
+    /* 'genIndex:51' else */
     /*  c = combnk(1:l,k); */
-    /* 'genIndex:52' c = flip(nchoosek(1:l,k)); */
+    /* 'genIndex:53' c = flip(nchoosek(1:l,k)); */
     if (l < 1.0) {
       f->size[0] = 1;
       f->size[1] = 0;
@@ -2130,7 +2140,7 @@ void genIndex(double l, double k, double n_frac, emxArray_real_T *c,
     }
     nchoosek(f, k, c);
     flip(c);
-    /* 'genIndex:53' [c,C,I,ind,mat,rcnum] = sort_comb(c,l,k,n_frac); */
+    /* 'genIndex:54' [c,C,I,ind,mat,rcnum] = sort_comb(c,l,k,n_frac); */
     sort_comb(c, l, k, 1.0, C, b_I, ind, mat, rcnum);
   }
   emxFree_real_T(&f);
