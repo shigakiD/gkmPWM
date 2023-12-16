@@ -2,7 +2,7 @@
 
 A package to extract compact and interpretable features from sequence based models.
 
-## Getting Started
+## Installation
 
 Run the following on the commandline:
 
