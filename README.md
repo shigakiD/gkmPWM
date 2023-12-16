@@ -4,7 +4,7 @@ A package to extract compact and interpretable features from sequence based mode
 
 ## Installation
 
-Run the following on the commandline:
+Run the following on the command line:
 
 ```bash
 git clone https://github.com/dshigaki/gkmPWM.git
@@ -195,7 +195,9 @@ You can make a profile plot of the results of mapTF for a sequence using <i>mapT
 python mapTF_profile.py --fasta seqfile --weights wfilename --locsprefix kmerPWMprefix --seqindex sind
 python mapTF_profile.py --fasta GM12878.fa --weights GM12878_weights.out --locsprefix GM12878 --seqindex 1
 ```
-This creates a png named _GM12878_1_profile.png_, formatted as _kmerPWMprefix_sind_profile.png_.  The first row is the sequences of interest with the nucleotides contained in binding sites raised.  The second is are the mapped PWMs.  The third row is the average deltaSVM score of each nucleotide for all possible mutations.
+This creates a png named _GM12878_1_profile.png_, formatted as _kmerPWMprefix_sind_profile.png_.  
+![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_1_profile.png)
+The first row is the sequences of interest with the nucleotides contained in binding sites raised.  The second is are the mapped PWMs.  The third row is the average deltaSVM score of each nucleotide for all possible mutations.
 
 ## Authors
 
