@@ -11,8 +11,8 @@ git clone https://github.com/dshigaki/gkmPWM.git
 ```
 This repository is organized into 4 directories.  Two of them, matlab and src contain the code to run:
 
-<b>gkmPWMlasso</b>: an algorithm to extract known PWMs from a sequence based model.
-<b>gkmPWM</b>: an algorithm to learn <i>de novo</i> PWMs from a sequence based model.
+<b>gkmPWMlasso</b>: an algorithm to extract known PWMs from a sequence based model.  
+<b>gkmPWM</b>: an algorithm to learn <i>de novo</i> PWMs from a sequence based model.  
 <b>mapTF</b>: a method to map the PWMs from gkmPWMlasso and gkmPWM to a set of sequences.  
 
 To run the matlab code, include <i>addpath('dir/gkmPWM/matlab')</i> in one of your lines.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
@@ -52,12 +52,12 @@ gkmPWMlasso('GM12878', 'combined_db_v4.meme', 30)
 ```
 
 These both output <i>GM12878_10_6_30_gkmPWMlasso.out</i>, which contains the following columns:
-1. Cluster ID: The cluster to which the PWM belongs.  gkmPWMlasso clusters PWMs to prevent linear dependence and redundant features.  
-2. ID: The number of the motif from (1) as it as appears in the memefile input.
-3. MOTIF ID: The name of the motif in the memefile
-4. Weight: The regression weight of the motif.
-5. Z-score: The number of standard deviations of the average of the top gapped k-mers weights.  The number of gapped k-mers used depends on the combination of optional parameters '<i>l</i>', '<i>k</i>', and '<i>KmerFrac</i>'.
-6. Importance: The relative increase in error when removing that PWM from the list of features.
+1. <u>Cluster ID</u>: The cluster to which the PWM belongs.  gkmPWMlasso clusters PWMs to prevent linear dependence and redundant features.  
+2. <u>ID</u>: The number of the motif from (1) as it as appears in the memefile input.
+3. <u>MOTIF ID</u>: The name of the motif in the memefile
+4. <u>Weight</u>: The regression weight of the motif.
+5. <u>Z-score</u>: The number of standard deviations of the average of the top gapped k-mers weights.  The number of gapped k-mers used depends on the combination of optional parameters '<i>l</i>', '<i>k</i>', and '<i>KmerFrac</i>'.
+6. <u>Importance</u>: The relative increase in error when removing that PWM from the list of features.
 
 You can create a pdf of the output by running <i>plotMotif.py</i> in the visualization directory.  The parameters required are:
 1. gkmPWMlasso output: <i>lassofile</i> passed to --info
@@ -108,13 +108,13 @@ This creates 3 files <i>GM12878_10_6_0_15_denovo.meme</i>,<i>GM12878_10_6_0_erro
 
 The first is a meme file containing the PWMs.  The second file is a summary file.  The second file is a record of the error after each iteration.  If the error does not clearly converge, run it again for more reps.  There will be small jumps in the error, which is gkmPWM adjusting the alignment of the PWMs.   The last file is a summary file with the following columns:
 
-1. MOTIF: The name of the motif in the memefile that had the highest pearson correlation with that PWM
-2. ID: The number of the motif from (1) as it as appears in the memefile input.
-3. Similarity: The pearson correlation from (1).
-4. Redundancy: The highest pearson correlation with another PWM that was also learned.
-5. Weight: The regression weight of the motif.
-6. Z-score: The number of standard deviations of the average of the top gapped k-mers weights.  The number of gapped k-mers used depends on the combination of optional parameters '<i>l</i>', '<i>k</i>', and '<i>KmerFrac</i>'.
-7. Importance: The relative increase in error when removing that PWM from the list of features.
+1. <u>MOTIF</u>: The name of the motif in the memefile that had the highest pearson correlation with that PWM
+2. <u>ID</u>: The number of the motif from (1) as it as appears in the memefile input.
+3. <u>Similarity</u>: The pearson correlation from (1).
+4. <u>Redundancy</u>: The highest pearson correlation with another PWM that was also learned.
+5. <u>Weight</u>: The regression weight of the motif.
+6. <u>Z-score</u>: The number of standard deviations of the average of the top gapped k-mers weights.  The number of gapped k-mers used depends on the combination of optional parameters '<i>l</i>', '<i>k</i>', and '<i>KmerFrac</i>'.
+7. <u>Importance</u>: The relative increase in error when removing that PWM from the list of features.
 
 The numbers in the output correspond to the '<i>l</i>', '<i>k</i>', and '<i>RegFrac</i>' parameters.
 
@@ -160,14 +160,14 @@ This outputs two files:
 The first file contains the PWMs for the visualization script mapTF_profile.py.  
 The second file gives a list of the locations of the mapped TFBSs.  The columns are:
 
-1. Sequence ID: The sequence index to which the TFBS was mapped (not zero indexed)
-2. Motif Name
-3. Motif number in <i>outprefix_motifs.out</i>   
-4. Start location (not zero indexed)
-5. End location
-6. Average kmer probability (higher means more likely a binding site)
-7. Correlation with deltaSVM (higher means more likely a good match).
-8. TFBS sequence
+1. <u>Sequence ID</u>: The sequence index to which the TFBS was mapped (not zero indexed)
+2. <u>Motif Name</u>
+3. <u>Motif number</u> in <i>outprefix_motifs.out</i>   
+4. <u>Start location</u> (not zero indexed)
+5. <u>End location</u>
+6. <u>Average kmer probability</u> (higher means more likely a binding site)
+7. <u>Correlation with deltaSVM</u> (higher means more likely a good match).
+8. <u>TFBS sequence</u>
 
 You can convert the _outprefix_kmer_PWM_locs.out_ file to a bed by using the _convert2bed.m_ or <i>convert2bed.py</i> functions.  The _bedfile_ input should be in the same order as the input fasta file.
 
@@ -181,11 +181,11 @@ convert2bed('GM12878', 'GM12878.bed')
 python convert2bed.py --locsprefix outprefix --bed bedfile
 python convert2bed.py --locsprefix GM12878 --bed GM12878.bed
 ```
-You can make a profile plot of the results of mapTF for a sequence using <i>mapTF_profile</i> for a given sequence.  It requires: 
+You can make a profile plot of the results of mapTF for a sequence using <i>mapTF_profile.py</i> for a given sequence.  It requires: 
 
 1. Sequences in fasta format: <i>seqfile</i>.
 2. gkmSVM kmer weights: <i>wfilename</i> 
-3. _kmer_PWM_locs.out_ prefix: <i>kmerPWMprefix</i>
+3. mapTF output prefix: <i>kmerPWMprefix</i>
 4. Sequence Index: _sind_ (from _kmer_PWM_locs.out_)
 ```bash
 python mapTF_profile.py --fasta seqfile --weights wfilename --locsprefix kmerPWMprefix --seqindex sind
