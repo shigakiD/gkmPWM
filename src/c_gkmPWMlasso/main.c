@@ -37,39 +37,41 @@ emxArray_char_T* allocate_for_charArray(char* str) {
 void display_arguments() {
     printf(
             "\n"
-            "gkmPWMlasso: A method to extract compact predictive motifs from sequence-based models of regulatory elements using a database of PWMs (meme format)." 
+            "gkmPWMlasso: A method to extract compact and interpretable " 
+            "features from gkmSVM models, using PWM from a database (meme format).\n"
             "\n\n"
             "Version:   1.0\n"
             "Code:      https://github.com/shigakiD/gkmPWM/tree/main\n"
             "Author:    Dustin Shigaki, Gary Yang, Michael Beer\n"
 	    "Contact:   Report issues to the Github page\n"
             "\n\n"
-            "Usage:     gkmPWMlasso [options] <prefix> <database> <motif number>"
+            "Usage:     gkmPWMlasso [options] <prefix> <database>"
             "\n"
             "Arguments:\n"
-            "       prefix: prefix of a gkmSVM model, where the model files are either\n"
-            "               FILEHEADER_svseq.fa and FILEHEADER_svalpha.out OR FILEHEADER.model.txt\n"
-            "     database: file name to a database of transcription factor binding sites\n"
-            "               that is in meme format. An example file (combined_db_v4.meme) is provided.\n"
-	    " motif number: The number of motifs to learn.  If 0 is specified, gkmPWMlasso will \n"
-	    "               try to find the optimal number of motifs. \n"
+            "    prefix: prefix of a gkmSVM model, where the model files are either\n"
+            "            *_svseq.fa and *_svalpha.out OR *.model.txt\n"
+            "  database: file name to a database of transcription factor binding sites\n"
+            "            that is in meme format. An example file (combined_db_v4.meme) is provided.\n"
             "\n"
             "  Options:\n"
-            "    -m <int>      PWMs with lengths shorter than this will be filtered out (default: 10)\n"
-            "    -i <float>    PWMs with an average information per position less than this will be filtered out (default: 0.5)\n"
-            "    -c <float>    PWMs with a pearson correlation greater than this will be clustered \n"
-	    "                  together to prevent linear dependence and redundant features (default: 0.86)\n"
-	    "    -f <float>    Set the fraction of the total number of gapped k-mers to use with gkmPWM. \n"
-            "                  This reduces the memory and runtime needed. If the total number of gapped k-mers \n"
-            "                  is too high with the given combination of (l,k,KmerFrac), KmerFrac will be \n"
-	    "                  automatically set to a lower value to create a more workable number of gapped k-mers \n"
-            "    -l <int>      The full length of the gapped k-mer. This DOES NOT need to be the same as the \n"
-	    "                  l in the gkmSVM model (default: 10) \n"
-            "    -k <int>      The number of ungapped positions of the gapped k-mer. This DOES NOT need to be \n"
-	    "                  the same as the k in the gkmSVM model (default: 6) \n"
-            "    -b            if set, use both the positive and negative set to get the background \n"
-            "                  distribution of gapped k-mers. This is best used when the model is trained \n"
-            "                  with both the positive and negative sets containing regulatory elements.\n"
+            "    -d <int>      number of position weight matrix (PWM) to extract from gkmSVM model, \n"
+            "                  if set to 0, gkmPWMlasso will automatically determine the number of \n"
+	    "                  PWMs (default: 0)\n"
+            "    -m <int>      minimum cutoff length of a PWM (default: 10)\n"
+            "    -i <float>    minimum cutoff average information content per position for a PWM (default: 0.5)\n"
+            "    -c <float>    pearson correlation cutoff for considering two PWMs to be similar (default: 0.86)\n"
+            "    -f <float>    a fraction of total gapped k-mer for PWM extraction; the number must be in [0,1];\n"
+            "                  setting to a smaller value, like 0.2, will significantly speed up the program.\n"
+	    "                  If the total number of gapped k-mer is too large, this value will be set \n"
+	    "                  automatically to a smaller number (default: 1)\n"
+            "    -l <int>      total length of the gapped k-mer. It DOES NOT need to be the same l from the \n"
+	    "                  input gkmSVM model (default: 10)\n"
+            "    -k <int>      the number of ungapped positions. It DOES NOT need to be the same k from the \n"
+	    "                  input gkmSVM model (default: 6)\n"
+            "    -b            if set, background GC content equal to the average of the \n"
+            "                  positive and negative set used to train gkmSVM; else, the GC content \n"
+            "                  equal to the negative set. Use this if the positive and negative sets both \n"
+	    "                  contain regulatory elements \n"
             "    -R            if set, consider reverse-complements of gapped k-mers to be distinct \n"
             "\n");
     exit(0);
@@ -80,14 +82,15 @@ int main(int argc, char* argv[]) {
     
 	if(argc == 1) { display_arguments(); }
 
-	double minLength = 10;
-	double minInfo = 0.5;
-	double corrCut = 0.86;
-	double kmerFrac = 1;
-	double lSVM = 10;
-	double kSVM = 6 ;
-	int backgroundGC = 0;
-	int reverseCompl = 1;
+    double numPWM = 0;
+    double minLength = 10;
+    double minInfo = 0.5;
+    double corrCut = 0.86;
+    double kmerFrac = 1;
+    double lSVM = 10;
+    double kSVM = 6 ;
+    int backgroundGC = 0;
+    int reverseCompl = 1;
 	char * pEnd;
 
 	int c;
@@ -98,6 +101,9 @@ int main(int argc, char* argv[]) {
                 break;
             case 'R':
                 reverseCompl = 0;
+                break;
+            case 'd':
+                numPWM = strtod(optarg, &pEnd);
                 break;
             case 'm':
                 minLength = strtod(optarg, &pEnd);
@@ -117,56 +123,55 @@ int main(int argc, char* argv[]) {
             case 'k':
                 kSVM = strtod(optarg, &pEnd);
                 break;
-            default:
+			default:
                 fprintf(stderr, "Unknown option: -%c\n", c);
                 display_arguments();
 		}
 	}
 
-	if (argc - optind != 3) {
-		fprintf(stderr, "Incorrect number of required arguments. Please read the .\n");
-		display_arguments();
-	}
+    if (argc - optind != 2) {
+        fprintf(stderr, "Incorrect number of required arguments. Please read the .\n");
+        display_arguments();
+    }
 
 	int index = optind;
-	emxArray_char_T *model_file = allocate_for_charArray(argv[index++]);
-	emxArray_char_T *motif_file = allocate_for_charArray(argv[index++]);
-	double numPWM = strtod(argv[index++], &pEnd);
+    emxArray_char_T *model_file = allocate_for_charArray(argv[index++]);
+    emxArray_char_T *motif_file = allocate_for_charArray(argv[index++]);
 
-	char arr[11][30] = {"model file", "motif file", "number of PWM", "min PWM length", 
-				"min PWM info", "correlation cutoff", "kmer fraction",
-				"total gapped k-mer length", "number of ungapped positions", 
-				"average GC", "reverse complement"};
-	double arr2[6] = {minLength, minInfo, corrCut, kmerFrac, lSVM, kSVM};
-	int arr3[2] = {backgroundGC, reverseCompl};
-	printf("\n----Following Are The Command Line Arguments Passed----");
-	for(int counter=1; counter<4; counter++)
-		printf("\nargv[%d] - %s: %s", counter, arr[counter-1], argv[optind+counter-1]);
-	for(int counter=4; counter<10; counter++)
-		printf("\nargv[%d] - %s: %4.2f", counter, arr[counter-1], arr2[counter-4]);
-	for(int counter=10; counter<12; counter++)
-		printf("\nargv[%d] - %s: %s", counter, arr[counter-1], arr3[counter-10] ? "True" : "False");
-	printf("\n");
+    char arr[11][30] = {"model file", "motif file", "number of PWM", "min PWM length", 
+                        "min PWM info", "correlation cutoff", "kmer fraction",
+                        "total gapped k-mer length", "number of ungapped positions", 
+                        "average GC", "reverse complement"};
+    double arr2[7] = {numPWM, minLength, minInfo, corrCut, kmerFrac, lSVM, kSVM};
+    int arr3[2] = {backgroundGC, reverseCompl};
+    printf("\n----Following Are The Command Line Arguments Passed----");
+    for(int counter=1; counter<3; counter++)
+        printf("\nargv[%d] - %s: %s", counter, arr[counter-1], argv[optind+counter-1]);
+    for(int counter=3; counter<10; counter++)
+        printf("\nargv[%d] - %s: %4.2f", counter, arr[counter-1], arr2[counter-3]);
+    for(int counter=10; counter<12; counter++)
+        printf("\nargv[%d] - %s: %s", counter, arr[counter-1], arr3[counter-10] ? "True" : "False");
+    printf("\n");
     
-	openblas_set_num_threads(1);
+    openblas_set_num_threads(1);
     
-	gkmPWMlasso(model_file,
-			motif_file, 
-			minLength,
-			minInfo,
-			corrCut,
-			lSVM,
-			kSVM,
-			backgroundGC,
-			reverseCompl,
-			numPWM, 
-			kmerFrac);
+    gkmPWMlasso(model_file,
+                 motif_file, 
+                 minLength,
+                 minInfo,
+                 corrCut,
+                 lSVM,
+                 kSVM,
+                 backgroundGC,
+                 reverseCompl,
+                 numPWM, 
+                 kmerFrac);
     
-	emxFree_char_T(&model_file);
-	emxFree_char_T(&motif_file);
+    emxFree_char_T(&model_file);
+    emxFree_char_T(&motif_file);
     
-	gkmPWMlasso_terminate();
-	return 0;
+    gkmPWMlasso_terminate();
+    return 0;
 }
 
-// End of code generation (main.c)
+// End of code generation (main.cpp)
