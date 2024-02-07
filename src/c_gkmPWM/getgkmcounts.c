@@ -232,11 +232,7 @@ static void encodekmers(double l, double k, const emxArray_real_T *c,
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     u1 = 0;
   } else {
-    nx = c->size[0];
-    u1 = c->size[1];
-    if (nx >= u1) {
-      u1 = nx;
-    }
+    u1 = c->size[0] * c->size[1] / k;
   }
   emxInit_real_T(&seqvec, 2);
   /* 'getgkmcounts:271' seqvec = zeros(4^l, l); */
@@ -492,11 +488,7 @@ static void encodekmers_norc(double l, double k, const emxArray_real_T *c,
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     u1 = 0;
   } else {
-    nx = c->size[0];
-    u1 = c->size[1];
-    if (nx >= u1) {
-      u1 = nx;
-    }
+    u1 = c->size[0] * c->size[1] / k;
   }
   emxInit_real_T(&seqvec, 2);
   /* 'getgkmcounts:286' seqvec = zeros(4^l, l); */
@@ -1191,11 +1183,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
     u1 = 0;
   } else {
-    vlen = comb->size[0];
-    u1 = comb->size[1];
-    if (vlen >= u1) {
-      u1 = vlen;
-    }
+    u1 = comb->size[0] * comb->size[1] / k;
   }
   /* 'getgkmcounts:125' n = length(alpha); */
   /*  disp(['# of support vectors: ' num2str(n)]) */

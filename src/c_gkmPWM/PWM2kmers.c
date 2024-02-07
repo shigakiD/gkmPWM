@@ -316,11 +316,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     ni = 0;
   } else {
-    idx = c->size[0];
-    ni = c->size[1];
-    if (idx >= ni) {
-      ni = idx;
-    }
+    ni = c->size[0] * c->size[1] / k;
   }
   emxInit_real_T(&mat2, 2);
   n_tmp = pow(4.0, k);
@@ -387,11 +383,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     ni = 0;
   } else {
-    idx = c->size[0];
-    ni = c->size[1];
-    if (idx >= ni) {
-      ni = idx;
-    }
+    ni = c->size[0] * c->size[1] / k;
   }
   emxInit_cell_wrap_14(&KC);
   i = KC->size[0];
@@ -406,11 +398,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     ni = 0;
   } else {
-    idx = c->size[0];
-    ni = c->size[1];
-    if (idx >= ni) {
-      ni = idx;
-    }
+    ni = c->size[0] * c->size[1] / k;
   }
   for (b_i = 0; b_i < ni; b_i++) {
     /* 'PWM2kmers:24' KC{i} = zeros(4^k,1); */
@@ -465,11 +453,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
       if ((c->size[0] == 0) || (c->size[1] == 0)) {
         m = 0;
       } else {
-        idx = c->size[0];
-        m = c->size[1];
-        if (idx >= m) {
-          m = idx;
-        }
+        m = c->size[0] * c->size[1] / k;
       }
     }
     /* 'PWM2kmers:38' for i2 = 1:m */
@@ -834,11 +818,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     ni = 0;
   } else {
-    idx = c->size[0];
-    ni = c->size[1];
-    if (idx >= ni) {
-      ni = idx;
-    }
+    ni = c->size[0] * c->size[1] / k;
   }
   for (b_i = 0; b_i < ni; b_i++) {
     /* 'PWM2kmers:84' kweig((4^k*(i-1)+1):4^k*i) = KC{i}; */
@@ -861,11 +841,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     ni = 0;
   } else {
-    idx = c->size[0];
-    ni = c->size[1];
-    if (idx >= ni) {
-      ni = idx;
-    }
+    ni = c->size[0] * c->size[1] / k;
   }
   /* 'PWM2kmers:87' kweig(4^k*alen+1:end) = kweig(4^k*alen+1:end)/sqrt(2); */
   c_tmp = n_tmp * ((double)ni - rcnum) + 1.0;

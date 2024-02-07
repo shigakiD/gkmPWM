@@ -63,11 +63,7 @@ void BGkmer(const double mat[16], double GC, const emxArray_real_T *c,
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     u1 = 0;
   } else {
-    m = c->size[0];
-    u1 = c->size[1];
-    if (m >= u1) {
-      u1 = m;
-    }
+    u1 = c->size[0] * c->size[1] / k;
   }
   /* 'BGkmer:3' alen = len-rcnum; */
   /* 'BGkmer:4' negweights = zeros(len*4^k,1); */
