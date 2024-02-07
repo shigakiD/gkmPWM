@@ -129,8 +129,8 @@ end
 
 [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);%generate gapped positions, adjusted for reverse complements
 
-if length(comb)*4^k_svm > 6*10^5
-    nfrac = round(5*10^7/4^k_svm/length(comb))/100;
+if numel(comb)/k_svm*4^k_svm > 6*10^5
+    nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     l_svm2 = l_svm;
     k_svm2 = k_svm;
@@ -169,7 +169,7 @@ end
 indvec = intersect(find(info./lenvec>=minInfo),find(lenvec>=minL));
 n = length(indvec);
 disp('Mapping PWMs to gkm space')
-lcnum = length(comb);
+lcnum = numel(comb)/k_svm;
 A=zeros(lcnum*4^k_svm,n);
 AA=zeros(lcnum*4^k_svm,n);
 GCmat = repmat([0.5-GCpos1/2 GCpos1/2 GCpos1/2 0.5-GCpos1/2],l_svm-1,1);

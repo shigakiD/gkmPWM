@@ -1,5 +1,5 @@
 function [negweights] = BGkmer(mat,GC,c,rcnum,l,k,RC)
-len = length(c);
+len = numel(c)/k;
 alen = len-rcnum;
 negweights = zeros(len*4^k,1);
 GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];

@@ -7,7 +7,7 @@ for i = 1:l-1
 end
 m = length(x);
 M = length(mat)-l;
-n = 4^k*length(c); %number of possible k-mers
+n = 4^k*numel(c)/k; %number of possible k-mers
 mat2 = rot90(mat,2);
 kweig = zeros(n,1);
 ktree = cell(k,1);
@@ -22,7 +22,7 @@ end
 a = 0;
 for i = 0:M
     if i == M-1
-        m = length(c);
+        m = numel(c)/k;
     end
     for i2 = 1:m
         if ~(i == M-1 && i2 > rx && i2 ~= m)

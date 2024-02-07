@@ -148,8 +148,8 @@ if nargin > 4
 end
 
 [comb,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);%generate gapped positions, adjusted for reverse complements
-if length(comb)*4^k_svm > 6*10^5
-    nfrac = round(5*10^7/4^k_svm/length(comb))/100;
+if numel(comb)/k_svm*4^k_svm > 6*10^5
+    nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     lk = [l_svm k_svm];
     [comb,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
@@ -565,6 +565,7 @@ end
 PWM = PWM(a);
 C = C(a);
 E = E(a);
+E = E/max(abs(E));
 Rd = max(CM);
 Rd = Rd(a);
 
@@ -710,7 +711,7 @@ for i = 2:5
 end
 for i = 0:M
     if i > M-cx+1
-        m = length(c);
+        m = numel(c)/k;
     end
     %the following loops is basically dynamic programming for tensor multiplication.  there are multiple cases to consider, hence the if statements.
     for ii = 1:m
@@ -812,7 +813,7 @@ for i = 2:5
 end
 for i = 0:M
     if i > M-cx+1
-        m = length(c);
+        m = numel(c)/k;
     end
     %the following loops is basically dynamic programming for tensor multiplication.  there are multiple cases to consider, hence the if statements.
     for ii = 1:m

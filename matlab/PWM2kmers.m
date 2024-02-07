@@ -7,7 +7,7 @@ for i = 1:l-1
 end
 m = length(x);
 M = length(mat)-l;
-n = 4^k*length(c); %number of possible k-mers
+n = 4^k*numel(c)/k; %number of possible k-mers
 mat2 = rot90(mat,2);
 kweig = zeros(n,1);
 kweig2= zeros(n,1);
@@ -15,8 +15,8 @@ ktree = cell(k,1);
 ktree2 = cell(k,1);
 [rx,cx] = size(x);
 X = cx*ones(length(mat)-l+1,1);
-KC = cell(length(c),1);
-for i = 1:length(c)
+KC = cell(numel(c)/k,1);
+for i = 1:numel(c)/k
     KC{i} = zeros(4^k,1);
 end
 for i = 1:cx
@@ -29,7 +29,7 @@ end
 a = 0;
 for i = 0:M
     if i == M-1
-        m = length(c);
+        m = numel(c)/k;
     end
     for i2 = 1:m
         if ~(i == M-1 && i2 > rx && i2 ~= m)
@@ -73,9 +73,9 @@ for i = 0:M
         end
     end
 end
-for i = 1:length(c)
+for i = 1:numel(c)/k
     kweig((4^k*(i-1)+1):4^k*i) = KC{i};
 end
-alen = length(c)-rcnum;
+alen = numel(c)/k-rcnum;
 kweig(4^k*alen+1:end) = kweig(4^k*alen+1:end)/sqrt(2);
 kweig = kweig+kweig2;

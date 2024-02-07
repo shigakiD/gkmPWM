@@ -24,6 +24,14 @@ elseif isfile([filename '.model.txt'])
 else
     error(['Needs ' filename '_svseq.fa and ' filename '_svalpha.out or ' filename '.model.txt']);
 end
+if max(alpha) <= 1 && min(alpha) > 0
+    f = find(alpha>0.9999);
+    alpha(f) = 0.9999;
+    f = find(alpha<0.0001);
+    alpha(f) = 0.0001;
+    alpha = log(alpha./(1-alpha));
+    disp('converting probabilities to scores')
+end
 
 if RC
     x = encodekmers(l, k, comb);
@@ -43,7 +51,7 @@ else
     disp('Using gapped k-mer count vector to calculate norms');
     LK = 1;
 end
-lcnum = length(comb);
+lcnum = numel(comb)/k;
 n = length(alpha);
 disp(['# of support vectors: ' num2str(n)])
 alphasum = sum(alpha(alpha>0));
@@ -181,7 +189,7 @@ for i = 1:l
 end
 
 function mat = encodekmers(l,k,c);
-lcnum = length(c);
+lcnum = numel(c)/k;
 seqvec = zeros(4^l, l);
 vec = (1:4^l)'-1;
 for i = 1:l
@@ -196,7 +204,7 @@ for i = 1:lcnum
 end
 
 function mat = encodekmers_norc(l,k,c);
-lcnum = length(c);
+lcnum = numel(c)/k;
 seqvec = zeros(4^l, l);
 vec = (1:4^l)'-1;
 for i = 1:l
