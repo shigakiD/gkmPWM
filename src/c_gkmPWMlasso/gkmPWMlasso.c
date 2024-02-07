@@ -1359,28 +1359,12 @@ void gkmPWMlasso(const emxArray_char_T *varargin_1,
            &rcnum);
   /* generate gapped positions, adjusted for reverse complements */
   /* 'gkmPWMlasso:69' if length(comb)*4^k_svm > 6*10^5 */
-  if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
-    u1 = 0;
-  } else {
-    nx = comb->size[0];
-    u1 = comb->size[1];
-    if (nx >= u1) {
-      u1 = nx;
-    }
-  }
   c = pow(4.0, varargin_7);
-  if ((double)u1 * c > 600000.0) {
-    /* 'gkmPWMlasso:70' nfrac = round(5*10^7/4^k_svm/length(comb))/100; */
-    if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
-      u1 = 0;
-    } else {
-      nx = comb->size[0];
-      u1 = comb->size[1];
-      if (nx >= u1) {
-        u1 = nx;
-      }
-    }
-    nfrac = rt_roundd(5.0E+7 / c / (double)u1) / 100.0;
+  if ((double)(comb->size[0] * comb->size[1]) / varargin_7 * c > 600000.0) {
+    /* 'gkmPWM:74' nfrac = round(5*10^7/4^k_svm/(numel(comb)/k_svm))/100; */
+    nfrac = rt_roundd(5.0E+7 / c / ((double)(comb->size[0] * comb->size[1]) /
+      varargin_7)) / 100.0;
+      
     /* 'gkmPWMlasso:71' fprintf('WARNING: Combination of (l,k) yields too many
      * gapped kmers.  Using %f of the total gapped kmers', nfrac); */
     printf("WARNING: Combination of (l,k) yields too many gapped kmers.  Using "
@@ -1593,11 +1577,7 @@ void gkmPWMlasso(const emxArray_char_T *varargin_1,
   if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
     u1 = 0;
   } else {
-    nx = comb->size[0];
-    u1 = comb->size[1];
-    if (nx >= u1) {
-      u1 = nx;
-    }
+    u1 = comb->size[0] * comb->size[1] / varargin_7;
   }
   emxInit_real_T(&b_A, 2);
   /* 'gkmPWMlasso:110' A=zeros(lcnum*4^k_svm,n); */
@@ -3874,8 +3854,22 @@ void gkmPWMlasso(const emxArray_char_T *varargin_1,
      * memefile,num,minL, minInfo, correlation(1,2)); */
     nfrac = maximum(OLS);
     c = maximum(normvec);
+    
+    int printret;
+    char buffer[1000];
+    printret = sprintf(buffer, "%s_%d_%d_%d", varargin_1->data, (int)rt_roundd(varargin_6),
+              (int)rt_roundd(varargin_7), (int)rt_roundd(varargin_10));
+    emxEnsureCapacity_char_T(text, printret+1);
+    text_data = text->data;
+    for (int tmpcount = 0; tmpcount < printret; tmpcount++) {
+        text_data[tmpcount] = buffer[tmpcount];
+    }
+    text_data[printret] = '\x00';
+    /*
     c_sprintf(varargin_1, (int)rt_roundd(varargin_6),
               (int)rt_roundd(varargin_7), text);
+    */
+    
     loop_ub = OLS->size[0];
     for (i = 0; i < loop_ub; i++) {
       OLS_data[i] /= nfrac;
@@ -4821,8 +4815,22 @@ void gkmPWMlasso(const emxArray_char_T *varargin_1,
      * int32(k_svm2)),memefile,num,minL, minInfo, correlation(1,2)); */
     nfrac = maximum(OLS);
     c = maximum(normvec);
+
+    int printret;
+    char buffer[1000];
+    printret = sprintf(buffer, "%s_%d_%d_%d", varargin_1->data, (int)rt_roundd(varargin_6),
+              (int)rt_roundd(varargin_7), (int)rt_roundd(varargin_10));
+    emxEnsureCapacity_char_T(text, printret+1);
+    text_data = text->data;
+    for (int tmpcount = 0; tmpcount < printret; tmpcount++) {
+        text_data[tmpcount] = buffer[tmpcount];
+    }
+    text_data[printret] = '\x00';
+    
+    /*
     b_sprintf(varargin_1, (int)rt_roundd(varargin_6),
               (int)rt_roundd(varargin_7), text);
+    */
     loop_ub = OLS->size[0];
     for (i = 0; i < loop_ub; i++) {
       OLS_data[i] /= nfrac;

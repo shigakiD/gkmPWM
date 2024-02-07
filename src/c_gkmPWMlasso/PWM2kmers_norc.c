@@ -174,11 +174,7 @@ void PWM2kmers_norc(const emxArray_real_T *mat, const double negmat[16],
   if ((c->size[0] == 0) || (c->size[1] == 0)) {
     nrows = 0;
   } else {
-    ibcol = c->size[0];
-    nrows = c->size[1];
-    if (ibcol >= nrows) {
-      nrows = ibcol;
-    }
+    nrows = c->size[0] * c->size[1] / k;
   }
   n_tmp = pow(4.0, k);
   /* number of possible k-mers */
@@ -262,11 +258,7 @@ void PWM2kmers_norc(const emxArray_real_T *mat, const double negmat[16],
       if ((c->size[0] == 0) || (c->size[1] == 0)) {
         m = 0;
       } else {
-        ibcol = c->size[0];
-        m = c->size[1];
-        if (ibcol >= m) {
-          m = ibcol;
-        }
+        m = c->size[0] * c->size[1] / k;
       }
     }
     /* 'PWM2kmers_norc:29' for i2 = 1:m */

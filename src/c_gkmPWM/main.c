@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
 	}
 
     if (argc - optind != 4) {
-        fprintf(stderr, "Incorrect number of required arguments. Please read the .\n");
+        fprintf(stderr, "Incorrect number of required arguments. Please read the documentation.\n");
         display_arguments();
     }
 

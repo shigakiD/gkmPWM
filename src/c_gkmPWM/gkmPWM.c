@@ -7259,11 +7259,7 @@ static void ls_kweigtree(const emxArray_real_T *mat, const double negmat[16],
       if ((c->size[0] == 0) || (c->size[1] == 0)) {
         b_m = 0;
       } else {
-        m = c->size[0];
-        b_m = c->size[1];
-        if (m >= b_m) {
-          b_m = m;
-        }
+        b_m = c->size[0] * c->size[1] / k;
       }
     }
 
@@ -8280,11 +8276,7 @@ static void ls_kweigtree_norc(const emxArray_real_T *mat, const double negmat[16
       if ((c->size[0] == 0) || (c->size[1] == 0)) {
         m = 0;
       } else {
-        n = c->size[0];
-        m = c->size[1];
-        if (n >= m) {
-          m = n;
-        }
+        m = c->size[0] * c->size[1] / k;
       }
     }
 
@@ -10834,31 +10826,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
            &rcnum);
 
   /* generate gapped positions, adjusted for reverse complements */
-  /* 'gkmPWM:71' if length(comb)*4^k_svm > 6*10^5 */
-  if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
-    nbytes = 0;
-  } else {
-    last = comb->size[0];
-    nbytes = comb->size[1];
-    if (last >= nbytes) {
-      nbytes = last;
-    }
-  }
-
   d = pow(4.0, varargin_9);
-  if ((double)nbytes * d > 600000.0) {
-    /* 'gkmPWM:72' nfrac = round(5*10^7/4^k_svm/length(comb))/100; */
-    if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
-      nbytes = 0;
-    } else {
-      last = comb->size[0];
-      nbytes = comb->size[1];
-      if (last >= nbytes) {
-        nbytes = last;
-      }
-    }
-
-    nfrac = rt_roundd(5.0E+7 / d / (double)nbytes) / 100.0;
+  if ((double)(comb->size[0] * comb->size[1]) / varargin_9 * d > 600000.0) {
+    /* 'gkmPWM:74' nfrac = round(5*10^7/4^k_svm/(numel(comb)/k_svm))/100; */
+    nfrac = rt_roundd(5.0E+7 / d / ((double)(comb->size[0] * comb->size[1]) /
+      varargin_9)) / 100.0;
 
     /* 'gkmPWM:73' fprintf('Combination of (l,k) yields too many gapped kmers.  Using %f of the total gapped kmers', nfrac) */
     printf("Combination of (l,k) yields too many gapped kmers.  Using %f of the total gapped kmers",
