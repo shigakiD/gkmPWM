@@ -193,7 +193,8 @@ disp('Running de novo motif discovery')
 m = mean(A);
 s = std(A);
 cfile = A-negvec/sum(negvec)*sum(A);
-cfile = cfile/max(abs(cfile));% normalize to speed up computation
+%cfile = cfile/max(abs(cfile));% normalize to speed up computation
+cfile = cfile/std(cfile);
 clear A
 [pp scorevec C r R E Rd] = gkmPWM_lagrange(cfile,mat,p,negvec,num,rcorr,reg,l_svm,k_svm,RC,rc,diffc,indc,xc,rcnum);
 
@@ -372,7 +373,7 @@ for i = 1:l_svm
     f = find(sum(ct==l_svm,2));
     ct = ct(f,:);
     CT = zeros(length(ct),k_svm-1);
-    for j = 1:length(ct)
+    for j = 1:numel(ct)/k_svm
         a = 1;
         for jj = 1:k_svm
             if ct(j,jj) ~= l_svm
@@ -526,7 +527,7 @@ while i < n
     %Breaks the loop if it looks like it converged
     C = (kmat'*kmat)^(-1)*(kmat'*kweig);
     scorevec(i) = sqrt(res'*res);
-    if i >= 10 && acount == 5 && scount >= 10 && max(abs(diff(scorevec(i-9:i))./scorevec(i-8:i))) < 0.0001 
+    if i >= 10 && acount == 5 && scount >= 10 && max(abs(diff(scorevec(i-9:i))./scorevec(i-8:i))) < 0.001 
         scorevec = scorevec(1:i);
         break
     end
@@ -556,14 +557,11 @@ for i = 1:m
     c = (Kmat'*Kmat)^(-1)*(Kmat'*kweig);
     res = kweig-Kmat*c;
     E(i) = (sqrt(res'*res)-scorevec(end))/scorevec(end);
-    if C(i) < 0
-        CM(i,:) = 0;
-        CM(:,i) = 0;
-    end
 end
 [R,a] = sort(R, 'descend');
 PWM = PWM(a);
 C = C(a);
+C = C/max(C);
 E = E(a);
 E = E/max(abs(E));
 Rd = max(CM);

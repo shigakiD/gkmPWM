@@ -1,4 +1,4 @@
-function mapTF2(varargin)
+function mapTF(varargin)
 % mapTF maps the TFBS motifs found from gkmPWM and gkmPWMlasso to regions at
 %     base-pair resolution
 % 
@@ -87,7 +87,7 @@ if nargin > 6
     end
 end
 
-disp('Processing Motifs')
+disp('processing motifs')
 process_motifs(mfn1, mfn2, memefn, ofn)
 mfn = [ofn '_motifs.out'];
 [P,V, seqindmat, ss, seq] = seq2pv(fn, wfn,l_svm);
@@ -98,6 +98,8 @@ b = 1;
 a = numel(len);
 PWM = cell(a,1);
 PWM2 = cell(a,1);
+PWM3 = cell(a,1);
+lPWM3 = cell(a,1);
 pwm = cell(a,1);
 lpwm = cell(a,1);
 lab = zeros(a,1);
@@ -108,6 +110,8 @@ for i = 1:a
     shift(i) = max([l_svm-len(i) 4]);
     PWM{i} = [repmat(GCmat,shift(i), 1); p{i} ;repmat(GCmat,shift(i), 1)];
     PWM2{i} = p{i};
+    PWM3{i} = [ones(l_svm-1,4)/4; p{i} ;ones(l_svm-1,4)/4];
+    lPWM3{i} = log((PWM3{i}+10^-10)/(1+4*10^-10));
     LEN_2(i) = len(i);
     LEN(i) = len(i)+2*shift(i)-l_svm+1;
     for j = 1:LEN(i)
@@ -146,9 +150,12 @@ for j = 1:B
     maxnorm(j) = sum(exp(seqmat*vec'));
     minnorm(j) = sum(exp(seqmat*vec2'));
 end
-dnorm = maxnorm-minnorm;
+dnorm = maxnorm;
 vec = zeros(l_svm,1);
-disp('Mapping motifs')
+LL = cell(length(V),1);
+VV = cell(length(V),1);
+NN = cell(length(V),1);
+disp('mapping motifs')
 tic
 for I = 1:length(ss)
     seq2 = ss{I};
@@ -169,14 +176,19 @@ for I = 1:length(ss)
             pwm_prob(:,i) = kmat(:,ind);
         end
     end
-    MAPTF(fn, mfn, seq{I*2}, ss{I}, GC, pwm_prob, Smat, l_svm, k_svm, ofn, PWM, PWM2, pwm, lpwm, lab, LEN, LEN_2, shift, P{I}, V{I}, names, len, a,b, I)
+    [LL{I}, NN{I}] = MAPTF(fn, ss{I}, GC, pwm_prob, l_svm, k_svm, ofn, PWM, PWM2, pwm, lpwm, lab, LEN, LEN_2, shift, P{I}, names, len, a,b, I);
+    if numel(LL{I}) > 0
+        VV{I} = scoreseqkmer(PWM3, lPWM3, LL{I}, ss{I}, Smat, l_svm, k_svm, ofn, V{I});
+    end
     if mod(I,100)==0
         fprintf('%d out of %d done...\n', I, length(ss));
         toc
     end
 end
+clear kmat
+PWM_corr(ofn, VV, NN, LL, seq);
 
-function MAPTF(fn, mfn, s,ss, GC, pwm_prob, Smat, l_svm, k_svm, ofn, PWM, PWM2, pwm, lpwm, lab, LEN, LEN_2, shift, gkmprob, dsvm, names, len, a, b,rnum)
+function [Lmat, NAME] = MAPTF(fn, ss, GC, pwm_prob, l_svm, k_svm, ofn, PWM, PWM2, pwm, lpwm, lab, LEN, LEN_2, shift, gkmprob, names, len, a, b, rnum)
 GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];
 L = length(ss)-l_svm+1;
 ACGT = 'ACGT';
@@ -184,43 +196,28 @@ lab = [lab; 0];
 n = sum(LEN)+1;
 mat = zeros(n,L)-Inf;
 ind = zeros(n,L);
-TRANS = zeros(n);
 LEN = [0;LEN];
 C = cumsum(LEN);
-
-gkmprob(gkmprob>0.99) = 0.99;
-pos = gkmprob;
+pos = log(gkmprob);
 neg = log(1-gkmprob);
 for i = 1:a
-    for j = 1:LEN(i+1)-1
-        TRANS(C(i)+j,C(i)+j+1)=1;
-    end
-    TRANS(C(i+1),C(1:end-1)+1) = 1;
-    TRANS(C(i+1),n)=1;
-end
-TRANS(n,C(1:end-1)+1) = 1;
-TRANS(n,n) = 1;
-TRANS = log(TRANS);
-for i = 1:a
-    mat(C(i)+1,1) = pwm_prob(C(i)+1,1)+pos(1);
+    mat(C(i)+1,1) = pwm_prob(C(i)+1,1);
 end
 mat(n,1) = neg(1);
 for i = 2:L
     for j = 1:a
-        [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(1:end,i-1)+TRANS(1:end,C(j)+1)+pwm_prob(C(j)+1,i));
-        for jj = 1:LEN(j+1)-1
-            mat(C(j)+jj+1,i) = mat(C(j)+jj,i-1)+TRANS(C(j)+jj,C(j)+jj+1)+pwm_prob(C(j)+jj+1,i);
-            ind(C(j)+jj+1,i) = C(j)+jj;
-        end
+        [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(1:end,i-1)+pwm_prob(C(j)+1,i)+pos(i));
+        mat(C(j)+2:LEN(j+1),i) = mat(C(j)+1:(LEN(j+1)-1),i-1)+pwm_prob(C(j)+2:LEN(j+1),i)+pos(i);
+        ind(C(j)+2:LEN(j+1),i) = C(j)+1:(LEN(j+1)-1);
     end
-    [mat(n,i),ind(n,i)] = max(mat(1:end,i-1)+TRANS(1:end,end)+neg(i-1));
+    [mat(n,i),ind(n,i)] = max(mat(1:end,i-1)+neg(i));
 end
 path = zeros(L,1);
 path(end) = n;
 for i = fliplr(1:L-1)
     path(i) = ind(path(i+1),i+1);
 end
-PATH = zeros(length(s),1);
+PATH = zeros(length(ss),1);
 C_2 = cumsum([0;LEN_2]);
 for i = 1:a
     f = find(path==C(i)+1);
@@ -233,151 +230,65 @@ for i = 1:a
 end
 N =sum(LEN_2)+1;
 PATH(PATH==0) = N;
-MAT = [];
-lab = [];
-for i = 1:a
-    MAT = [MAT;PWM2{i}];
-    lab = [lab;ones(LEN_2(i),1)*i];
-end
-lab = [lab;0];
-MAT = [MAT;ones(1,4)/4];
-n = sum(LEN_2)+1;
-PWM = ones(L,4)/4;
-PWM_alt = ones(L,4)/4;
-
-GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];
-
-I = lab(PATH);
-Cmat = [I PATH ones(length(I),4)/4];
-for i = 1:L+l_svm-1
-    if PATH(i)~=n
-        Cmat(i,3:6) = MAT(PATH(i),:);
-    else    
-        Cmat(i,2) = 0;
-    end
-end
-Cmat(:,3:6) = (Cmat(:,3:6)+0.0001)/(1.0001);
-LEN(1) = [];
-L = [];
+L2 = [];
 for i = 1:length(PWM2)
     f = find(path==C(i)+1);
-    F = [];
-    a = 0;
     if ~isempty(f)
         for j = 1:length(f)
             if f(j)+shift(i)+LEN_2(i)< length(ss)-l_svm+1 && f(j)+shift(i) > l_svm-1
-                a = a+1;
-                F = [F; f(j)+shift(i) f(j)+shift(i)+LEN_2(i)-1 mean(gkmprob(f(j):f(j)+2*shift(i)+LEN_2(i)-l_svm))];
+                [~,ind] = max(gkmprob(f(j):f(j)+2*shift(i)+LEN_2(i)-l_svm));
+                if f(j)-1+ind < 3
+                    R = 1:5;
+                elseif f(j)-1+ind > L-2
+                    R = L-4:L;
+                else
+                    R = f(j)+ind-3:f(j)+ind+1;
+                end
+                L2 = [L2; f(j)+shift(i) f(j)+shift(i)+LEN_2(i)-1 mean(gkmprob(R)) i];
             end
         end
-        if a > 0
-            L = [L;F ones(a,1)*i];
-        end
     end
 end
-NAME = cell(numel(L)/4,1);
-Lmat = zeros(numel(L)/4,4);
-if ~isempty(L)
-    [~,b] = sort(L(:,1));
-    L = L(b,:);
-    for i = 1:numel(L)/4
-        NAME{i} = names{L(i,4)};
-        Lmat(i,:) = [L(i,4) L(i,1) L(i,2) L(i,3)];
+NAME = cell(numel(L2)/4,1);
+Lmat = zeros(numel(L2)/4,4);
+if ~isempty(L2)
+    [~,b] = sort(L2(:,1));
+    L2 = L2(b,:);
+    for i = 1:numel(L2)/4
+        NAME{i} = names{L2(i,4)};
+        Lmat(i,:) = [L2(i,4) L2(i,1) L2(i,2) L2(i,3)];
     end
 end
-kmer = scoreseqkmer(fn, rnum, ss, Smat, l_svm,k_svm, ofn,Cmat, dsvm);
-[omat, NAME, Lmat] = PWM_corr(ofn, rnum, mfn,kmer,Cmat, dsvm, NAME, Lmat,PWM2);
-kmer = scoreseqkmer(fn, rnum, ss, Smat, l_svm, k_svm,ofn,omat, dsvm);
-PWM_corr2(ofn, rnum, kmer, dsvm, NAME, Lmat, s)
 
-function omat = scoreseqkmer(fn, NUM, ss, Smat, l,k, ofn,mat, dsvm);
-%fn: fasta file
-%NUM: sequence number
-%l,k: gapped kmer parameters
-%ofn: output prefix
-L = length(ss);
-nvar = numel(dsvm);
-loc = zeros(nvar, 1);
-varvec = zeros(nvar, 1);
-varc = cell(4,1);
-varc{1} = [2 3 4];
-varc{2} = [1 3 4];
-varc{3} = [1 2 4];
-varc{4} = [1 2 3];
-for i = 1:nvar
-    loc(i) = floor((i-1)/3)+l;
-    varvec(i) = varc{ss(loc(i))}(mod(i-1,3)+1);
-end
-lab = mat(:,1);
-lab = [lab; zeros(l,1)];
-path_ref = mat(:,2);
-path_ref = [path_ref; zeros(l,1)];
-PWM = log(mat(:,3:6));
-c = combnk(1:l,k);
-[c1,~] = size(c);
-O = ones(1,k);
-evec = zeros(nvar, 1);
-f = find(lab==0);
-GCvec = PWM(f(1),:);
-for i = 1:nvar
-    if lab(loc(i)) > 0
-        vec = (max([1 loc(i)-l+1]):min([L loc(i)+l-1]));
-        LAB = lab(loc(i));
-        path_vec = path_ref(vec);
-        path_loc = path_ref(loc(i));
-        scores = zeros(length(vec),1);
-        V = exp(PWM(loc(i),varvec(i)))-exp(PWM(loc(i), ss(loc(i))));
-        for j = 1:length(vec);
-            if lab(vec(j)) == LAB && path_loc-path_vec(j)==loc(i)-vec(j)
-                scores(j) = PWM(vec(j),ss(vec(j)));
-            else
-                scores(j) = GCvec(ss(vec(j)));
-            end
+function varscore = scoreseqkmer(PWM3, lPWM3, Lmat, ss, Smat, l_svm, k_svm, ofn, dsvm);
+varc = [2 3 4; 1 3 4;1 2 4;1 2 3];
+O = ones(1,l_svm-1);
+n = numel(Lmat)/4;
+varscore = zeros(n,1);
+for i = 1:n
+    M = Lmat(i,1);
+    ind = [O ss(Lmat(i,2):Lmat(i,3)) O];
+    DSVM = dsvm(Lmat(i,2):Lmat(i,3),:); 
+    L = Lmat(i,3)-Lmat(i,2)+1;
+    matscore = zeros(L,3);
+    for ii = 1:L
+        Lind = l_svm-1+ii;
+        scores = zeros(2*l_svm-1,1);
+        for j = 1:2*l_svm-1;
+            scores(j) = lPWM3{M}(Lind-l_svm+j,ind(Lind-l_svm+j));
         end
-        if loc(i)-l+1 < 1
-            a = l-loc(i);
-            scores(loc(i)) = 0;
-        else
-            a = 0;
-            scores(l) = 0;
+        evec = 0;
+        scores(l_svm) = 0;
+        for j = 1:l_svm
+            evec = evec+sum(exp(Smat{l_svm-j+1}*scores(j:l_svm+j-1)));
         end
-
-        if loc(i)+l-1 > L
-            b = l-1+L-loc(i);
-        else
-            b = l-1;
-        end
-        for j = a:b
-            evec(i) = evec(i)+sum(exp(Smat{l-j}*scores(1+j-a:l+j-a)));
-            %for jj = 1:c1
-            %    if ismember(l-j , c(jj,:));
-            %        evec(i) = evec(i) + prod(scores(c(jj,:)+j-a));
-            %    end
-            %end
-        end
-        evec(i) = evec(i)*V;
-    end
-end
-u = unique(lab);
-for i = 1:numel(u)
-    if u(i) ~= 0
-        d = diff(lab==u(i));
-        f = find(d==1);
-        F = find(d==-1);
-        if numel(f) ~= numel(F)
-            F = [F;numel(dsvm)];
-        end
-        for j = 1:numel(f)
-            a = [];
-            for jj = f(j)+1:F(j)
-                a = [a;find(loc==jj)];
-            end
-            evec(a) = evec(a)*(evec(a)'*dsvm(a))/(evec(a)'*evec(a));
+        for iii = 1:3
+            V = PWM3{M}(Lind,varc(ind(Lind),iii))-PWM3{M}(Lind,ind(Lind));
+            matscore(ii,iii) = evec*V;            
         end
     end
+    varscore(i) = ip(matscore(:), DSVM(:));
 end
-omat = [loc varvec evec];
-
 
 function en = letterconvert(s)
 
@@ -394,51 +305,6 @@ for i = 1:l
         en(i) = 3;
     end
 end
-
-function [omat, NAME2, Lmat2] = PWM_corr(fn,NUM,mfn,kmer,omat, dsvm, NAME, Lmat, p)
-[coords, ind] = sort(kmer(:,1));
-kmer = kmer(ind, :);
-dsvm = dsvm(ind, :);
-L = length(NAME);
-ind = ones(L,1);
-n = [];
-for i = 1:L
-    F = find(coords > Lmat(i,2));
-    FF = find(coords <= Lmat(i,3));
-    f = intersect(F,FF);
-    a1 = ip(kmer(f,end),dsvm(f,end));
-    if a1 > 0.6
-        n = [n;i];
-    else
-        ind(i) = 0;
-        omat(Lmat(i,2):Lmat(i,3),1:2) = 0;
-        omat(Lmat(i,2):Lmat(i,3),3:6) = 0.25;
-    end
-end
-Lmat2 = Lmat(n,:);
-NAME2 = NAME(n);
-LEN = zeros(length(p),1);
-for i = 1:length(p)
-    [LEN(i),~] = size(p);
-end
-C = cumsum([0;LEN]);
-mat = [zeros(length(omat),2) ones(length(omat),4)/4];
-for i = 1:L-length(n)
-    if ind(i) == 1
-        num = Lmat(i,1);
-        a = 1;
-        for j = Lmat(i,2):Lmat(i,3)
-            if mat(j,1) == 0
-                mat(j,1) = num;
-                mat(j,2) = C(num)+1;
-                mat(j,3:6) = p{num}(a,:);
-            else
-                mat(j,3:6) = (mat(j,3:6)+p{num}(a,:))/2;
-            end
-            a = 1+a;
-        end
-    end 
-end 
 
 function c = ip(x,y);
 c = x'*y/sqrt(x'*x)/sqrt(y'*y);
@@ -470,23 +336,20 @@ else
 end
 fclose(fid);
 
-function PWM_corr2(fn,NUM,kmer, dsvm, NAME, Lmat, s)
-[coords, ind] = sort(kmer(:,1));
-kmer = kmer(ind, :);
-dsvm = dsvm(ind, :);
-L = length(NAME);
-if NUM ==1
-    fid1 = fopen([fn '_kmer_PWM_locs.out'],'w');
-else
-    fid1 = fopen([fn '_kmer_PWM_locs.out'],'a+');
-end
-ind = ones(L,1);
-for i = 1:L
-    F = find(coords > Lmat(i,2));
-    FF = find(coords <= Lmat(i,3));
-    f = intersect(F,FF);
-    a1 = ip(kmer(f,end),dsvm(f,end));
-    fprintf(fid1, '%d\t%s\t%d\t%d\t%d\t%f\t%f\t%s\n', NUM, NAME{i}, Lmat(i,1), Lmat(i,2), Lmat(i,3), Lmat(i,4), a1, s(Lmat(i,2):Lmat(i,3)));
+function PWM_corr(fn, VV, NN, LL, seq);
+n = length(VV);
+fid1 = fopen([fn '_kmer_PWM_locs.out'],'w');
+for j = 1:n
+    NAME = NN{j};
+    Lmat = LL{j};
+    varscore = VV{j};
+    s = seq{j*2};
+    L = length(NAME);
+    for i = 1:L
+        if varscore(i) > 0.6
+            fprintf(fid1, '%d\t%s\t%d\t%d\t%d\t%f\t%f\t%s\n', j, NAME{i}, Lmat(i,1), Lmat(i,2), Lmat(i,3), Lmat(i,4), varscore(i), s(Lmat(i,2):Lmat(i,3)));
+        end
+    end
 end
 fclose(fid1);
 
@@ -498,8 +361,9 @@ fid = fopen(wfn, 'r');
 X = textscan(fid,'%s\t%f\n');
 fclose(fid);
 l = length(X{1}{1});
-if l_svm ~= 0
+if l_svm ~= l
     error('l is not the same length as the kmers in the weight file')
+end
 w = zeros(4^l,1);
 pow = (4.^(0:(l-1)))';
 disp('calculating indices')
@@ -511,12 +375,14 @@ for i = 1:numel(X{2});
 end
 m = mean(X{2});
 s = std(X{2});
-W = (1/2)*(1+erf((w-m)/s/sqrt(2)));
+W = (1/2)*(1+erf((w-m-s)/s/sqrt(2)));
+W(W>0.99) = 0.99;
+%W(W<0.01) = 0.01;
 seq = importdata(sfn);
 n = length(seq)/2;
 seqout = cell(n,1);
 seqindmat = cell(n,1);
-disp('converting kmers to  probabilities')
+disp('converting kmers to probabilities')
 P = cell(n,1);
 for i = 1:n
     if mod(i,1000)==0
@@ -537,6 +403,7 @@ for i = 1:n
     end
     P{i} = p;
 end
+
 disp('running dsvm')
 mat = [1 2 3;0 2 3;0 1 3;0 1 2];
 O = ones(1,l);
@@ -545,30 +412,42 @@ for i = 1:n
     if mod(i,1000)==0
         disp([num2str(i) ' sequences converted'])
     end
-    L = length(seq{2*i})-2*l+2;
-    ss = letterconvert(seq{2*i});
+    L = length(seq{2*i});
+    ss = seqout{i}-1;
     p = zeros(L+l-1,1);
     I = ss(1:l)*pow;
     p(1) = w(I+1);
-    for j = 2:L+l-1
+    for j = 2:L-l+1
         I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1);
         p(j) = w(I+1);
     end
-    v = zeros(3*L,1);
-    a = 1;
-    for j = l:L
-        S = ss(j-l+1:j+l-1);
-        ref = O*p(j-l+1:j);
+    v = zeros(L,3);
+    for j = 1:L
+        R = max([1 j-l+1]):min([j+l-1 L]);
+        RR = max([1 j-l+1]):min([j L+l-1]);
+        S = ss(R);
+        ref = sum(p(RR));
+        if max([1 j-l+1]) == 1
+            cen = j;
+            cen2 = j;
+        elseif min([j+l-1 L]) == L
+            cen = l;
+            cen2 = L-j+1;
+        else
+            cen = l;
+            cen2 = l;
+        end
         for ii = 1:3
-            S(l) = mat(ss(j)+1,ii);
+            S(cen) = mat(ss(j)+1,ii);
             I = S(1:l)*pow;
-            v(a) = w(I+1);
-            for jj = 2:l
-                I = (I-S(jj-1))/4+4^(l-1)*S(jj+l-1);
-                v(a)=v(a)+w(I+1);
+            v(j,ii) = w(I+1);
+            if length(RR) > 1
+                for jj = 2:cen2
+                    I = (I-S(jj-1))/4+4^(l-1)*S(jj+l-1);
+                    v(j,ii)=v(j,ii)+w(I+1);
+                end
             end
-            v(a) = v(a)-ref;
-            a = a+1;
+            v(j,ii) = v(j,ii)-ref;
         end
     end
     V{i} = v;
@@ -622,13 +501,13 @@ for ii = 1:length(w)
     if ii > N
         hal = true;
         [~,cor] = ppmsim([pp{ii} PWM2], [len(ii) LEN_2]);
-        if cor > 0.7 || vec2(ii-N) < 1.5
+        if cor > 0.8 || vec2(ii-N) < 1.5
             hal = false;
         end
     elseif ii > 1 && a > 2
         hal = true;
         [~,cor] = ppmsim([pp{ii} PWM2], [len(ii) LEN_2]);
-        if cor > 0.7
+        if cor > 0.8
             hal = false;
         end
     end
