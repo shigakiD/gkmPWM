@@ -33,7 +33,7 @@ function mapTF(varargin)
 %                     workable number of gapped k-mers
 % 
 %     Outputs 2 files named:
-%     outputprefix_kmer_PWM_locs.out
+%     outputprefix_TFBS_locations.out
 %         Contains the location of the motifs from gkmPWM and gkmPWMlasso.  
 %         See the README.md for details on the format of the output
 %     outputprefix_motifs.out
@@ -44,7 +44,7 @@ function mapTF(varargin)
 %     mapTF('GM12878.fa', 'GM12878_weights.out','GM12878_10_6_0_15_denovo.meme',...
 %         'GM12878_10_6_30_gkmPWMlasso.out','combined_db_v4.meme', 'GM12878',...
 %         'l', 11, 'k', 7,'KmerFrac', 1)
-%         Outputs GM12878_kmer_PWM_locs.oout and GM12878_motif.out
+%         Outputs GM12878_TFBS_locations.out and GM12878_motif.out
 if nargin < 6
     error('Need at least 6 inputs')
 end
@@ -70,20 +70,26 @@ if nargin > 6
             error([varargin{vec(i)} ' is not an input option'])
         end
     end
-    f = find(strcmp('l', varargin));
     if ~isempty(f);
         l_svm = varargin{f+1};
+        if ~isa(l_svm, 'double') || round(l_svm)-l_svm ~= 0 || l_svm <= 0
+            error(['l must be a positive integer'])
+        end
     end
     f = find(strcmp('k', varargin));
     if ~isempty(f);
         k_svm = varargin{f+1};
+        if ~isa(k_svm, 'double') || round(k_svm)-k_svm ~= 0 || k_svm <= 0 || k_svm > l_svm
+            error(['k must be a positive integer less than or equal to l'])
+        end
     end
     f = find(strcmp('KmerFrac', varargin));
-    if ~isempty(f)
-        nfrac = varargin{f+1};        
-    end
-    if l_svm < k_svm
-        error('7th argument must be greater or equal to the 8th argument')
+    if ~isempty(f);
+        nfrac = varargin{f+1};
+        lk = [l_svm k_svm];
+        if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
+            error(['KmerFrac must be a positive float in (0 1]'])
+        end
     end
 end
 
@@ -181,10 +187,11 @@ for I = 1:length(ss)
         VV{I} = scoreseqkmer(PWM3, lPWM3, LL{I}, ss{I}, Smat, l_svm, k_svm, ofn, V{I});
     end
     if mod(I,100)==0
-        fprintf('%d out of %d done...\n', I, length(ss));
+        fprintf('%d out of %d sequences done...\n', I, length(ss));
         toc
     end
 end
+fprintf('%d out of %d sequences done...\n', length(ss), length(ss));
 clear kmat
 PWM_corr(ofn, VV, NN, LL, seq);
 
@@ -338,7 +345,7 @@ fclose(fid);
 
 function PWM_corr(fn, VV, NN, LL, seq);
 n = length(VV);
-fid1 = fopen([fn '_kmer_PWM_locs.out'],'w');
+fid1 = fopen([fn '_TFBS_locations.out'],'w');
 for j = 1:n
     NAME = NN{j};
     Lmat = LL{j};
@@ -375,7 +382,7 @@ for i = 1:numel(X{2});
 end
 m = mean(X{2});
 s = std(X{2});
-W = (1/2)*(1+erf((w-m-s)/s/sqrt(2)));
+W = (1/2)*(1+erf((w-m)/s/sqrt(2)));
 W(W>0.99) = 0.99;
 %W(W<0.01) = 0.01;
 seq = importdata(sfn);

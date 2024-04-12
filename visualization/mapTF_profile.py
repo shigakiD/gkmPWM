@@ -13,17 +13,17 @@ def main():
     parser.add_argument('--fasta'  , required=True, type=str,
                         help='fasta file that was used when running mapTF')
     parser.add_argument('--locsprefix', required=True, type=str,
-                        help='prefix of *_kmer_PWM_locs.out and *_motifs.out files')
+                        help='prefix of *_TFBS_locations.out and *_motifs.out files')
     parser.add_argument('--weights', required=True, type=str,
                         help='kmer weight file that was used when running mapTF')
     parser.add_argument('--seqindex', required=True, type=str,
-                        help='index of the sequence from the fasta file that will be plotted (first column in *_kmer_PWM_locs.out)')
+                        help='index of the sequence from the fasta file that will be plotted (first column in *_TFBS_locations.out)')
     args = parser.parse_args()
     locsprefix = args.locsprefix
     bed = args.fasta
     sfile = args.fasta
     wfile = args.weights
-    pfile = args.locsprefix+'_kmer_PWM_locs.out'
+    pfile = args.locsprefix+'_TFBS_locations.out'
     mfile = args.locsprefix+'_motifs.out'
     ofname = args.locsprefix+'_'+args.seqindex+'_profile.png'
     seqnum = int(args.seqindex)

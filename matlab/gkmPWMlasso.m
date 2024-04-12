@@ -32,12 +32,12 @@ function gkmPWMlasso(varargin)
 %                     MinInfo will be filtered out (default: 0.5)
 %     'CorrCutoff'    PWMs with a pearson correlation greater than CorrCutoff
 %                     will be clustered together to prevent linear dependence
-%                     and redundant features (default: 0.86)
+%                     and redundant features (default: 0.83)
 %     'l'             The full length of the gapped k-mer.  This DOES NOT need
-%                     to be the same as the l in the gkmSVM model (default: 10)
+%                     to be the same as the l in the gkmSVM model (default: 11)
 %     'k'             The number of ungapped positions of the gapped k-mer.
 %                     This DOES NOT need to be the same as the k in the gkmSVM
-%                     model (default: 6)
+%                     model (default: 7)
 %     'Mode'          Use both the positive and negative set to get the background
 %                     distribution of gapped k-mers.  This is best used when
 %                     the model is trained with both the positive and negative
@@ -52,6 +52,9 @@ function gkmPWMlasso(varargin)
 %                     with the given combination of (l,k,KmerFrac), KmerFrac will
 %                     be automatically set to a lower value to create a more 
 %                     workable number of gapped k-mers
+%     'KmerFracLimit' Automatically lower KmerFrac if the number of gapped kmers
+%.                    is too large.  Note that this will require more memory and
+%                     increase runtime if set to false. (default: true)
 % 
 %     Outputs a file named fileprefix_l_k_motifNum_gkmPWMlasso.out that contains
 %     the most predictive motifs with the given motif number.  If motifNum = 0,
@@ -60,8 +63,8 @@ function gkmPWMlasso(varargin)
 % 
 %     Example (files in the example_files directory):
 %     gkmPWMlasso('GM12878', 'combined_db_v4.meme', 30, 'MinLength',10,...
-%         'MinInfo', 0.5, 'CorrCutoff', 0.86, 'l', 10, 'k', 6,'RC',true)
-%         Outputs GM12878_10_6_30_gkmPWMlasso.out
+%         'MinInfo', 0.5, 'CorrCutoff', 0.83, 'l', 11, 'k', 7,'RC',true)
+%         Outputs GM12878_11_7_30_gkmPWMlasso.out
 if nargin < 3
     error('Need at least 3 inputs')
 elseif nargin > 3
@@ -69,7 +72,7 @@ elseif nargin > 3
         error('Incorrect number of inputs')
      else
         vec = 4:2:nargin;
-        inputlib = {'MinLength', 'MinInfo', 'CorrCutoff', 'l', 'k', 'Mode', 'RC', 'KmerFrac'};
+        inputlib = {'MinLength', 'MinInfo', 'CorrCutoff', 'l', 'k', 'Mode', 'RC', 'KmerFrac', 'KmerFracLimit'};
         for i = 1:length(vec)
             f = strcmp(varargin{vec(i)},inputlib);
             if sum(f) == 0
@@ -90,27 +93,43 @@ k_svm = 7;
 BG_GC = 0;
 RC = true;
 nfrac = 1;
+nfracLim = true;
 lk = 1;
 if nargin > 2
     f = find(strcmp('MinLength', varargin));
     if ~isempty(f);
         minL = varargin{f+1};
+        if ~isa(minL, 'double') || round(minL)-minL ~= 0 || minL <= 0
+            error(['MinLength must be a positive integer'])
+        end
     end
     f = find(strcmp('MinInfo', varargin));
     if ~isempty(f);
         minInfo = varargin{f+1};
+        if ~isa(minInfo, 'double') || minInfo <= 0
+            error(['MinInfo must be a positive float'])
+        end
     end
     f = find(strcmp('CorrCutoff', varargin));
     if ~isempty(f);
         corrCut = varargin{f+1};
+        if ~isa(corrCut, 'double') || corrCut <= 0
+            error(['CorrCutoff must be a positive float'])
+        end
     end
     f = find(strcmp('l', varargin));
     if ~isempty(f);
         l_svm = varargin{f+1};
+        if ~isa(l_svm, 'double') || round(l_svm)-l_svm ~= 0 || l_svm <= 0
+            error(['l must be a positive integer'])
+        end
     end
     f = find(strcmp('k', varargin));
     if ~isempty(f);
         k_svm = varargin{f+1};
+        if ~isa(k_svm, 'double') || round(k_svm)-k_svm ~= 0 || k_svm <= 0 || k_svm > l_svm
+            error(['k must be a positive integer less than or equal to l'])
+        end
     end
     f = find(strcmp('Mode', varargin));
     if ~isempty(f) && strcmp('Compare',varargin{f+1});
@@ -119,17 +138,30 @@ if nargin > 2
     f = find(strcmp('RC', varargin));
     if ~isempty(f);
         RC = varargin{f+1};
+        if ~islogical(RC)
+            error(['RC must be a boolean'])
+        end
     end
     f = find(strcmp('KmerFrac', varargin));
     if ~isempty(f);
         nfrac = varargin{f+1};
         lk = [l_svm k_svm];
+        if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
+            error(['KmerFrac must be a positive float in (0 1]'])
+        end
+    end
+    f = find(strcmp('KmerFracLimit', varargin));
+    if ~isempty(f);
+        nfracLim = varargin{f+1};
+        if ~islogical(nfracLim)
+            error(['KmerFracLimit must be a boolean'])
+        end
     end
 end
 
 [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);%generate gapped positions, adjusted for reverse complements
 
-if numel(comb)/k_svm*4^k_svm > 6*10^5
+if nfracLim && numel(comb)/k_svm*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     l_svm2 = l_svm;

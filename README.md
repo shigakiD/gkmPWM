@@ -53,7 +53,7 @@ gkmPWMlasso('GM12878', 'combined_db_v4.meme', 30)
 ./gkmPWMlasso GM12878 combined_db_v4.meme 30
 ```
 
-These both output <i>GM12878_10_6_30_gkmPWMlasso.out</i>, which contains the following columns:
+These both output <i>GM12878_11_7_30_gkmPWMlasso.out</i>, which contains the following columns:
 1. <u>Cluster ID</u>: The cluster to which the PWM belongs.  gkmPWMlasso clusters PWMs to prevent linear dependence and redundant features.  
 2. <u>ID</u>: The number of the motif from (1) as it as appears in the memefile input.
 3. <u>MOTIF ID</u>: The name of the motif in the memefile
@@ -67,10 +67,10 @@ You can create a pdf of the output by running <i>plotMotif.py</i> in the visuali
 3. Output prefix: _outprefix_ passed to --output
 ```bash
 python plotMotif.py --info lassofile --meme memefile --output outprefix
-python plotMotif.py --info GM12878_10_6_30_gkmPWMlasso.out --meme combined_db_v4.meme --output GM12878_10_6_30_gkmPWMlasso
+python plotMotif.py --info GM12878_11_7_30_gkmPWMlasso.out --meme combined_db_v4.meme --output GM12878_11_7_30_gkmPWMlasso
 ```
-This will create _GM12878_10_6_30_gkmPWMlasso.pdf_
-![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_10_6_30_gkmPWMlasso.png)
+This will create _GM12878_11_7_30_gkmPWMlasso.pdf_
+![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_11_7_30_gkmPWMlasso.png)
 A quick note:  for the optional parameters <i>l</i> and <i>k</i>, these <b>do not</b> need to be the same as the <i>l</i> and <i>k</i> from the gkmSVM model.  In fact, if <i>l</i> and <i>k</i> generate too many gapped k-mers, gkmPWMlasso will take only a subset of the gapped k-mer to use as features.  This is also true for gkmPWM.
 
 ## Running gkmPWM (de novo PWMs)
@@ -107,7 +107,7 @@ gkmPWM('GM12878', 'GM12878_weights.out', 'combined_db_v4.meme',15)
 ./gkmPWM fileprefix wfilename memefile m
 ./gkmPWM GM12878 GM12878_weights.out combined_db_v4.meme 15
 ```
-This creates 3 files <i>GM12878_10_6_0_15_denovo.meme</i>,<i>GM12878_10_6_0_error.out</i>, and  <i>GM12878_10_6_0_15_gkmPWM.out</i>.  
+This creates 3 files <i>GM12878_11_7_0_15_denovo.meme</i>,<i>GM12878_11_7_0_error.out</i>, and  <i>GM12878_11_7_0_15_gkmPWM.out</i>.  
 
 The first is a meme file containing the PWMs.  The second file is a summary file.  The second file is a record of the error after each iteration.  If the error does not clearly converge, run it again for more reps.  There will be small jumps in the error, which is gkmPWM adjusting the alignment of the PWMs.   The last file is a summary file with the following columns:
 
@@ -130,10 +130,10 @@ You can create a pdf of the output by running <i>plotMotif.py</i> in the visuali
 You also need to specify --denovo
 ```bash
 python plotMotif.py --denovo --info gkmPWMfile --meme memefile --output outprefix
-python plotMotif.py --denovo --info GM12878_10_6_0_15_gkmPWM.out --meme GM12878_10_6_0_15_denovo.meme --output GM12878_10_6_0_15_gkmPWM
+python plotMotif.py --denovo --info GM12878_11_7_0_15_gkmPWM.out --meme GM12878_11_7_0_15_denovo.meme --output GM12878_11_7_0_15_gkmPWM
  ```
- This will create _GM12878_10_6_0_15_gkmPWM.pdf_
- ![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_10_6_0_15_gkmPWM.png)
+ This will create _GM12878_11_7_0_15_gkmPWM.pdf_
+ ![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_11_7_0_15_gkmPWM.png)
 ## Running mapTF 
 
 This function maps PWMS from both gkmPWM and gkmPWMlasso to sequences at base-pair resolution.  The required parameters are:
@@ -151,16 +151,16 @@ This function maps PWMS from both gkmPWM and gkmPWMlasso to sequences at base-pa
 <b>MATLAB</b>
 ```bash
 mapTF(seqfile, wfilename, denovofile, lassofile, memefile,outprefix)
-gkmPWM('GM12878.fa', 'GM12878_weights.out','GM12878_10_6_0_15_denovo.meme', 'GM12878_10_6_30_gkmPWMlasso.out', 'combined_db_v4.meme','GM12878')
+gkmPWM('GM12878.fa', 'GM12878_weights.out','GM12878_11_7_0_15_denovo.meme', 'GM12878_11_7_30_gkmPWMlasso.out', 'combined_db_v4.meme','GM12878')
 ```
 <b>C</b>
 ```bash
 ./mapTF seqfile wfilename denovofile lassofile memefile outprefix
-./mapTF GM12878.fa GM12878_weights.out GM12878_10_6_0_15_denovo.meme GM12878_10_6_30_gkmPWMlasso.out combined_db_v4.meme GM12878
+./mapTF GM12878.fa GM12878_weights.out GM12878_11_7_0_15_denovo.meme GM12878_11_7_30_gkmPWMlasso.out combined_db_v4.meme GM12878
 ```
 This outputs two files:
 <i>outprefix_motifs.out</i>
-<i>outprefix_kmer_PWM_locs.out</i>
+<i>outprefix_TFBS_locations.out</i>
 The first file contains the PWMs for the visualization script mapTF_profile.py.  
 The second file gives a list of the locations of the mapped TFBSs.  The columns are:
 
@@ -173,7 +173,7 @@ The second file gives a list of the locations of the mapped TFBSs.  The columns 
 7. <u>Correlation with deltaSVM</u> (higher means more likely a good match).
 8. <u>TFBS sequence</u>
 
-You can convert the _outprefix_kmer_PWM_locs.out_ file to a bed by using the _convert2bed.m_ or <i>convert2bed.py</i> functions.  The _bedfile_ input should be in the same order as the input fasta file.
+You can convert the _outprefix_TFBS_locations.out_ file to a bed by using the _convert2bed.m_ or <i>convert2bed.py</i> functions.  The _bedfile_ input should be in the same order as the input fasta file.
 
 <b>MATLAB</b>
 ```bash
@@ -189,13 +189,13 @@ You can make a profile plot of the results of mapTF for a sequence using <i>mapT
 
 1. Sequences in fasta format: <i>seqfile</i>.
 2. gkmSVM kmer weights: <i>wfilename</i> 
-3. mapTF output prefix: <i>kmerPWMprefix</i>
-4. Sequence Index: _sind_ (from _kmer_PWM_locs.out_)
+3. mapTF output prefix: <i>mapTFoutprefix</i>
+4. Sequence Index: _sind_ (from _TFBS_locations.out_)
 ```bash
-python mapTF_profile.py --fasta seqfile --weights wfilename --locsprefix kmerPWMprefix --seqindex sind
+python mapTF_profile.py --fasta seqfile --weights wfilename --locsprefix mapTFoutprefix --seqindex sind
 python mapTF_profile.py --fasta GM12878.fa --weights GM12878_weights.out --locsprefix GM12878 --seqindex 1
 ```
-This creates a png named _GM12878_1_profile.png_, formatted as _kmerPWMprefix_sind_profile.png_.  
+This creates a png named _GM12878_1_profile.png_, formatted as _mapTFoutprefix_sind_profile.png_.  
 ![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_1_profile.png)
 The first row is the sequences of interest with the nucleotides contained in binding sites raised.  The second is are the mapped PWMs.  The third row is the average deltaSVM score of each nucleotide for all possible mutations.
 

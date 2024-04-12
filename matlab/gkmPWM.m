@@ -38,10 +38,10 @@ function gkmPWM(varargin)
 %                     Must be a value in [0,1).  Keeping this value low (<0.05)
 %                     works best.  (default: 0).
 %     'l'             The full length of the gapped k-mer.  This DOES NOT need
-%                     to be the same as the l in the gkmSVM model (default: 10)
+%                     to be the same as the l in the gkmSVM model (default: 11)
 %     'k'             The number of ungapped positions of the gapped k-mer.
 %                     This DOES NOT need to be the same as the k in the gkmSVM
-%                     model (default: 6)
+%                     model (default: 7)
 %     'Mode'          Use both the positive and negative set to get the background
 %                     distribution of gapped k-mers.  This is best used when
 %                     the model is trained with both the positive and negative
@@ -56,6 +56,9 @@ function gkmPWM(varargin)
 %                     with the given combination of (l,k,KmerFrac), KmerFrac will
 %                     be automatically set to a lower value to create a more 
 %                     workable number of gapped k-mers
+%     'KmerFracLimit' Automatically lower KmerFrac if the number of gapped kmers 
+%.                    is too large.  Note that this will require more memory and 
+%                     increase runtime if set to false. (default: true)
 % 
 %     Outputs 3 files named:
 %     fileprefix_l_k_RegFrac_motifNum_gkmPWM.out
@@ -69,9 +72,9 @@ function gkmPWM(varargin)
 %
 %     Example (files in the example_files directory):
 %     gkmPWM('GM12878', 'GM12878_weights.out','combined_db_v4.meme', 15,...
-%         'MaxCorr',0.9, 'MaxIter', 200, 'RegFrac', 0, 'l', 10,'k', 6,'RC',true)
-%         Outputs GM12878_10_6_0_15_gkmPWM.out, GM12878_10_6_0_15_denovo.meme
-%         and GM12878_10_6_0_15_error.out
+%         'MaxCorr',0.9, 'MaxIter', 200, 'RegFrac', 0, 'l', 11,'k', 7,'RC',true)
+%         Outputs GM12878_11_7_0_15_gkmPWM.out, GM12878_11_7_0_15_denovo.meme
+%         and GM12878_11_7_0_15_error.out
 if nargin < 4
     error('Need at least 4 inputs')
 elseif nargin > 4
@@ -79,7 +82,7 @@ elseif nargin > 4
         error('Incorrect number of inputs')
      else
         vec = 5:2:nargin;
-        inputlib = {'MaxCorr', 'MaxIter', 'PNratio', 'RegFrac', 'l', 'k', 'Mode', 'RC', 'KmerFrac'};
+        inputlib = {'MaxCorr', 'MaxIter', 'PNratio', 'RegFrac', 'l', 'k', 'Mode', 'RC', 'KmerFrac', 'KmerFracLimit'};
         for i = 1:length(vec)
             f = strcmp(varargin{vec(i)},inputlib);
             if sum(f) == 0
@@ -102,35 +105,51 @@ BG_GC = 0;
 RC = true;
 ipnr = true;
 nfrac = 1;
+nfracLim = true;
 lk = 1;
 if nargin > 4
     f = find(strcmp('MaxCorr', varargin));
     if ~isempty(f);
         rcorr = varargin{f+1};
+        if ~isa(rcorr, 'double') || rcorr <= 0
+            error(['MaxCorr must be a positive float'])
+        end
     end
     f = find(strcmp('MaxIter', varargin));
     if ~isempty(f);
-        rcorr = varargin{f+1};
+        num = varargin{f+1};
+        if ~isa(num, 'double') || round(num)-num ~= 0 || num <= 0
+            error(['MaxIter must be a positive integer'])
+        end
     end
     f = find(strcmp('PNratio', varargin));
     if ~isempty(f);
         pnr = varargin{f+1};
         ipnr=false;
+        if ~isa(pnr, 'double') || pnr <= 0
+            error(['PNratio must be a positive float'])
+        end
     end
     f = find(strcmp('RegFrac', varargin));
     if ~isempty(f);
         reg = varargin{f+1};
-        if reg < 0 || reg >= 1
-            error('RegFrac must be in [0,1)')
+        if ~isa(RegFrac, 'double') || reg < 0 || reg >= 1
+            error('RegFrac must be a positive float in [0,1)')
         end
     end
     f = find(strcmp('l', varargin));
     if ~isempty(f);
         l_svm = varargin{f+1};
+        if ~isa(l_svm, 'double') || round(l_svm)-l_svm ~= 0 || l_svm <= 0
+            error(['l must be a positive integer'])
+        end
     end
     f = find(strcmp('k', varargin));
     if ~isempty(f);
         k_svm = varargin{f+1};
+        if ~isa(k_svm, 'double') || round(k_svm)-k_svm ~= 0 || k_svm <= 0 || k_svm > l_svm
+            error(['k must be a positive integer less than or equal to l'])
+        end
     end
     f = find(strcmp('Mode', varargin));
     if ~isempty(f) && strcmp('Compare',varargin{f+1});
@@ -139,16 +158,29 @@ if nargin > 4
     f = find(strcmp('RC', varargin));
     if ~isempty(f);
         RC = varargin{f+1};
+        if ~islogical(RC)
+            error(['RC must be a boolean'])
+        end
     end
     f = find(strcmp('KmerFrac', varargin));
     if ~isempty(f);
         nfrac = varargin{f+1};
         lk = [l_svm k_svm];
+        if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
+            error(['KmerFrac must be a positive float in (0 1]'])
+        end
+    end
+    f = find(strcmp('KmerFracLimit', varargin));
+    if ~isempty(f);
+        nfracLim = varargin{f+1};
+        if ~islogical(nfracLim)
+            error(['KmerFracLimit must be a boolean'])
+        end
     end
 end
 
 [comb,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);%generate gapped positions, adjusted for reverse complements
-if numel(comb)/k_svm*4^k_svm > 6*10^5
+if nfracLim && numel(comb)/k_svm*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     lk = [l_svm k_svm];
