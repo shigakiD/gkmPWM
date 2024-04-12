@@ -1,22 +1,22 @@
 import sys,os,argparse
 
 def main(argv = sys.argv):
-    parser = argparse.ArgumentParser(description='Converts the results of mapTF *_kmer_PWM_locs.out to bed format')
+    parser = argparse.ArgumentParser(description='Converts the results of mapTF *_TFBS_locations.out to bed format')
     parser.add_argument('--bed'  , required=True, type=str,
                         help='bed file in the same order of the fasta file input to mapTF')
     parser.add_argument('--locsprefix', required=True, type=str,
-                        help='prefix of *_kmer_PWM_locs.out file.')
+                        help='prefix of *_TFBS_locations.out file.')
     args = parser.parse_args()
     locsprefix = args.locsprefix
     bed = args.bed
-    fid = open(locsprefix+'_kmer_PWM_locs.out', 'r')
+    fid = open(locsprefix+'_TFBS_locations.out', 'r')
     x = fid.readlines()
     fid.close()
     fid = open(bed, 'r')
     y = fid.readlines()
     fid.close()
     L = len(x)
-    fid = open(locsprefix+'_kmer_PWM_locs.bed', 'w')
+    fid = open(locsprefix+'_TFBS_locations.bed', 'w')
     L2 = len(y)
     Y = []
     for i in range(L2):
