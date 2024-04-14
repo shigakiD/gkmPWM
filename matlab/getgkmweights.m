@@ -30,6 +30,10 @@ function getgkmweights(varargin)
 %                     with the given combination of (l,k,KmerFrac), KmerFrac will
 %                     be automatically set to a lower value to create a more
 %                     workable number of gapped k-mers
+%     'KmerFracLimit' Automatically lower KmerFrac if the number of gapped kmers
+%.                    is too large.  Note that this will require more memory and
+%                     increase runtime if set to false. (default: true)
+
 if nargin < 3
     error('Need at least 3 inputs')
 elseif nargin > 3
@@ -51,20 +55,34 @@ l_svm = varargin{2};
 k_svm = varargin{3};
 RC = true;
 nfrac = 1;
+nfracLim = true;
 lk = 1;
 if nargin > 3
     f = find(strcmp('RC', varargin));
     if ~isempty(f);
         RC = varargin{f+1};
+        if ~islogical(RC)
+            error(['RC must be a boolean'])
+        end
     end
     f = find(strcmp('KmerFrac', varargin));
     if ~isempty(f);
         nfrac = varargin{f+1};
         lk = [l_svm k_svm];
+        if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
+            error(['KmerFrac must be a positive float in (0 1]'])
+        end
+    end
+    f = find(strcmp('KmerFracLimit', varargin));
+    if ~isempty(f);
+        nfracLim = varargin{f+1};
+        if ~islogical(nfracLim)
+            error(['KmerFracLimit must be a boolean'])
+        end
     end
 end
 [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
-if length(comb)*4^k_svm > 6*10^5
+if nfracLim && length(comb)*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     lk = ([l_svm k_svm]);
