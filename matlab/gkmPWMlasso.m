@@ -203,7 +203,6 @@ n = length(indvec);
 disp('Mapping PWMs to gkm space')
 lcnum = numel(comb)/k_svm;
 A=zeros(lcnum*4^k_svm,n);
-AA=zeros(lcnum*4^k_svm,n);
 GCmat = repmat([0.5-GCpos1/2 GCpos1/2 GCpos1/2 0.5-GCpos1/2],l_svm-1,1);
 per = 10;
 normvec = zeros(n,1);
@@ -220,14 +219,13 @@ for j = 1:n
         A(:,j) = PWM2kmers_norc([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
     end
     A(:,j) = A(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
-    normvec(j) = (A(:,j)'*A(:,j))^0.5;
-    AA(:,j) = A(:,j)/normvec(j);
+    normvec(j) = sqrt(A(:,j)'*A(:,j));
 end
 fprintf('\n')
 disp('Clustering motifs')
-simmat = AA'*AA;
-clear AA
+simmat = diag(normvec.^-1)*(A'*A)*diag(normvec.^-1);
 motclus = clus_simmat_eig(simmat,corrCut);
+clear simmat
 disp(['Number of motif clusters:' num2str(length(motclus))])
 
 disp('Selecting Motifs')
@@ -262,7 +260,7 @@ B = B(:,f);
 B = B/std(B(:))';
 motclus = motclus(f);
 Z = Z(f);
-clear A AA loc mat GMmat
+clear A loc mat GMmat
 
 if d == 0
 disp('Running LASSO')
