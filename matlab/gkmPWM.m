@@ -133,7 +133,7 @@ if nargin > 4
     f = find(strcmp('RegFrac', varargin));
     if ~isempty(f);
         reg = varargin{f+1};
-        if ~isa(RegFrac, 'double') || reg < 0 || reg >= 1
+        if ~isa(reg, 'double') || reg < 0 || reg >= 1
             error('RegFrac must be a positive float in [0,1)')
         end
     end
