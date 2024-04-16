@@ -104,20 +104,17 @@ b = 1;
 a = numel(len);
 PWM = cell(a,1);
 PWM2 = cell(a,1);
-PWM3 = cell(a,1);
-lPWM3 = cell(a,1);
+lPWM2 = cell(a,1);
 pwm = cell(a,1);
 lpwm = cell(a,1);
-lab = zeros(a,1);
 LEN = zeros(a,1);
 LEN_2 = zeros(a,1);
 shift = zeros(a,1);
 for i = 1:a
     shift(i) = max([l_svm-len(i) 4]);
     PWM{i} = [repmat(GCmat,shift(i), 1); p{i} ;repmat(GCmat,shift(i), 1)];
-    PWM2{i} = p{i};
-    PWM3{i} = [ones(l_svm-1,4)/4; p{i} ;ones(l_svm-1,4)/4];
-    lPWM3{i} = log((PWM3{i}+10^-10)/(1+4*10^-10));
+    PWM2{i} = [ones(l_svm-1,4)/4; p{i} ;ones(l_svm-1,4)/4];
+    lPWM2{i} = log((PWM2{i}+10^-10)/(1+4*10^-10));
     LEN_2(i) = len(i);
     LEN(i) = len(i)+2*shift(i)-l_svm+1;
     for j = 1:LEN(i)
@@ -182,9 +179,9 @@ for I = 1:length(ss)
             pwm_prob(:,i) = kmat(:,ind);
         end
     end
-    [LL{I}, NN{I}] = MAPTF(fn, ss{I}, GC, pwm_prob, l_svm, k_svm, ofn, PWM, PWM2, pwm, lpwm, lab, LEN, LEN_2, shift, P{I}, names, len, a,b, I);
+    [LL{I}, NN{I}] = MAPTF(fn, ss{I}, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, P{I}, names, a, b);
     if numel(LL{I}) > 0
-        VV{I} = scoreseqkmer(PWM3, lPWM3, LL{I}, ss{I}, Smat, l_svm, k_svm, ofn, V{I});
+        VV{I} = scoreseqkmer(PWM2, lPWM2, LL{I}, ss{I}, Smat, l_svm, k_svm, ofn, V{I});
     end
     if mod(I,100)==0
         fprintf('%d out of %d sequences done...\n', I, length(ss));
@@ -195,52 +192,39 @@ fprintf('%d out of %d sequences done...\n', length(ss), length(ss));
 clear kmat
 PWM_corr(ofn, VV, NN, LL, seq);
 
-function [Lmat, NAME] = MAPTF(fn, ss, GC, pwm_prob, l_svm, k_svm, ofn, PWM, PWM2, pwm, lpwm, lab, LEN, LEN_2, shift, gkmprob, names, len, a, b, rnum)
-GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];
+function [Lmat, NAME] = MAPTF(fn, ss, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, gkmprob, names, a, b)
 L = length(ss)-l_svm+1;
-ACGT = 'ACGT';
-lab = [lab; 0];
 n = sum(LEN)+1;
 mat = zeros(n,L)-Inf;
 ind = zeros(n,L);
 LEN = [0;LEN];
 C = cumsum(LEN);
+D = setdiff(1:C(end),C+1)';
 C2 = [C(2:end);n];
 pos = log(gkmprob);
 neg = log(1-gkmprob);
+pwm_prob = pwm_prob+repmat(pos',n-1,1);
 for i = 1:a
     mat(C(i)+1,1) = pwm_prob(C(i)+1,1);
 end
 mat(n,1) = neg(1);
+ind(D,:) = repmat(D-1,1,L);
 for i = 2:L
     for j = 1:a
-        [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(C2,i-1)+pwm_prob(C(j)+1,i)+pos(i));
+        [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(C2,i-1)+pwm_prob(C(j)+1,i));
         ind(C(j)+1,i) = C2(ind(C(j)+1,i));
-        mat(C(j)+(2:LEN(j+1)),i) = mat(C(j)+(1:LEN(j+1)-1),i-1)+pwm_prob(C(j)+(2:LEN(j+1)),i)+pos(i);
-        ind(C(j)+(2:LEN(j+1)),i) = C(j)+(1:LEN(j+1)-1);
     end
-    [mat(n,i),ind(n,i)] = max(mat(:,i-1)+neg(i));
+    mat(D,i) = mat(D-1,i-1)+pwm_prob(D,i);
+    [mat(n,i),ind(n,i)] = max(mat(C2,i-1)+neg(i));
+    ind(n,i) = C2(ind(n,i));
 end
 path = zeros(L,1);
 path(end) = n;
 for i = fliplr(1:L-1)
     path(i) = ind(path(i+1),i+1);
 end
-PATH = zeros(length(ss),1);
-C_2 = cumsum([0;LEN_2]);
-for i = 1:a
-    f = find(path==C(i)+1);
-    if ~isempty(f)
-        for j = 1:length(f)
-            vec = f(j)+shift(i):f(j)+shift(i)+LEN_2(i)-1;
-            PATH(vec) = C_2(i)+1:C_2(i)+LEN_2(i);
-        end
-    end
-end
-N =sum(LEN_2)+1;
-PATH(PATH==0) = N;
 L2 = [];
-for i = 1:length(PWM2)
+for i = 1:length(LEN_2)
     f = find(path==C(i)+1);
     if ~isempty(f)
         for j = 1:length(f)
@@ -269,7 +253,7 @@ if ~isempty(L2)
     end
 end
 
-function varscore = scoreseqkmer(PWM3, lPWM3, Lmat, ss, Smat, l_svm, k_svm, ofn, dsvm);
+function varscore = scoreseqkmer(PWM2, lPWM2, Lmat, ss, Smat, l_svm, k_svm, ofn, dsvm);
 varc = [2 3 4; 1 3 4;1 2 4;1 2 3];
 O = ones(1,l_svm-1);
 n = numel(Lmat)/4;
@@ -284,7 +268,7 @@ for i = 1:n
         Lind = l_svm-1+ii;
         scores = zeros(2*l_svm-1,1);
         for j = 1:2*l_svm-1;
-            scores(j) = lPWM3{M}(Lind-l_svm+j,ind(Lind-l_svm+j));
+            scores(j) = lPWM2{M}(Lind-l_svm+j,ind(Lind-l_svm+j));
         end
         evec = 0;
         scores(l_svm) = 0;
@@ -292,7 +276,7 @@ for i = 1:n
             evec = evec+sum(exp(Smat{l_svm-j+1}*scores(j:l_svm+j-1)));
         end
         for iii = 1:3
-            V = PWM3{M}(Lind,varc(ind(Lind),iii))-PWM3{M}(Lind,ind(Lind));
+            V = PWM2{M}(Lind,varc(ind(Lind),iii))-PWM2{M}(Lind,ind(Lind));
             matscore(ii,iii) = evec*V;            
         end
     end
