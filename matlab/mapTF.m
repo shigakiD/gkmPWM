@@ -205,6 +205,7 @@ mat = zeros(n,L)-Inf;
 ind = zeros(n,L);
 LEN = [0;LEN];
 C = cumsum(LEN);
+C2 = [C(2:end);n];
 pos = log(gkmprob);
 neg = log(1-gkmprob);
 for i = 1:a
@@ -213,11 +214,12 @@ end
 mat(n,1) = neg(1);
 for i = 2:L
     for j = 1:a
-        [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(1:end,i-1)+pwm_prob(C(j)+1,i)+pos(i));
-        mat(C(j)+2:LEN(j+1),i) = mat(C(j)+1:(LEN(j+1)-1),i-1)+pwm_prob(C(j)+2:LEN(j+1),i)+pos(i);
-        ind(C(j)+2:LEN(j+1),i) = C(j)+1:(LEN(j+1)-1);
+        [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(C2,i-1)+pwm_prob(C(j)+1,i)+pos(i));
+        ind(C(j)+1,i) = C2(ind(C(j)+1,i));
+        mat(C(j)+(2:LEN(j+1)),i) = mat(C(j)+(1:LEN(j+1)-1),i-1)+pwm_prob(C(j)+(2:LEN(j+1)),i)+pos(i);
+        ind(C(j)+(2:LEN(j+1)),i) = C(j)+(1:LEN(j+1)-1);
     end
-    [mat(n,i),ind(n,i)] = max(mat(1:end,i-1)+neg(i));
+    [mat(n,i),ind(n,i)] = max(mat(:,i-1)+neg(i));
 end
 path = zeros(L,1);
 path(end) = n;
