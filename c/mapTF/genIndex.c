@@ -26,7 +26,6 @@
 #include "sort.h"
 #include "sum.h"
 #include "rt_nonfinite.h"
-#include <emmintrin.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -253,7 +252,6 @@ static void g_binary_expand_op(emxArray_real_T *x, const emxArray_real_T *C,
 static void genIndex_frac(double l, double k, const emxArray_real_T *c,
                           double Lfrac, emxArray_real_T *mat)
 {
-  __m128d r3;
   emxArray_boolean_T *b_f;
   emxArray_boolean_T *b_x;
   emxArray_int32_T *c_f;
@@ -281,7 +279,6 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   int b_k;
   unsigned int count;
   int i;
-  int i1;
   int j;
   int nxin;
   int nxout;
@@ -315,22 +312,22 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   } else {
     i = ind->size[0] * ind->size[1];
     ind->size[0] = 1;
-    nxout = (int)floor(L - 1.0);
-    ind->size[1] = nxout + 1;
+    nxin = (int)floor(L - 1.0);
+    ind->size[1] = nxin + 1;
     emxEnsureCapacity_real_T(ind, i);
     ind_data = ind->data;
-    for (i = 0; i <= nxout; i++) {
+    for (i = 0; i <= nxin; i++) {
       ind_data[i] = (double)i + 1.0;
     }
   }
   emxInit_real_T(&X, 1);
   /* 'genIndex:168' X = zeros(L,1); */
   i = X->size[0];
-  nxout = (int)L;
+  nxin = (int)L;
   X->size[0] = (int)L;
   emxEnsureCapacity_real_T(X, i);
   X_data = X->data;
-  for (i = 0; i < nxout; i++) {
+  for (i = 0; i < nxin; i++) {
     X_data[i] = 0.0;
   }
   /* 'genIndex:169' count = 0; */
@@ -357,13 +354,13 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
     b_r = floor(b_r * (L - (double)count));
     /* 'genIndex:177' cvec = c(ind(r),:); */
     xtmp = ind_data[(int)(b_r + 1.0) - 1];
-    nxout = c->size[1];
+    nxin = c->size[1];
     i = cvec->size[0] * cvec->size[1];
     cvec->size[0] = 1;
     cvec->size[1] = c->size[1];
     emxEnsureCapacity_real_T(cvec, i);
     cvec_data = cvec->data;
-    for (i = 0; i < nxout; i++) {
+    for (i = 0; i < nxin; i++) {
       cvec_data[i] = c_data[((int)xtmp + c->size[0] * i) - 1];
     }
     /* 'genIndex:178' X(count) = ind(r); */
@@ -389,8 +386,8 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
     b_x->size[1] = cvec->size[1];
     emxEnsureCapacity_boolean_T(b_x, i);
     x_data = b_x->data;
-    nxout = cvec->size[1];
-    for (i = 0; i < nxout; i++) {
+    nxin = cvec->size[1];
+    for (i = 0; i < nxin; i++) {
       x_data[i] = (cvec_data[i] < M + 1.0);
     }
     vlen = b_x->size[1];
@@ -418,16 +415,16 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
       }
       /* 'genIndex:183' C(1:num) = sort(mod(cvec(1:num)+(j-1),M)+1); */
       if (1 > nz) {
-        nxout = 0;
+        nxin = 0;
       } else {
-        nxout = nz;
+        nxin = nz;
       }
       i = r->size[0] * r->size[1];
       r->size[0] = 1;
-      r->size[1] = nxout;
+      r->size[1] = nxin;
       emxEnsureCapacity_real_T(r, i);
       r2 = r->data;
-      for (i = 0; i < nxout; i++) {
+      for (i = 0; i < nxin; i++) {
         b_r = cvec_data[i] + (((double)j + 1.0) - 1.0);
         r2[i] = b_mod(b_r, M);
       }
@@ -435,73 +432,61 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
       r->size[0] = 1;
       emxEnsureCapacity_real_T(r, i);
       r2 = r->data;
-      nxout = r->size[1] - 1;
-      vlen = (r->size[1] / 2) << 1;
-      nxin = vlen - 2;
-      for (i = 0; i <= nxin; i += 2) {
-        r3 = _mm_loadu_pd(&r2[i]);
-        _mm_storeu_pd(&r2[i], _mm_add_pd(r3, _mm_set1_pd(1.0)));
-      }
-      for (i = vlen; i <= nxout; i++) {
+      nxin = r->size[1] - 1;
+      for (i = 0; i <= nxin; i++) {
         r2[i]++;
       }
       d_sort(r);
       r2 = r->data;
-      nxout = r->size[1];
-      for (i = 0; i < nxout; i++) {
+      nxin = r->size[1];
+      for (i = 0; i < nxin; i++) {
         C_data[i] = r2[i];
       }
       /* 'genIndex:184' C(num+1:end) = sort(l-mod(l+1-cvec(num+1:end)+(j-1),M));
        */
       if ((double)nz + 1.0 > cvec->size[1]) {
         i = 0;
-        i1 = 0;
-      } else {
-        i = nz;
-        i1 = cvec->size[1];
-      }
-      if ((double)nz + 1.0 > C->size[1]) {
         b_k = 0;
       } else {
-        b_k = nz;
+        i = nz;
+        b_k = cvec->size[1];
+      }
+      if ((double)nz + 1.0 > C->size[1]) {
+        nxout = 0;
+      } else {
+        nxout = nz;
       }
       vlen = r->size[0] * r->size[1];
       r->size[0] = 1;
-      nxout = i1 - i;
-      r->size[1] = nxout;
+      nxin = b_k - i;
+      r->size[1] = nxin;
       emxEnsureCapacity_real_T(r, vlen);
       r2 = r->data;
-      for (i1 = 0; i1 < nxout; i1++) {
-        b_r = ((l + 1.0) - cvec_data[i + i1]) + (((double)j + 1.0) - 1.0);
-        r2[i1] = b_mod(b_r, M);
+      for (b_k = 0; b_k < nxin; b_k++) {
+        b_r = ((l + 1.0) - cvec_data[i + b_k]) + (((double)j + 1.0) - 1.0);
+        r2[b_k] = b_mod(b_r, M);
       }
       i = r->size[0] * r->size[1];
       r->size[0] = 1;
       emxEnsureCapacity_real_T(r, i);
       r2 = r->data;
-      nxout = r->size[1] - 1;
-      vlen = (r->size[1] / 2) << 1;
-      nxin = vlen - 2;
-      for (i = 0; i <= nxin; i += 2) {
-        r3 = _mm_loadu_pd(&r2[i]);
-        _mm_storeu_pd(&r2[i], _mm_sub_pd(_mm_set1_pd(l), r3));
-      }
-      for (i = vlen; i <= nxout; i++) {
+      nxin = r->size[1] - 1;
+      for (i = 0; i <= nxin; i++) {
         r2[i] = l - r2[i];
       }
       d_sort(r);
       r2 = r->data;
-      nxout = r->size[1];
-      for (i = 0; i < nxout; i++) {
-        C_data[b_k + i] = r2[i];
+      nxin = r->size[1];
+      for (i = 0; i < nxin; i++) {
+        C_data[nxout + i] = r2[i];
       }
       /* 'genIndex:185' mat = repmat(C, L-count,1); */
       b_r = L - (double)count;
       i = (int)b_r;
-      i1 = mat->size[0] * mat->size[1];
+      b_k = mat->size[0] * mat->size[1];
       mat->size[0] = (int)b_r;
       mat->size[1] = C->size[1];
-      emxEnsureCapacity_real_T(mat, i1);
+      emxEnsureCapacity_real_T(mat, b_k);
       mat_data = mat->data;
       vlen = C->size[1];
       for (nxout = 0; nxout < vlen; nxout++) {
@@ -511,27 +496,27 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         }
       }
       /* 'genIndex:186' f = find(sum(abs(c(ind,:)-mat),2)==0); */
-      i1 = r1->size[0];
+      b_k = r1->size[0];
       r1->size[0] = ind->size[1];
-      emxEnsureCapacity_real_T(r1, i1);
+      emxEnsureCapacity_real_T(r1, b_k);
       r2 = r1->data;
-      nxout = ind->size[1];
-      for (i1 = 0; i1 < nxout; i1++) {
-        r2[i1] = ind_data[i1];
+      nxin = ind->size[1];
+      for (b_k = 0; b_k < nxin; b_k++) {
+        r2[b_k] = ind_data[b_k];
       }
       if ((r1->size[0] == mat->size[0]) && (c->size[1] == mat->size[1])) {
-        nxout = c->size[1];
-        i1 = x->size[0] * x->size[1];
+        nxin = c->size[1];
+        b_k = x->size[0] * x->size[1];
         x->size[0] = r1->size[0];
         x->size[1] = c->size[1];
-        emxEnsureCapacity_real_T(x, i1);
+        emxEnsureCapacity_real_T(x, b_k);
         b_x_data = x->data;
-        for (i1 = 0; i1 < nxout; i1++) {
+        for (b_k = 0; b_k < nxin; b_k++) {
           vlen = r1->size[0];
-          for (b_k = 0; b_k < vlen; b_k++) {
-            b_x_data[b_k + x->size[0] * i1] =
-                c_data[((int)r2[b_k] + c->size[0] * i1) - 1] -
-                mat_data[b_k + mat->size[0] * i1];
+          for (nxout = 0; nxout < vlen; nxout++) {
+            b_x_data[nxout + x->size[0] * b_k] =
+                c_data[((int)r2[nxout] + c->size[0] * b_k) - 1] -
+                mat_data[nxout + mat->size[0] * b_k];
           }
         }
       } else {
@@ -539,33 +524,33 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         b_x_data = x->data;
       }
       vlen = x->size[0] * x->size[1];
-      i1 = y->size[0] * y->size[1];
+      b_k = y->size[0] * y->size[1];
       y->size[0] = x->size[0];
       y->size[1] = x->size[1];
-      emxEnsureCapacity_real_T(y, i1);
+      emxEnsureCapacity_real_T(y, b_k);
       mat_data = y->data;
       for (b_k = 0; b_k < vlen; b_k++) {
         mat_data[b_k] = fabs(b_x_data[b_k]);
       }
       sum(y, f);
       mat_data = f->data;
-      i1 = b_f->size[0];
+      b_k = b_f->size[0];
       b_f->size[0] = f->size[0];
-      emxEnsureCapacity_boolean_T(b_f, i1);
+      emxEnsureCapacity_boolean_T(b_f, b_k);
       x_data = b_f->data;
-      nxout = f->size[0];
-      for (i1 = 0; i1 < nxout; i1++) {
-        x_data[i1] = (mat_data[i1] == 0.0);
+      nxin = f->size[0];
+      for (b_k = 0; b_k < nxin; b_k++) {
+        x_data[b_k] = (mat_data[b_k] == 0.0);
       }
       eml_find(b_f, c_f);
       f_data = c_f->data;
-      i1 = f->size[0];
+      b_k = f->size[0];
       f->size[0] = c_f->size[0];
-      emxEnsureCapacity_real_T(f, i1);
+      emxEnsureCapacity_real_T(f, b_k);
       mat_data = f->data;
-      nxout = c_f->size[0];
-      for (i1 = 0; i1 < nxout; i1++) {
-        mat_data[i1] = f_data[i1];
+      nxin = c_f->size[0];
+      for (b_k = 0; b_k < nxin; b_k++) {
+        mat_data[b_k] = f_data[b_k];
       }
       /* 'genIndex:187' if isempty(f) */
       if (f->size[0] == 0) {
@@ -579,24 +564,18 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
           C_data[nxout] = xtmp;
         }
         /* 'genIndex:189' mat = repmat(R,L-count,1); */
-        i1 = C->size[0] * C->size[1];
+        b_k = C->size[0] * C->size[1];
         C->size[0] = 1;
-        emxEnsureCapacity_real_T(C, i1);
+        emxEnsureCapacity_real_T(C, b_k);
         C_data = C->data;
-        nxout = C->size[1] - 1;
-        vlen = (C->size[1] / 2) << 1;
-        nxin = vlen - 2;
-        for (i1 = 0; i1 <= nxin; i1 += 2) {
-          r3 = _mm_loadu_pd(&C_data[i1]);
-          _mm_storeu_pd(&C_data[i1], _mm_sub_pd(_mm_set1_pd(l + 1.0), r3));
+        nxin = C->size[1] - 1;
+        for (b_k = 0; b_k <= nxin; b_k++) {
+          C_data[b_k] = (l + 1.0) - C_data[b_k];
         }
-        for (i1 = vlen; i1 <= nxout; i1++) {
-          C_data[i1] = (l + 1.0) - C_data[i1];
-        }
-        i1 = mat->size[0] * mat->size[1];
+        b_k = mat->size[0] * mat->size[1];
         mat->size[0] = (int)b_r;
         mat->size[1] = C->size[1];
-        emxEnsureCapacity_real_T(mat, i1);
+        emxEnsureCapacity_real_T(mat, b_k);
         mat_data = mat->data;
         vlen = C->size[1];
         for (nxout = 0; nxout < vlen; nxout++) {
@@ -607,18 +586,18 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         }
         /* 'genIndex:190' f = find(sum(abs(c(ind,:)-mat),2)==0); */
         if ((r1->size[0] == mat->size[0]) && (c->size[1] == mat->size[1])) {
-          nxout = c->size[1];
+          nxin = c->size[1];
           i = x->size[0] * x->size[1];
           x->size[0] = r1->size[0];
           x->size[1] = c->size[1];
           emxEnsureCapacity_real_T(x, i);
           b_x_data = x->data;
-          for (i = 0; i < nxout; i++) {
+          for (i = 0; i < nxin; i++) {
             vlen = r1->size[0];
-            for (i1 = 0; i1 < vlen; i1++) {
-              b_x_data[i1 + x->size[0] * i] =
-                  c_data[((int)r2[i1] + c->size[0] * i) - 1] -
-                  mat_data[i1 + mat->size[0] * i];
+            for (b_k = 0; b_k < vlen; b_k++) {
+              b_x_data[b_k + x->size[0] * i] =
+                  c_data[((int)r2[b_k] + c->size[0] * i) - 1] -
+                  mat_data[b_k + mat->size[0] * i];
             }
           }
         } else {
@@ -640,8 +619,8 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         b_f->size[0] = r1->size[0];
         emxEnsureCapacity_boolean_T(b_f, i);
         x_data = b_f->data;
-        nxout = r1->size[0];
-        for (i = 0; i < nxout; i++) {
+        nxin = r1->size[0];
+        for (i = 0; i < nxin; i++) {
           x_data[i] = (r2[i] == 0.0);
         }
         eml_find(b_f, c_f);
@@ -650,8 +629,8 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         f->size[0] = c_f->size[0];
         emxEnsureCapacity_real_T(f, i);
         mat_data = f->data;
-        nxout = c_f->size[0];
-        for (i = 0; i < nxout; i++) {
+        nxin = c_f->size[0];
+        for (i = 0; i < nxin; i++) {
           mat_data[i] = f_data[i];
         }
         /* 'genIndex:191' if isempty(f) */
@@ -668,8 +647,8 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
           c_f->size[0] = f->size[0];
           emxEnsureCapacity_int32_T(c_f, i);
           f_data = c_f->data;
-          nxout = f->size[0];
-          for (i = 0; i < nxout; i++) {
+          nxin = f->size[0];
+          for (i = 0; i < nxin; i++) {
             f_data[i] = (int)mat_data[i];
           }
           nullAssignment(ind, c_f);
@@ -687,8 +666,8 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         c_f->size[0] = f->size[0];
         emxEnsureCapacity_int32_T(c_f, i);
         f_data = c_f->data;
-        nxout = f->size[0];
-        for (i = 0; i < nxout; i++) {
+        nxin = f->size[0];
+        for (i = 0; i < nxin; i++) {
           f_data[i] = (int)mat_data[i];
         }
         nullAssignment(ind, c_f);
@@ -720,17 +699,17 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   e_sort(X);
   X_data = X->data;
   /* 'genIndex:207' mat = c(X,:); */
-  nxout = c->size[1];
+  nxin = c->size[1];
   i = mat->size[0] * mat->size[1];
   mat->size[0] = X->size[0];
   mat->size[1] = c->size[1];
   emxEnsureCapacity_real_T(mat, i);
   mat_data = mat->data;
-  for (i = 0; i < nxout; i++) {
+  for (i = 0; i < nxin; i++) {
     vlen = X->size[0];
-    for (i1 = 0; i1 < vlen; i1++) {
-      mat_data[i1 + mat->size[0] * i] =
-          c_data[((int)X_data[i1] + c->size[0] * i) - 1];
+    for (b_k = 0; b_k < vlen; b_k++) {
+      mat_data[b_k + mat->size[0] * i] =
+          c_data[((int)X_data[b_k] + c->size[0] * i) - 1];
     }
   }
   emxFree_real_T(&X);
@@ -788,7 +767,6 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
                       emxArray_real_T *C, emxArray_real_T *b_I,
                       emxArray_real_T *ind, emxArray_real_T *mat, double *rcnum)
 {
-  __m128d r1;
   emxArray_boolean_T *b_d;
   emxArray_boolean_T *b_e;
   emxArray_int32_T *b_ind;
@@ -848,11 +826,11 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   /* 'genIndex:63' e = ones(1,length(d)-1) * -1; */
   i = e->size[0] * e->size[1];
   e->size[0] = 1;
-  j2 = (int)L - 1;
+  nx = (int)L - 1;
   e->size[1] = (int)L - 1;
   emxEnsureCapacity_int32_T(e, i);
   e_data = e->data;
-  for (i = 0; i < j2; i++) {
+  for (i = 0; i < nx; i++) {
     e_data[i] = -1;
   }
   /* 'genIndex:65' a = 1; */
@@ -864,13 +842,13 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   emxInit_real_T(&x, 2);
   for (b_i = 0; b_i <= loop_ub - 2; b_i++) {
     /* 'genIndex:67' vec = l+1-fliplr(c(i,:)); */
-    j2 = c->size[1];
+    nx = c->size[1];
     i = vec->size[0] * vec->size[1];
     vec->size[0] = 1;
-    vec->size[1] = j2;
+    vec->size[1] = nx;
     emxEnsureCapacity_real_T(vec, i);
     vec_data = vec->data;
-    for (i = 0; i < j2; i++) {
+    for (i = 0; i < nx; i++) {
       vec_data[i] = c_data[b_i + c->size[0] * i];
     }
     nd2 = c->size[1] >> 1;
@@ -884,27 +862,21 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     vec->size[0] = 1;
     emxEnsureCapacity_real_T(vec, i);
     vec_data = vec->data;
-    j2 = vec->size[1] - 1;
-    nx = (vec->size[1] / 2) << 1;
-    nd2 = nx - 2;
-    for (i = 0; i <= nd2; i += 2) {
-      r1 = _mm_loadu_pd(&vec_data[i]);
-      _mm_storeu_pd(&vec_data[i], _mm_sub_pd(_mm_set1_pd(l + 1.0), r1));
-    }
-    for (i = nx; i <= j2; i++) {
+    nx = vec->size[1] - 1;
+    for (i = 0; i <= nx; i++) {
       vec_data[i] = (l + 1.0) - vec_data[i];
     }
     /* 'genIndex:68' if d(i) ~= 0 */
     if (d_data[b_i] != 0.0) {
       /* 'genIndex:69' if sum(abs(c(i,:)-vec))==0 */
       if (c->size[1] == vec->size[1]) {
-        j2 = c->size[1];
+        nx = c->size[1];
         i = x->size[0] * x->size[1];
         x->size[0] = 1;
-        x->size[1] = j2;
+        x->size[1] = nx;
         emxEnsureCapacity_real_T(x, i);
         x_data = x->data;
-        for (i = 0; i < j2; i++) {
+        for (i = 0; i < nx; i++) {
           x_data[i] = c_data[b_i + c->size[0] * i] - vec_data[i];
         }
       } else {
@@ -935,13 +907,13 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
           b_j = ((unsigned int)b_i + j) + 2U;
           /* 'genIndex:75' if sum(abs(c(j,:)-vec))==0 */
           if (c->size[1] == vec->size[1]) {
-            j2 = c->size[1];
+            nx = c->size[1];
             i1 = x->size[0] * x->size[1];
             x->size[0] = 1;
-            x->size[1] = j2;
+            x->size[1] = nx;
             emxEnsureCapacity_real_T(x, i1);
             x_data = x->data;
-            for (i1 = 0; i1 < j2; i1++) {
+            for (i1 = 0; i1 < nx; i1++) {
               x_data[i1] =
                   c_data[((int)b_j + c->size[0] * i1) - 1] - vec_data[i1];
             }
@@ -1049,8 +1021,8 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   emxEnsureCapacity_real_T(varargin_1, i);
   vec_data = varargin_1->data;
   for (i = 0; i < loop_ub; i++) {
-    j2 = iidx->size[0];
-    for (i1 = 0; i1 < j2; i1++) {
+    nx = iidx->size[0];
+    for (i1 = 0; i1 < nx; i1++) {
       vec_data[i1 + varargin_1->size[0] * i] =
           c_data[(iidx_data[i1] + c->size[0] * i) - 1];
     }
@@ -1144,13 +1116,7 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
     emxEnsureCapacity_real_T(vec, i);
     vec_data = vec->data;
     loop_ub = vec->size[1] - 1;
-    nx = (vec->size[1] / 2) << 1;
-    nd2 = nx - 2;
-    for (i = 0; i <= nd2; i += 2) {
-      r1 = _mm_loadu_pd(&vec_data[i]);
-      _mm_storeu_pd(&vec_data[i], _mm_sub_pd(_mm_set1_pd(l + 1.0), r1));
-    }
-    for (i = nx; i <= loop_ub; i++) {
+    for (i = 0; i <= loop_ub; i++) {
       vec_data[i] = (l + 1.0) - vec_data[i];
     }
     /* 'genIndex:93' if sum(0.5.^c(i,:)) < sum(0.5.^c2) */
@@ -1191,8 +1157,8 @@ static void sort_comb(emxArray_real_T *c, double l, double k, double n_frac,
   c_data = c->data;
   loop_ub = C->size[1];
   for (i = 0; i < loop_ub; i++) {
-    j2 = C->size[0];
-    for (i1 = 0; i1 < j2; i1++) {
+    nx = C->size[0];
+    for (i1 = 0; i1 < nx; i1++) {
       c_data[i1 + c->size[0] * i] = C_data[i1 + C->size[0] * i];
     }
   }
