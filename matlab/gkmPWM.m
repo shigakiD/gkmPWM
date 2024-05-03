@@ -377,7 +377,6 @@ end
 
 function [M, ind] = matchMotif(mot,lenvec)
 n = length(lenvec)-1;
-simmat = ones(n-1,1);
 for i = 1:n+1
     mot{i} = mot{i}-1/4;
     mot{i} = mot{i}/sqrt(sum(sum(mot{i}.^2)));
