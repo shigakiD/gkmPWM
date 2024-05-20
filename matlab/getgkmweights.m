@@ -41,7 +41,7 @@ elseif nargin > 3
         error('Incorrect number of inputs')
      else
         vec = 4:2:nargin;
-        inputlib = {'RC', 'KmerFrac','KmerFracLimit'};
+        inputlib = {'RC', 'KmerFrac'};
         for i = 1:length(vec)
             f = strcmp(varargin{vec(i)},inputlib);
             if sum(f) == 0
@@ -98,7 +98,7 @@ for i = 1:k_svm
     s = [s 'A'];
 end
 kmer = repmat(s,4^k_svm,1);
-vec = 0:4^k_svm-1;
+vec = fliplr(0:4^k_svm-1);
 for i = 1:k_svm
     vec2 = mod(floor(vec/4^(k_svm-i)),4);
     f = find(vec2==1);
