@@ -22,6 +22,7 @@
 void gkmPWM_initialize(void)
 {
   omp_init_nest_lock(&gkmPWM_nestLockGlobal);
+  omp_set_num_threads(1);
   savedTime_not_empty_init();
   freq_not_empty_init();
   c_eml_rand_mt19937ar_stateful_i();
