@@ -10525,11 +10525,6 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       nfrac = rt_roundd(5.0E+7 / nfrac / (double)(comb->size[0] * comb->size[1])
                         * varargin_9) / 100.0;
 
-      /* 'gkmPWM:47' fprintf('Combination of (l,k) yields too many gapped kmers.  Using %f of the total gapped kmers', nfrac); */
-      printf("Combination of (l,k) yields too many gapped kmers.  Using %f of the total gapped kmers",
-             nfrac);
-      fflush(stdout);
-
       /* 'gkmPWM:48' lk = [l_svm k_svm]; */
       lk_size[0] = 1;
       lk_size[1] = 2;
@@ -10539,6 +10534,9 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       /* 'gkmPWM:49' [comb,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac); */
       genIndex(varargin_8, varargin_9, nfrac, comb, rc, diffc, indc, xc, &rcnum);
       comb_data = comb->data;
+        
+      printf("WARNING: Using %d gapped kmers\n", (int)((double)(comb->size[0] * comb->size[1]) / varargin_9 * pow(4.0, varargin_9)));
+      fflush(stdout); 
     }
   }
 
