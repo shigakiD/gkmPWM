@@ -23,6 +23,7 @@
 void mapTF_initialize(void)
 {
   omp_init_nest_lock(&mapTF_nestLockGlobal);
+  omp_set_num_threads(1);
   savedTime_not_empty_init();
   freq_not_empty_init();
   filedata_init();
