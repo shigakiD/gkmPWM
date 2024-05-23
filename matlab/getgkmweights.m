@@ -84,9 +84,9 @@ end
 [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
 if nfracLim && length(comb)*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
-    disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     lk = ([l_svm k_svm]);
     [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
+    disp(['Using ' num2str(numel(comb)/k_svm*4^k_svm) ' gapped kmers'])
 end
 disp('Counting gapped kmers')
 [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fn, l_svm, k_svm, lk, RC, comb,rcnum);

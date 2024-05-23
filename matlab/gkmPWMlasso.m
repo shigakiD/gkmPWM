@@ -163,11 +163,11 @@ end
 
 if nfracLim && numel(comb)/k_svm*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
-    disp(['Combination of (l,k) yields too many gapped kmers.  Using ' num2str(nfrac) ' of the total gapped kmers'])
     l_svm2 = l_svm;
     k_svm2 = k_svm;
     lk = ([l_svm k_svm]);
     [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
+    disp(['Using ' num2str(numel(comb)/k_svm*4^k_svm) ' gapped kmers'])
 else
     l_svm2 = l_svm;
     k_svm2 = k_svm;
