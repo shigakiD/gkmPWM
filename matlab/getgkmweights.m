@@ -41,7 +41,7 @@ elseif nargin > 3
         error('Incorrect number of inputs')
      else
         vec = 4:2:nargin;
-        inputlib = {'RC', 'KmerFrac'};
+        inputlib = {'RC', 'KmerFrac','KmerFracLimit'};
         for i = 1:length(vec)
             f = strcmp(varargin{vec(i)},inputlib);
             if sum(f) == 0
