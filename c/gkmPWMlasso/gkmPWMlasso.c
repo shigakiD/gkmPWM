@@ -1367,12 +1367,6 @@ void gkmPWMlasso(const emxArray_char_T *varargin_1,
       nfrac = rt_roundd(5.0E+7 / d / (double)(comb->size[0] * comb->size[1]) *
                         varargin_8) /
               100.0;
-      /* 'gkmPWMlasso:42' fprintf('WARNING: Combination of (l,k) yields too many
-       * gapped kmers.  Using %f of the total gapped kmers\n', nfrac); */
-      printf("WARNING: Combination of (l,k) yields too many gapped kmers.  "
-             "Using %f of the total gapped kmers\n",
-             nfrac);
-      fflush(stdout);
       /* 'gkmPWMlasso:43' l_svm2 = l_svm; */
       /* 'gkmPWMlasso:44' k_svm2 = k_svm; */
       /* 'gkmPWMlasso:45' lk = ([l_svm k_svm]); */
@@ -1384,6 +1378,8 @@ void gkmPWMlasso(const emxArray_char_T *varargin_1,
        * genIndex(l_svm,k_svm,nfrac); */
       genIndex(varargin_7, varargin_8, nfrac, comb, comb2, diffc, indc, xc,
                &rcnum);
+      printf("WARNING: Using %d gapped kmers\n", (int)((double)(comb->size[0] * comb->size[1]) / varargin_8 * pow(4.0, varargin_8)));
+      fflush(stdout); 
     } else {
       /* 'gkmPWMlasso:47' else */
       /* 'gkmPWMlasso:48' l_svm2 = l_svm; */

@@ -223,12 +223,14 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       nfrac = rt_roundd(5.0E+7 / nfrac /
                         (double)(comb->size[0] * comb->size[1]) * varargin_3) /
               100.0;
-      /* 'getgkmweights:30' fprintf('Combination of (l,k) yields too many gapped
-       * kmers.  Using %f of the total gapped kmers\n', nfrac); */
-      printf("Combination of (l,k) yields too many gapped kmers.  Using %f of "
-             "the total gapped kmers\n",
-             nfrac);
-      fflush(stdout);
+    
+      // /* 'getgkmweights:30' fprintf('Combination of (l,k) yields too many gapped
+      //  * kmers.  Using %f of the total gapped kmers\n', nfrac); */
+      // printf("Combination of (l,k) yields too many gapped kmers.  Using %f of "
+      //        "the total gapped kmers\n",
+      //        nfrac);
+      // fflush(stdout);
+    
       /* 'getgkmweights:31' lk = ([l_svm k_svm]); */
       lk_size[0] = 1;
       lk_size[1] = 2;
@@ -239,6 +241,9 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       genIndex(varargin_2, varargin_3, nfrac, comb, c2, negvec, cfile, seqvec2,
                &rcnum);
       comb_data = comb->data;
+        
+      printf("WARNING: Using %d gapped kmers\n", (int)((double)(comb->size[0] * comb->size[1]) / varargin_3 * pow(4.0, varargin_3)));
+      fflush(stdout); 
     }
   }
   /* 'getgkmweights:34' fprintf('Counting gapped kmers\n'); */
