@@ -70,6 +70,7 @@ if nargin > 6
             error([varargin{vec(i)} ' is not an input option'])
         end
     end
+    f = find(strcmp('l', varargin));
     if ~isempty(f);
         l_svm = varargin{f+1};
         if ~isa(l_svm, 'double') || round(l_svm)-l_svm ~= 0 || l_svm <= 0
