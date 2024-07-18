@@ -154,7 +154,7 @@ for j = 1:B
     maxnorm(j) = sum(exp(seqmat*vec'));
     minnorm(j) = sum(exp(seqmat*vec2'));
 end
-dnorm = maxnorm;
+dnorm = maxnorm-minnorm;
 vec = zeros(l_svm,1);
 LL = cell(length(V),1);
 VV = cell(length(V),1);
