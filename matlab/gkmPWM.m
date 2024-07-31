@@ -32,7 +32,7 @@ function gkmPWM(varargin)
 %                     value.  (default: 200)
 %     'PNratio'       The ratio of positive PWMs to negative PWMs that will
 %                     be seeded.  e.g., PNratio = 2 means twice as many positive
-%                     set PWMs will be seeded as negative set PWMs.  If not set
+%                     set PWMs will be seeded as negative set PWMs.  If set to 0,
 %                     gkmPWM will automatically set this value based on the model.
 %     'RegFrac'       This parameter will push the PWMs to have higher information.
 %                     Must be a value in [0,1).  Keeping this value low (<0.05)
@@ -103,7 +103,7 @@ l_svm = 11;
 k_svm = 7;
 BG_GC = 0;
 RC = true;
-ipnr = true;
+pnr = 2;
 nfrac = 1;
 nfracLim = true;
 lk = 1;
@@ -125,8 +125,7 @@ if nargin > 4
     f = find(strcmp('PNratio', varargin));
     if ~isempty(f);
         pnr = varargin{f+1};
-        ipnr=false;
-        if ~isa(pnr, 'double') || pnr <= 0
+        if ~isa(pnr, 'double') || pnr < 0
             error(['PNratio must be a positive float'])
         end
     end
@@ -154,6 +153,7 @@ if nargin > 4
     f = find(strcmp('Mode', varargin));
     if ~isempty(f) && strcmp('Compare',varargin{f+1});
         BG_GC = 1;
+        pnr = 1;
     end
     f = find(strcmp('RC', varargin));
     if ~isempty(f);
@@ -198,7 +198,7 @@ if BG_GC == 1
 end
 negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);%generate expected gapped kmer distribution of background
 GC=[0.5-GCneg1/2 GCneg1/2 GCneg1/2 0.5-GCneg1/2];%GC content vector
-if ipnr
+if pnr == 0
     pnr = abs(max(A)/min(A));
 end
 disp('Finding PWM seeds')
