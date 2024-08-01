@@ -15,7 +15,6 @@
 /* Variable Definitions */
 unsigned int state[625];
 
-omp_nest_lock_t getgkmweights_nestLockGlobal;
 
 const bool bv[128] = {
     false, false, false, false, false, false, false, false, false, true,  true,

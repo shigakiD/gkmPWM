@@ -1,5 +1,5 @@
 CC     := gcc
-CFLAGS := -fopenmp -O3 -fPIC -fno-loop-optimize -fno-aggressive-loop-optimizations
+CFLAGS := -O3 -fPIC -fno-loop-optimize -fno-aggressive-loop-optimizations
 
 DIR1   := c/gkmPWMlasso
 SRC1   := $(wildcard c/gkmPWMlasso/*.c)

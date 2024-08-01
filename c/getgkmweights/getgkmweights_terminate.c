@@ -16,7 +16,6 @@
 /* Function Definitions */
 void getgkmweights_terminate(void)
 {
-  omp_destroy_nest_lock(&getgkmweights_nestLockGlobal);
   isInitialized_getgkmweights = false;
 }
 

@@ -18,7 +18,6 @@
 /* Function Definitions */
 void mapTF_terminate(void)
 {
-  omp_destroy_nest_lock(&mapTF_nestLockGlobal);
   isInitialized_mapTF = false;
 }
 

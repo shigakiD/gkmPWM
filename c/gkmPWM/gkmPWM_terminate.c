@@ -17,7 +17,6 @@
 /* Function Definitions */
 void gkmPWM_terminate(void)
 {
-  omp_destroy_nest_lock(&gkmPWM_nestLockGlobal);
   isInitialized_gkmPWM = false;
 }
 

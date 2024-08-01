@@ -21,7 +21,6 @@ double freq;
 
 bool freq_not_empty;
 
-omp_nest_lock_t mapTF_nestLockGlobal;
 
 const bool bv[128] = {
     false, false, false, false, false, false, false, false, false, true,  true,

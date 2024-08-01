@@ -93,6 +93,8 @@ static void i_binary_expand_op(emxArray_real_T *vec, const emxArray_real_T *mat,
 
 static void letterconvert(const emxArray_char_T *s, emxArray_real_T *en);
 
+static void minus(emxArray_real_T *maxnorm, const emxArray_real_T *minnorm);
+
 static void plus(emxArray_real_T *pwm_prob, const emxArray_real_T *b);
 
 static void ppmsim(emxArray_cell_wrap_5 *mot, const emxArray_real_T *lenvec,
@@ -1048,7 +1050,6 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_4 *mat,
     /* 'mapTF:330' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
     printf("ERROR: Cannot open gkmPWM motif files\n");
     fflush(stdout);
-    exit(1);
   }
   /* 'mapTF:332' curr_pos = ftell(fid); */
   getfilestar(fid, &filestar, &b_bool);
@@ -1318,7 +1319,6 @@ static void getdenovomotif(const emxArray_char_T *filename,
     /* 'mapTF:840' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
     printf("ERROR: Cannot open gkmPWM motif files\n");
     fflush(stdout);
-    exit(1);
   }
   /* 'mapTF:842' curr_pos = ftell(fid); */
   getfilestar(fid, &filestar, &b_bool);
@@ -1657,6 +1657,49 @@ static void letterconvert(const emxArray_char_T *s, emxArray_real_T *en)
       en_data[b_i] = 3.0;
     }
   }
+}
+
+static void minus(emxArray_real_T *maxnorm, const emxArray_real_T *minnorm)
+{
+  emxArray_real_T *b_maxnorm;
+  const double *minnorm_data;
+  double *b_maxnorm_data;
+  double *maxnorm_data;
+  int i;
+  int loop_ub;
+  int stride_0_0;
+  int stride_1_0;
+  minnorm_data = minnorm->data;
+  maxnorm_data = maxnorm->data;
+  emxInit_real_T(&b_maxnorm, 1);
+  i = b_maxnorm->size[0];
+  if (minnorm->size[0] == 1) {
+    b_maxnorm->size[0] = maxnorm->size[0];
+  } else {
+    b_maxnorm->size[0] = minnorm->size[0];
+  }
+  emxEnsureCapacity_real_T(b_maxnorm, i);
+  b_maxnorm_data = b_maxnorm->data;
+  stride_0_0 = (maxnorm->size[0] != 1);
+  stride_1_0 = (minnorm->size[0] != 1);
+  if (minnorm->size[0] == 1) {
+    loop_ub = maxnorm->size[0];
+  } else {
+    loop_ub = minnorm->size[0];
+  }
+  for (i = 0; i < loop_ub; i++) {
+    b_maxnorm_data[i] =
+        maxnorm_data[i * stride_0_0] - minnorm_data[i * stride_1_0];
+  }
+  i = maxnorm->size[0];
+  maxnorm->size[0] = b_maxnorm->size[0];
+  emxEnsureCapacity_real_T(maxnorm, i);
+  maxnorm_data = maxnorm->data;
+  loop_ub = b_maxnorm->size[0];
+  for (i = 0; i < loop_ub; i++) {
+    maxnorm_data[i] = b_maxnorm_data[i];
+  }
+  emxFree_real_T(&b_maxnorm);
 }
 
 static void plus(emxArray_real_T *pwm_prob, const emxArray_real_T *b)
@@ -2022,7 +2065,6 @@ static void process_motifs(const emxArray_char_T *dfn,
      */
     printf("ERROR: gkmPWMlasso output file cannot be opened.\n");
     fflush(stdout);
-    exit(1);
   }
   emxInit_char_T(&b_fileid, 2);
   emxInit_char_T(&c_fileid, 2);
@@ -2903,7 +2945,6 @@ static void process_motifs(const emxArray_char_T *dfn,
     /* 'mapTF:778' fprintf("ERROR: Cannot create the combined motif file\n"); */
     printf("ERROR: Cannot create the combined motif file\n");
     fflush(stdout);
-    exit(1);
   }
   /* 'mapTF:780' a = 1; */
   a = 1.0;
@@ -3485,7 +3526,6 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     /* 'mapTF:401' fprintf("ERROR: Weight file cannot be opened.\n") */
     printf("ERROR: Weight file cannot be opened.\n");
     fflush(stdout);
-    exit(1);
   }
   /* 'mapTF:404' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
@@ -3570,7 +3610,6 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     printf("ERROR: L must be the same as the length of k-mer in the weight "
            "file\n");
     fflush(stdout);
-    exit(1);
   }
   emxInit_real_T(&w, 1);
   /* 'mapTF:430' w = zeros(4^l,1); */
@@ -3689,7 +3728,6 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
      * opened.\n") */
     printf("ERROR: Sequence file (.fa or .fasta) cannot be opened.\n");
     fflush(stdout);
-    exit(1);
   }
   /* 'mapTF:451' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
@@ -5104,8 +5142,17 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxFree_real_T(&b_lpwm);
   emxFree_real_T(&B);
   emxFree_real_T(&x);
+  /* 'mapTF:138' dnorm = maxnorm-minnorm; */
+  if (maxnorm->size[0] == minnorm->size[0]) {
+    loop_ub = maxnorm->size[0];
+    for (i1 = 0; i1 < loop_ub; i1++) {
+      maxnorm_data[i1] -= minnorm_data[i1];
+    }
+  } else {
+    minus(maxnorm, minnorm);
+    maxnorm_data = maxnorm->data;
+  }
   emxInit_real_T(&all_pwm, 3);
-  /* 'mapTF:138' dnorm = maxnorm; */
   /* 'mapTF:139' vec = zeros(l_svm,1); */
   /* 'mapTF:140' all_pwm = zeros(4, l_svm, B); */
   i1 = all_pwm->size[0] * all_pwm->size[1] * all_pwm->size[2];

@@ -15,13 +15,11 @@
 /* Include files */
 #include "gkmPWMlasso_types.h"
 #include "rtwtypes.h"
-#include "omp.h"
 #include <stddef.h>
 #include <stdlib.h>
 
 /* Variable Declarations */
 extern unsigned int state[625];
-extern omp_nest_lock_t gkmPWMlasso_nestLockGlobal;
 extern const bool bv[128];
 extern const struct_T r;
 extern bool isInitialized_gkmPWMlasso;

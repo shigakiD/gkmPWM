@@ -41,8 +41,6 @@ void applyScalarFunction(const emxArray_real_T *x, emxArray_real_T *z1)
   emxEnsureCapacity_real_T(z1, ub_loop);
   z1_data = z1->data;
   ub_loop = x->size[0] - 1;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-    absx, s, S, R, eint, b)
 
   for (k = 0; k <= ub_loop; k++) {
     /* ========================== COPYRIGHT NOTICE ============================

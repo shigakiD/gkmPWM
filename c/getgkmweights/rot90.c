@@ -70,7 +70,6 @@ void rot90(const emxArray_real_T *A, emxArray_real_T *B)
   B_data = B->data;
   if (A->size[0] * A->size[1] >= 8192) {
     j = A->size[1] - 1;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(b_i)
 
     for (b_j = 0; b_j <= j; b_j++) {
       for (b_i = 0; b_i < m; b_i++) {

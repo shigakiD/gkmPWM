@@ -19,8 +19,6 @@
 /* Function Definitions */
 void gkmPWMlasso_initialize(void)
 {
-  omp_init_nest_lock(&gkmPWMlasso_nestLockGlobal);
-  omp_set_num_threads(1);  
   c_eml_rand_mt19937ar_stateful_i();
   filedata_init();
   isInitialized_gkmPWMlasso = true;
