@@ -163,6 +163,7 @@ disp('mapping motifs')
 tic
 for I = 1:length(ss)
     seq2 = ss{I};
+    pwm_prob = zeros(B,length(seqindmat{I}));
     for i = 1:length(seqindmat{I})
         ind = seqindmat{I}(i);
         if IND(ind) == 0
