@@ -17,7 +17,6 @@
 /* Function Definitions */
 void gkmPWMlasso_terminate(void)
 {
-  omp_destroy_nest_lock(&gkmPWMlasso_nestLockGlobal);
   isInitialized_gkmPWMlasso = false;
 }
 

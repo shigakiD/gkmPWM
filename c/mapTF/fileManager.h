@@ -15,7 +15,6 @@
 /* Include files */
 #include "mapTF_types.h"
 #include "rtwtypes.h"
-#include "omp.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

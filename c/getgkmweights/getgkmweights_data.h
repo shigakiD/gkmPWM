@@ -14,13 +14,11 @@
 
 /* Include files */
 #include "rtwtypes.h"
-#include "omp.h"
 #include <stddef.h>
 #include <stdlib.h>
 
 /* Variable Declarations */
 extern unsigned int state[625];
-extern omp_nest_lock_t getgkmweights_nestLockGlobal;
 extern const bool bv[128];
 extern bool isInitialized_getgkmweights;
 

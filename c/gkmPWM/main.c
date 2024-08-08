@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
     double rCorr = 0.90;
     double reg = 0;
-    double iPNRatio = 0;
+    double iPNRatio = 2;
     double lSVM = 11;
     double kSVM = 7 ;
     double numIterations = 200;
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 'P':
                 iPNRatio = strtod(optarg, &pEnd);
-                if (iPNRatio <= 0) {
+                if (iPNRatio < 0) {
                     printf("ERROR: Positive-Negative PWM ratio must be a positive value.\n");
                     exit(1);
                 }

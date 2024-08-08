@@ -14,7 +14,6 @@
 
 /* Include files */
 #include "rtwtypes.h"
-#include "omp.h"
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -22,7 +21,6 @@
 extern unsigned int state[625];
 extern double freq;
 extern bool freq_not_empty;
-extern omp_nest_lock_t gkmPWM_nestLockGlobal;
 extern const bool bv[128];
 extern bool isInitialized_gkmPWM;
 

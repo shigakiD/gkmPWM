@@ -47,8 +47,6 @@ void vmovfun(const emxArray_real_T *x, int nx, int kleft, int kright,
     y_data[i] = 0.0;
   }
   loop_ub = nx - 1;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-    iLeft, ipnf, vlen, b_y, lastBlockLength, nblocks, b_k, ib, bsum, hi)
 
   for (k = 0; k <= loop_ub; k++) {
     if (k + 1 <= kleft) {
