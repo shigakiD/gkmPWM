@@ -31,6 +31,10 @@ function mapTF(varargin)
 %                     with the given combination of (l,k,KmerFrac), KmerFrac will
 %                     be automatically set to a lower value to create a more 
 %                     workable number of gapped k-mers
+%     'LS'            Speeds up mapTF for large numbers of sequences by saving 
+%                     the PWM probabilities for each k-mer.  Needs around 15GB
+%                     of RAM.  Only set this if you have enough RAM.  
+%                     (default: false)
 % 
 %     Outputs 2 files named:
 %     outputprefix_TFBS_locations.out
@@ -58,12 +62,13 @@ ofn = varargin{6};
 l_svm = 11;
 k_svm = 7;
 nfrac = 1;
+LS = false;
 if nargin > 6
     if mod(nargin,2) == 1
         error('Incorrect number of inputs')
     end
     vec = 7:2:nargin;
-    inputlib = {'l', 'k','KmerFrac'};
+    inputlib = {'l', 'k','KmerFrac','LS'};
     for i = 1:length(vec)
         f = strcmp(varargin{vec(i)},inputlib);
         if sum(f) == 0
@@ -92,6 +97,13 @@ if nargin > 6
             error(['KmerFrac must be a positive float in (0 1]'])
         end
     end
+    f = find(strcmp('LS', varargin));
+    if ~isempty(f);
+        LS = varargin{f+1};
+        if ~isa(LS, 'logical')
+            error(['LS must be set to true or false'])
+        end
+    end
 end
 
 disp('processing motifs')
@@ -106,8 +118,9 @@ a = numel(len);
 PWM = cell(a,1);
 PWM2 = cell(a,1);
 lPWM2 = cell(a,1);
-pwm = cell(a,1);
-lpwm = cell(a,1);
+pwm = cell(sum(len),1);
+lpwm = cell(sum(len),1);
+lab = zeros(sum(len),1);
 LEN = zeros(a,1);
 LEN_2 = zeros(a,1);
 shift = zeros(a,1);
@@ -125,6 +138,19 @@ for i = 1:a
         b = b+1;
     end
 end
+pwm = pwm(1:(b-1));
+lpwm = lpwm(1:(b-1));
+lab = lab(1:(b-1));
+lab2 = lab;
+f = (1:(b-1))';
+for i = 2:2:a
+    ff = find(lab2==i);
+    f(ff) = flipud(f(ff));
+end
+p1 = find(mod(lab,2)==1);
+ff = find(mod(lab,2)==0);
+p2 = f(ff);
+pl = length(p1);
 [c,~,~,~,~,rcnum] = genIndex(l_svm,k_svm,nfrac);
 c2 = c(1:numel(c)/k_svm-rcnum,:);
 c = [c;l_svm+1-fliplr(c2)];
@@ -147,7 +173,9 @@ maxnorm = zeros(B,1);
 minnorm = zeros(B,1);
 vec = zeros(l_svm,1);
 IND = zeros(4^l_svm,1);
-kmat = zeros(B,4^l_svm);
+if LS
+    kmat = zeros(B/2,4^l_svm);
+end
 for j = 1:B
     vec = max(lpwm{j}');
     vec2 = min(lpwm{j}');
@@ -163,22 +191,42 @@ disp('mapping motifs')
 tic
 for I = 1:length(ss)
     seq2 = ss{I};
-    pwm_prob = zeros(B,length(seqindmat{I}));
-    for i = 1:length(seqindmat{I})
-        ind = seqindmat{I}(i);
-        if IND(ind) == 0
-            IND(ind) = 1;
+    pwm_prob = zeros(B,numel(seqindmat{I})/2);
+    for i = 1:numel(seqindmat{I})/2
+        ind = seqindmat{I}(i,:);
+        if LS
+            if IND(ind(1)) == 0
+                IND(ind(1)) = 1;
+                SEQ = seq2(i:i+l_svm-1);
+                for j = 1:pl
+                    for jj = 1:l_svm
+                        vec(jj) = lpwm{p1(j)}(jj,SEQ(jj));
+                    end
+                    kmat(j,ind(1)) = sum(exp(seqmat*vec));
+                end
+                kmat(:,ind(1)) = log((kmat(:,ind(1))-minnorm(p1))./dnorm(p1));
+            end
+            pwm_prob(p1,i) = kmat(:,ind(1));
+            if IND(ind(2)) == 0
+                IND(ind(2)) = 1;
+                SEQ = seq2(i:i+l_svm-1);
+                for j = 1:pl
+                    for jj = 1:l_svm
+                        vec(jj) = lpwm{p2(j)}(jj,SEQ(jj));
+                    end
+                    kmat(j,ind(2)) = sum(exp(seqmat*vec));
+                end
+                kmat(:,ind(2)) = log((kmat(:,ind(2))-minnorm(p2))./dnorm(p2));
+            end
+            pwm_prob(p2,i) = kmat(:,ind(2));
+        else
             SEQ = seq2(i:i+l_svm-1);
             for j = 1:B
                 for jj = 1:l_svm
                     vec(jj) = lpwm{j}(jj,SEQ(jj));
                 end
-                kmat(j,ind) = sum(exp(seqmat*vec));
+                pwm_prob(j,i) = log((sum(exp(seqmat*vec))-minnorm(j))/dnorm(j));
             end
-            kmat(:,ind) = log((kmat(:,ind)-minnorm)./dnorm);
-            pwm_prob(:,i) = kmat(:,ind);
-        else
-            pwm_prob(:,i) = kmat(:,ind);
         end
     end
     [LL{I}, NN{I}] = MAPTF(fn, ss{I}, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, P{I}, names, a, b);
@@ -361,6 +409,7 @@ if l_svm ~= l
 end
 w = zeros(4^l,1);
 pow = (4.^(0:(l-1)))';
+pow2 = flipud(pow);
 disp('calculating indices')
 for i = 1:numel(X{2});
     ss = letterconvert(X{1}{i});
@@ -384,18 +433,25 @@ for i = 1:n
         disp([num2str(i) ' sequences converted'])
     end
     L = length(seq{2*i})-l+1;
-    seqindmat{i} = zeros(L,1);
+    seqindmat{i} = zeros(L,2);
     ss = letterconvert(seq{2*i});
+    rs = 3-ss;
     seqout{i} = ss+1;
     p = zeros(L,1);
     I = ss(1:l)*pow;
-    seqindmat{i}(1) = I+1;
+    I2 = rs(1:l)*pow2;
+    seqindmat{i}(1,1) = I+1;
+    seqindmat{i}(1,2) = I2+1;
     p(1) = W(I+1);
     for j = 2:L
         I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1);
-        seqindmat{i}(j) = I+1;
+        %I2 = (I2-rs(j-1))/4+4^(l-1)*rs(j+l-1);
+        I2 = (I2-rs(j-1)*4^(l-1))*4+rs(j+l-1);
+        seqindmat{i}(j,1) = I+1;
+        seqindmat{i}(j,2) = I2+1;
         p(j) = W(I+1);
     end
+    %seqindmat{i}(:,2) = flipud(seqindmat{i}(:,2));
     P{i} = p;
 end
 
