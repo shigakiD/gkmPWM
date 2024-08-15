@@ -25,6 +25,7 @@ void b_sum(const emxArray_real_T *x, emxArray_real_T *y)
   const double *x_data;
   double bsum;
   double *y_data;
+  unsigned int sz[2];
   int firstBlockLength;
   int hi;
   int ib;
@@ -37,12 +38,15 @@ void b_sum(const emxArray_real_T *x, emxArray_real_T *y)
   int xpageoffset;
   x_data = x->data;
   if ((x->size[0] == 0) || (x->size[1] == 0)) {
+    for (nblocks = 0; nblocks < 2; nblocks++) {
+      sz[nblocks] = (unsigned int)x->size[nblocks];
+    }
     nblocks = y->size[0] * y->size[1];
     y->size[0] = 1;
-    y->size[1] = x->size[1];
+    y->size[1] = (int)sz[1];
     emxEnsureCapacity_real_T(y, nblocks);
     y_data = y->data;
-    firstBlockLength = x->size[1];
+    firstBlockLength = (int)sz[1];
     for (nblocks = 0; nblocks < firstBlockLength; nblocks++) {
       y_data[nblocks] = 0.0;
     }
@@ -152,6 +156,7 @@ void sum(const emxArray_real_T *x, emxArray_real_T *y)
   const double *x_data;
   double *bsum_data;
   double *y_data;
+  unsigned int sz[2];
   int bvstride;
   int firstBlockLength;
   int hi;
@@ -164,11 +169,14 @@ void sum(const emxArray_real_T *x, emxArray_real_T *y)
   int xoffset;
   x_data = x->data;
   if ((x->size[0] == 0) || (x->size[1] == 0)) {
+    for (hi = 0; hi < 2; hi++) {
+      sz[hi] = (unsigned int)x->size[hi];
+    }
     hi = y->size[0];
-    y->size[0] = x->size[0];
+    y->size[0] = (int)sz[0];
     emxEnsureCapacity_real_T(y, hi);
     y_data = y->data;
-    firstBlockLength = x->size[0];
+    firstBlockLength = (int)sz[0];
     for (hi = 0; hi < firstBlockLength; hi++) {
       y_data[hi] = 0.0;
     }

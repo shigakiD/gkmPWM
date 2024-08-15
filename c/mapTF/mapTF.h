@@ -23,11 +23,13 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void
-mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
-      const emxArray_char_T *varargin_3, const emxArray_char_T *varargin_4,
-      const emxArray_char_T *varargin_5, const emxArray_char_T *varargin_6,
-      double varargin_7, double varargin_8, double varargin_9);
+extern void mapTF(const emxArray_char_T *varargin_1,
+                  const emxArray_char_T *varargin_2,
+                  const emxArray_char_T *varargin_3,
+                  const emxArray_char_T *varargin_4,
+                  const emxArray_char_T *varargin_5,
+                  const emxArray_char_T *varargin_6, double varargin_7,
+                  double varargin_8, double varargin_9, double varargin_10);
 
 #ifdef __cplusplus
 }

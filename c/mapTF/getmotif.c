@@ -35,15 +35,15 @@
  * function [mat, names] = getmotif(filename, m)
  */
 void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
-                emxArray_cell_wrap_5 *mat, emxArray_cell_wrap_3 *names)
+                emxArray_cell_wrap_6 *mat, emxArray_cell_wrap_4 *names)
 {
   static const char b[5] = {'M', 'O', 'T', 'I', 'F'};
   static const char b_cv[3] = {'a', 'l', 'l'};
-  cell_wrap_3 *names_data;
-  cell_wrap_5 *mat_data;
-  cell_wrap_5 *mat_tmp_data;
+  cell_wrap_4 *names_data;
+  cell_wrap_6 *mat_data;
+  cell_wrap_6 *mat_tmp_data;
   emxArray_boolean_T *y;
-  emxArray_cell_wrap_5 *mat_tmp;
+  emxArray_cell_wrap_6 *mat_tmp;
   emxArray_char_T *b_fid;
   emxArray_char_T *line;
   emxArray_char_T *line_clean;
@@ -89,7 +89,7 @@ void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
   text_len = m->size[1];
   i = mat->size[0];
   mat->size[0] = m->size[1];
-  emxEnsureCapacity_cell_wrap_5(mat, i);
+  emxEnsureCapacity_cell_wrap_6(mat, i);
   mat_data = mat->data;
   for (i = 0; i < text_len; i++) {
     mat_data[i].f1->size[0] = 0;
@@ -100,7 +100,7 @@ void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
   text_len = m->size[1];
   i = names->size[0];
   names->size[0] = m->size[1];
-  emxEnsureCapacity_cell_wrap_3(names, i);
+  emxEnsureCapacity_cell_wrap_4(names, i);
   names_data = names->data;
   for (i = 0; i < text_len; i++) {
     names_data[i].f1->size[0] = 1;
@@ -439,13 +439,13 @@ void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
       }
       matches_data[c_i] = (int)zero_idx_data[0];
     }
-    emxInit_cell_wrap_5(&mat_tmp, 1);
+    emxInit_cell_wrap_6(&mat_tmp, 1);
     /* 'getmotif:78' mat_tmp = cell(mylength,1); */
     /* 'getmotif:79' for i = 1:mylength */
     i = n->size[1];
     i1 = mat_tmp->size[0];
     mat_tmp->size[0] = n->size[1];
-    emxEnsureCapacity_cell_wrap_5(mat_tmp, i1);
+    emxEnsureCapacity_cell_wrap_6(mat_tmp, i1);
     mat_tmp_data = mat_tmp->data;
     for (c_i = 0; c_i < i; c_i++) {
       /* 'getmotif:80' mat_tmp{i} = mat{ind2(i)}; */
@@ -477,7 +477,7 @@ void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
         mat_data[c_i].f1->data[i1] = mat_tmp_data[c_i].f1->data[i1];
       }
     }
-    emxFree_cell_wrap_5(&mat_tmp);
+    emxFree_cell_wrap_6(&mat_tmp);
   } else {
     /*  Alternative to cell2mat */
     /*  mat = cell2mat(mat); */
@@ -492,17 +492,17 @@ void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
  * function [mat, names] = getmotif(filename, m)
  */
 void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
-              emxArray_cell_wrap_5 *mat)
+              emxArray_cell_wrap_6 *mat)
 {
   static const char b[5] = {'M', 'O', 'T', 'I', 'F'};
   static const char b_cv[3] = {'a', 'l', 'l'};
   FILE *filestar;
   long position_t;
-  cell_wrap_5 *mat_data;
-  cell_wrap_5 *mat_tmp_data;
+  cell_wrap_6 *mat_data;
+  cell_wrap_6 *mat_tmp_data;
   emxArray_boolean_T *c_n;
   emxArray_boolean_T *y;
-  emxArray_cell_wrap_5 *mat_tmp;
+  emxArray_cell_wrap_6 *mat_tmp;
   emxArray_char_T *b_fid;
   emxArray_char_T *line;
   emxArray_char_T *r;
@@ -547,7 +547,7 @@ void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
   vlen = m->size[0];
   i = mat->size[0];
   mat->size[0] = m->size[0];
-  emxEnsureCapacity_cell_wrap_5(mat, i);
+  emxEnsureCapacity_cell_wrap_6(mat, i);
   mat_data = mat->data;
   for (i = 0; i < vlen; i++) {
     mat_data[i].f1->size[0] = 0;
@@ -839,13 +839,13 @@ void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
     }
     emxFree_int32_T(&r1);
     emxFree_boolean_T(&c_n);
-    emxInit_cell_wrap_5(&mat_tmp, 1);
+    emxInit_cell_wrap_6(&mat_tmp, 1);
     /* 'getmotif:78' mat_tmp = cell(mylength,1); */
     /* 'getmotif:79' for i = 1:mylength */
     i = n->size[0];
     i1 = mat_tmp->size[0];
     mat_tmp->size[0] = n->size[0];
-    emxEnsureCapacity_cell_wrap_5(mat_tmp, i1);
+    emxEnsureCapacity_cell_wrap_6(mat_tmp, i1);
     mat_tmp_data = mat_tmp->data;
     for (nz = 0; nz < i; nz++) {
       /* 'getmotif:80' mat_tmp{i} = mat{ind2(i)}; */
@@ -875,7 +875,7 @@ void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
         mat_data[nz].f1->data[i1] = mat_tmp_data[nz].f1->data[i1];
       }
     }
-    emxFree_cell_wrap_5(&mat_tmp);
+    emxFree_cell_wrap_6(&mat_tmp);
   } else {
     /*  Alternative to cell2mat */
     /*  mat = cell2mat(mat); */

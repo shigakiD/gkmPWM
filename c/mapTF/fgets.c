@@ -159,12 +159,12 @@ void b_fgets(double fileID, emxArray_char_T *line)
     b_NULL = NULL;
     getfilestar(fileID, &filestar, &newLineAfterCarriageReturn);
     if (filestar == b_NULL) {
-      b_i = 0;
+      i = 0;
     } else {
       st = feof(filestar);
-      b_i = ((int)st != 0);
+      i = ((int)st != 0);
     }
-    if (b_i == 0) {
+    if (i == 0) {
       getfilestar(fileID, &filestar, &newLineAfterCarriageReturn);
       if ((!(fileID != 0.0)) || (!(fileID != 1.0)) || (!(fileID != 2.0))) {
         filestar = NULL;
@@ -175,12 +175,12 @@ void b_fgets(double fileID, emxArray_char_T *line)
       b_NULL = NULL;
       getfilestar(fileID, &filestar, &newLineAfterCarriageReturn);
       if (filestar == b_NULL) {
-        b_i = 0;
+        i = 0;
       } else {
         st = feof(filestar);
-        b_i = ((int)st != 0);
+        i = ((int)st != 0);
       }
-      if (b_i == 0) {
+      if (i == 0) {
         wherefrom = SEEK_CUR;
         getfilestar(fileID, &filestar, &newLineAfterCarriageReturn);
         if ((!(fileID != 0.0)) || (!(fileID != 1.0)) || (!(fileID != 2.0))) {

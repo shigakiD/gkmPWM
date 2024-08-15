@@ -41,6 +41,7 @@ void b_minimum(const emxArray_real_T *x, emxArray_real_T *ex)
   double a;
   double b;
   double *ex_data;
+  int i;
   int j;
   int n;
   bool p;
@@ -54,38 +55,18 @@ void b_minimum(const emxArray_real_T *x, emxArray_real_T *ex)
   if (x->size[1] >= 1) {
     for (j = 0; j < n; j++) {
       a = x_data[4 * j];
-      b = x_data[4 * j + 1];
-      if (rtIsNaN(b)) {
-        p = false;
-      } else if (rtIsNaN(a)) {
-        p = true;
-      } else {
-        p = (a > b);
-      }
-      if (p) {
-        a = b;
-      }
-      b = x_data[4 * j + 2];
-      if (rtIsNaN(b)) {
-        p = false;
-      } else if (rtIsNaN(a)) {
-        p = true;
-      } else {
-        p = (a > b);
-      }
-      if (p) {
-        a = b;
-      }
-      b = x_data[4 * j + 3];
-      if (rtIsNaN(b)) {
-        p = false;
-      } else if (rtIsNaN(a)) {
-        p = true;
-      } else {
-        p = (a > b);
-      }
-      if (p) {
-        a = b;
+      for (i = 0; i < 3; i++) {
+        b = x_data[(i + 4 * j) + 1];
+        if (rtIsNaN(b)) {
+          p = false;
+        } else if (rtIsNaN(a)) {
+          p = true;
+        } else {
+          p = (a > b);
+        }
+        if (p) {
+          a = b;
+        }
       }
       ex_data[j] = a;
     }
@@ -101,6 +82,7 @@ void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex)
   double a;
   double b;
   double *ex_data;
+  int i;
   int j;
   int n;
   bool p;
@@ -114,38 +96,18 @@ void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex)
   if (x->size[1] >= 1) {
     for (j = 0; j < n; j++) {
       a = x_data[4 * j];
-      b = x_data[4 * j + 1];
-      if (rtIsNaN(b)) {
-        p = false;
-      } else if (rtIsNaN(a)) {
-        p = true;
-      } else {
-        p = (a < b);
-      }
-      if (p) {
-        a = b;
-      }
-      b = x_data[4 * j + 2];
-      if (rtIsNaN(b)) {
-        p = false;
-      } else if (rtIsNaN(a)) {
-        p = true;
-      } else {
-        p = (a < b);
-      }
-      if (p) {
-        a = b;
-      }
-      b = x_data[4 * j + 3];
-      if (rtIsNaN(b)) {
-        p = false;
-      } else if (rtIsNaN(a)) {
-        p = true;
-      } else {
-        p = (a < b);
-      }
-      if (p) {
-        a = b;
+      for (i = 0; i < 3; i++) {
+        b = x_data[(i + 4 * j) + 1];
+        if (rtIsNaN(b)) {
+          p = false;
+        } else if (rtIsNaN(a)) {
+          p = true;
+        } else {
+          p = (a < b);
+        }
+        if (p) {
+          a = b;
+        }
       }
       ex_data[j] = a;
     }

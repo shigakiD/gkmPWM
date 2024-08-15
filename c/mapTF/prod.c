@@ -24,6 +24,7 @@ void prod(const emxArray_real_T *x, emxArray_real_T *y)
 {
   const double *x_data;
   double *y_data;
+  unsigned int sz[2];
   int j;
   int k;
   int vlen;
@@ -32,11 +33,14 @@ void prod(const emxArray_real_T *x, emxArray_real_T *y)
   x_data = x->data;
   vlen = x->size[1];
   if ((x->size[0] == 0) || (x->size[1] == 0)) {
+    for (j = 0; j < 2; j++) {
+      sz[j] = (unsigned int)x->size[j];
+    }
     j = y->size[0];
-    y->size[0] = x->size[0];
+    y->size[0] = (int)sz[0];
     emxEnsureCapacity_real_T(y, j);
     y_data = y->data;
-    xoffset = x->size[0];
+    xoffset = (int)sz[0];
     for (j = 0; j < xoffset; j++) {
       y_data[j] = 1.0;
     }

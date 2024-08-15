@@ -22,6 +22,7 @@ double freq;
 bool freq_not_empty;
 
 
+
 const bool bv[128] = {
     false, false, false, false, false, false, false, false, false, true,  true,
     true,  true,  true,  false, false, false, false, false, false, false, false,

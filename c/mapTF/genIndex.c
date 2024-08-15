@@ -276,6 +276,7 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
   double *ind_data;
   double *mat_data;
   double *r2;
+  unsigned int uv[2];
   int b_k;
   unsigned int count;
   int i;
@@ -524,9 +525,12 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
         b_x_data = x->data;
       }
       vlen = x->size[0] * x->size[1];
+      for (b_k = 0; b_k < 2; b_k++) {
+        uv[b_k] = (unsigned int)x->size[b_k];
+      }
       b_k = y->size[0] * y->size[1];
-      y->size[0] = x->size[0];
-      y->size[1] = x->size[1];
+      y->size[0] = (int)uv[0];
+      y->size[1] = (int)uv[1];
       emxEnsureCapacity_real_T(y, b_k);
       mat_data = y->data;
       for (b_k = 0; b_k < vlen; b_k++) {
@@ -605,9 +609,12 @@ static void genIndex_frac(double l, double k, const emxArray_real_T *c,
           b_x_data = x->data;
         }
         vlen = x->size[0] * x->size[1];
+        for (i = 0; i < 2; i++) {
+          uv[i] = (unsigned int)x->size[i];
+        }
         i = y->size[0] * y->size[1];
-        y->size[0] = x->size[0];
-        y->size[1] = x->size[1];
+        y->size[0] = (int)uv[0];
+        y->size[1] = (int)uv[1];
         emxEnsureCapacity_real_T(y, i);
         mat_data = y->data;
         for (b_k = 0; b_k < vlen; b_k++) {

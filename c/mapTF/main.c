@@ -63,6 +63,9 @@ void display_arguments() {
             "                  input weight model (default: 11)\n"
             "    -k <int>      the number of ungapped positions. It MUST be the same k from the \n"
             "                  input weight model (default:  7)\n" 
+            "    -L            if set, PWM probabilities for each k-mer will be saved. Setting this option speeds \n"
+            "                  up mapTF; however, around 15GB of RAM is needed. Only set this if you have enough \n"
+            "                  RAM. (default: false) \n"           
             "\n");
     exit(0);
 }
@@ -75,11 +78,12 @@ int main(int argc, char* argv[]) {
     double kmerFrac = 1;
     double lSVM = 11;
     double kSVM = 7 ;
+    int LS = 0;
 
     char * pEnd;
 
     int c;
-    while ((c = getopt(argc, argv, "l:k:f:")) != -1) {
+    while ((c = getopt(argc, argv, "Ll:k:f:")) != -1) {
         switch (c) {
             case 'f':
                 kmerFrac = strtod(optarg, &pEnd);
@@ -101,6 +105,9 @@ int main(int argc, char* argv[]) {
                     printf("ERROR: k must be a positive integer.\n");
                     exit(1);
                 }
+                break;
+            case 'L':
+                LS = 1;
                 break;
             default:
                 fprintf(stderr, "Unknown option: -%c\n", c);
@@ -125,14 +132,14 @@ int main(int argc, char* argv[]) {
     emxArray_char_T *motif_file    = allocate_for_charArray(argv[index++]);
     emxArray_char_T *output_prefix = allocate_for_charArray(argv[index++]);
     
-    char arr[9][30] = {"Sequence file", "K-mer weight file", "De novo motifs", "LASSO motifs", 
+    char arr[10][30] = {"Sequence file", "K-mer weight file", "De novo motifs", "LASSO motifs", 
                        "Motif file", "Output prefix", "K-mer fraction",
-                       "Total gapped k-mer length", "Number of ungapped positions"};
-    double arr2[3] = {kmerFrac, lSVM, kSVM};
+                       "Total gapped k-mer length", "Number of ungapped positions", "Save sequences"};
+    double arr2[4] = {kmerFrac, lSVM, kSVM, LS};
     printf("\n=====  Following Are The Command Line Arguments Passed  =====\n");
     for(int counter=1; counter<7; counter++)
         printf("\n%s: %s", arr[counter-1], argv[optind+counter-1]);
-    for(int counter=7; counter<10; counter++)
+    for(int counter=7; counter<11; counter++)
         printf("\n%s: %4.2f", arr[counter-1], arr2[counter-7]);
     printf("\n\n=============================================================");
     printf("\n\n");
@@ -147,7 +154,8 @@ int main(int argc, char* argv[]) {
           output_prefix,
           lSVM,
           kSVM,
-          kmerFrac);
+          kmerFrac,
+          LS);
                  
     emxFree_char_T(&seq_file);
     emxFree_char_T(&weight_file);                 

@@ -170,7 +170,7 @@ def generate_pdf(out: pd.DataFrame,
         
     plt.axis('off')
     try:
-        plt.savefig(f"{prefix}.pdf", dpi=600)
+        plt.savefig(f"{prefix}.pdf" if len(prefix) > 4 and prefix[-4:] != '.pdf' else prefix, dpi=600)
     except:
         print("ERROR: Fail to write a pdf to the current directory.")
 

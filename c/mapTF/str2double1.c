@@ -169,51 +169,38 @@ static bool copyexponent(emxArray_char_T *s1, int *idx,
 static bool isUnitImag(const emxArray_char_T *s, int k, int n)
 {
   int b_k;
+  int j;
+  char b_c[3];
   const char *s_data;
-  char c_idx_0;
-  char c_idx_1;
-  char c_idx_2;
+  char c;
   bool p;
   s_data = s->data;
   p = false;
   if (k <= n) {
-    c_idx_0 = s_data[k - 1];
-    if (c_idx_0 == 'j') {
+    c = s_data[k - 1];
+    if (c == 'j') {
       p = true;
-    } else if (c_idx_0 == 'i') {
+    } else if (c == 'i') {
       if (k >= n - 1) {
         p = true;
       } else {
         b_k = k;
-        c_idx_0 = '\x00';
-        while ((b_k <= n) && (s_data[b_k - 1] == ',')) {
+        for (j = 0; j < 3; j++) {
+          b_c[j] = '\x00';
+          while ((b_k <= n) && (s_data[b_k - 1] == ',')) {
+            b_k++;
+          }
+          if (b_k <= n) {
+            b_c[j] = s_data[b_k - 1];
+          }
           b_k++;
         }
-        if (b_k <= n) {
-          c_idx_0 = s_data[b_k - 1];
-        }
-        b_k++;
-        c_idx_1 = '\x00';
-        while ((b_k <= n) && (s_data[b_k - 1] == ',')) {
-          b_k++;
-        }
-        if (b_k <= n) {
-          c_idx_1 = s_data[b_k - 1];
-        }
-        b_k++;
-        c_idx_2 = '\x00';
-        while ((b_k <= n) && (s_data[b_k - 1] == ',')) {
-          b_k++;
-        }
-        if (b_k <= n) {
-          c_idx_2 = s_data[b_k - 1];
-        }
-        if ((((!(c_idx_0 == 'I')) && (!(c_idx_0 == 'i'))) ||
-             ((!(c_idx_1 == 'N')) && (!(c_idx_1 == 'n'))) ||
-             ((!(c_idx_2 == 'F')) && (!(c_idx_2 == 'f')))) &&
-            (((!(c_idx_0 == 'N')) && (!(c_idx_0 == 'n'))) ||
-             ((!(c_idx_1 == 'A')) && (!(c_idx_1 == 'a'))) ||
-             ((!(c_idx_2 == 'N')) && (!(c_idx_2 == 'n'))))) {
+        if ((((!(b_c[0] == 'I')) && (!(b_c[0] == 'i'))) ||
+             ((!(b_c[1] == 'N')) && (!(b_c[1] == 'n'))) ||
+             ((!(b_c[2] == 'F')) && (!(b_c[2] == 'f')))) &&
+            (((!(b_c[0] == 'N')) && (!(b_c[0] == 'n'))) ||
+             ((!(b_c[1] == 'A')) && (!(b_c[1] == 'a'))) ||
+             ((!(b_c[2] == 'N')) && (!(b_c[2] == 'n'))))) {
           p = true;
         }
       }
@@ -228,45 +215,29 @@ static bool isUnitImag(const emxArray_char_T *s, int k, int n)
 static void readNonFinite(const emxArray_char_T *s, int *k, int n,
                           bool *b_finite, double *fv)
 {
+  int j;
   int ksaved;
+  char c[3];
   const char *s_data;
-  char c_idx_0;
-  char c_idx_1;
-  char c_idx_2;
   s_data = s->data;
   ksaved = *k;
-  c_idx_0 = '\x00';
-  while ((*k <= n) && (s_data[*k - 1] == ',')) {
+  for (j = 0; j < 3; j++) {
+    c[j] = '\x00';
+    while ((*k <= n) && (s_data[*k - 1] == ',')) {
+      (*k)++;
+    }
+    if (*k <= n) {
+      c[j] = s_data[*k - 1];
+    }
     (*k)++;
   }
-  if (*k <= n) {
-    c_idx_0 = s_data[*k - 1];
-  }
-  (*k)++;
-  c_idx_1 = '\x00';
-  while ((*k <= n) && (s_data[*k - 1] == ',')) {
-    (*k)++;
-  }
-  if (*k <= n) {
-    c_idx_1 = s_data[*k - 1];
-  }
-  (*k)++;
-  c_idx_2 = '\x00';
-  while ((*k <= n) && (s_data[*k - 1] == ',')) {
-    (*k)++;
-  }
-  if (*k <= n) {
-    c_idx_2 = s_data[*k - 1];
-  }
-  (*k)++;
-  if (((c_idx_0 == 'I') || (c_idx_0 == 'i')) &&
-      ((c_idx_1 == 'N') || (c_idx_1 == 'n')) &&
-      ((c_idx_2 == 'F') || (c_idx_2 == 'f'))) {
+  if (((c[0] == 'I') || (c[0] == 'i')) && ((c[1] == 'N') || (c[1] == 'n')) &&
+      ((c[2] == 'F') || (c[2] == 'f'))) {
     *b_finite = false;
     *fv = rtInf;
-  } else if (((c_idx_0 == 'N') || (c_idx_0 == 'n')) &&
-             ((c_idx_1 == 'A') || (c_idx_1 == 'a')) &&
-             ((c_idx_2 == 'N') || (c_idx_2 == 'n'))) {
+  } else if (((c[0] == 'N') || (c[0] == 'n')) &&
+             ((c[1] == 'A') || (c[1] == 'a')) &&
+             ((c[2] == 'N') || (c[2] == 'n'))) {
     *b_finite = false;
     *fv = rtNaN;
   } else {

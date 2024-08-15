@@ -24,10 +24,10 @@ extern "C" {
 
 /* Function Declarations */
 void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
-                emxArray_cell_wrap_5 *mat, emxArray_cell_wrap_3 *names);
+                emxArray_cell_wrap_6 *mat, emxArray_cell_wrap_4 *names);
 
 void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
-              emxArray_cell_wrap_5 *mat);
+              emxArray_cell_wrap_6 *mat);
 
 #ifdef __cplusplus
 }

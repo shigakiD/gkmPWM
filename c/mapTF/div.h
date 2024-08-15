@@ -23,10 +23,15 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void binary_expand_op(emxArray_real_T *f, const emxArray_real_T *c,
-                      const emxArray_cell_wrap_0 *seqindmat, int b_I, int i,
-                      const emxArray_real_T *minnorm,
-                      const emxArray_real_T *maxnorm);
+void b_binary_expand_op(emxArray_real_T *ff, const emxArray_real_T *kmat,
+                        const emxArray_cell_wrap_2 *seqindmat, int b_I, int i,
+                        const emxArray_real_T *minnorm,
+                        const emxArray_int32_T *p1, const emxArray_real_T *f);
+
+void binary_expand_op(emxArray_real_T *ff, const emxArray_real_T *kmat,
+                      const emxArray_cell_wrap_2 *seqindmat, int b_I, int i,
+                      const emxArray_real_T *minnorm, const emxArray_real_T *p2,
+                      const emxArray_real_T *f);
 
 #ifdef __cplusplus
 }
