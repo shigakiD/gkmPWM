@@ -17,6 +17,8 @@ This repository is organized into 4 directories.  Two of them, matlab and c cont
 
 <b>mapTF</b>: a method to map the PWMs from gkmPWMlasso and gkmPWM to a set of sequences.  
 
+Currently, the C code can only be run in a Linux environment. If you are using a Mac or Windows environment, please use the Matlab code instead.
+
 Prior to running any of the funtions the matlab directory, run <i>addpath('dir/gkmPWM/matlab')</i> in matlab.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
 
 To run the C code, in the gkmPWM directory, run
@@ -71,7 +73,10 @@ python plotMotif.py --info GM12878_11_7_30_gkmPWMlasso.out --meme combined_db_v4
 ```
 This will create _GM12878_11_7_30_gkmPWMlasso.pdf_
 ![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_11_7_30_gkmPWMlasso.png)
-A quick note:  for the optional parameters <i>l</i> and <i>k</i>, these <b>do not</b> need to be the same as the <i>l</i> and <i>k</i> from the gkmSVM model.  In fact, if <i>l</i> and <i>k</i> generate too many gapped k-mers, gkmPWMlasso will take only a subset of the gapped k-mer to use as features.  This is also true for gkmPWM.
+
+A quick note:  for the optional parameters <i>l</i> and <i>k</i>, these <b>do not</b> need to be the same as the <i>l</i> and <i>k</i> from the gkmSVM model.  In fact, if <i>l</i> and <i>k</i> generate too many gapped k-mers, gkmPWMlasso will take only a subset of the gapped k-mer to use as features.  This is also true for gkmPWM. However, mapTF's <i>l</i> and <i>k</k> must be the same as the ones used for gkmSVM model.
+
+An additional note: If your sequence-based model is trained on a set of regulatory element versus genomic backgrounds, you should not set the option <i>Mode</i> in Matlab code or <i>B</i> in C code. However, if your model is trained on two different sets of regulatory elements, you should set this option.
 
 ## Running gkmPWM (de novo PWMs)
 
@@ -127,13 +132,14 @@ You can create a pdf of the output by running <i>plotMotif.py</i> in the visuali
 1. gkmPWM information output: <i>gkmPWMfile</i> passed to --info
 2. gkmPWM meme output: <i>memefile</i> passed to --meme
 3. Output prefix: _outprefix_ passed to --output
-You also need to specify --denovo
+4. You also need to specify --denovo
 ```bash
 python plotMotif.py --denovo --info gkmPWMfile --meme memefile --output outprefix
 python plotMotif.py --denovo --info GM12878_11_7_0_15_gkmPWM.out --meme GM12878_11_7_0_15_denovo.meme --output GM12878_11_7_0_15_gkmPWM
- ```
- This will create _GM12878_11_7_0_15_gkmPWM.pdf_
- ![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_11_7_0_15_gkmPWM.png)
+```
+
+This will create _GM12878_11_7_0_15_gkmPWM.pdf_
+![](https://github.com/shigakiD/gkmPWM/blob/main/example_files/GM12878_11_7_0_15_gkmPWM.png)
 ## Running mapTF 
 
 This function maps PWMS from both gkmPWM and gkmPWMlasso to sequences at base-pair resolution.  The required parameters are:
@@ -144,9 +150,9 @@ This function maps PWMS from both gkmPWM and gkmPWMlasso to sequences at base-pa
 5.  Database of PWMs in meme format: <i>memefile</i>
 6. Output prefix: <i>outprefix</i>
 
- <b>The optional parameters '<i>l</i>' and '<i>k</i>' must be the same as the model's parameters</b>.
+ <b>The optional parameters '<i>l</i>' and '<i>k</i>' MUST be the same as the model's parameters</b>.
  
- To run mapTF:
+To run mapTF:
  
 <b>MATLAB</b>
 ```bash
