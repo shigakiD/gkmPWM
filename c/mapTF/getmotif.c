@@ -159,6 +159,7 @@ void b_getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
     /* 'getmotif:12' fprintf("ERROR: Cannot open motif database.\n"); */
     printf("ERROR: Cannot open motif database.\n");
     fflush(stdout);
+    exit(1);
   } else {
     /* 'getmotif:13' else */
     /* 'getmotif:14' i=0; */
@@ -600,6 +601,7 @@ void getmotif(const emxArray_char_T *filename, const emxArray_real_T *m,
     /* 'getmotif:12' fprintf("ERROR: Cannot open motif database.\n"); */
     printf("ERROR: Cannot open motif database.\n");
     fflush(stdout);
+    exit(1);
   } else {
     /* 'getmotif:13' else */
     /* 'getmotif:14' i=0; */
