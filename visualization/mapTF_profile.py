@@ -124,11 +124,11 @@ def makePWMmatrix(pnum,pb,pe,mat,seq):
     for i in range(L):
         PWM.append([0.25,0.25,0.25,0.25])
         vec = [0,0,0,0]
-        if seq[i] == 'A':
+        if seq[i] == 'A' or seq[i] == 'a':
             vec[0] = 1
-        elif seq[i] == 'C':
+        elif seq[i] == 'C' or seq[i] == 'c':
             vec[1] = 1
-        elif seq[i] == 'G':
+        elif seq[i] == 'G' or seq[i] == 'g':
             vec[2] = 1
         else:
             vec[3] = 1
@@ -141,11 +141,11 @@ def makePWMmatrix(pnum,pb,pe,mat,seq):
             PWM[pb[i]+j-1][1] = mat[pnum[i]][j][1]
             PWM[pb[i]+j-1][2] = mat[pnum[i]][j][2]
             PWM[pb[i]+j-1][3] = mat[pnum[i]][j][3]
-            if seq[pb[i]+j-1] == 'A':
+            if seq[pb[i]+j-1] == 'A' or seq[pb[i]+j-1] == 'a':
                 SEQ[pb[i]+j-1][0] = 3
-            elif seq[pb[i]+j-1] == 'C':
+            elif seq[pb[i]+j-1] == 'C' or seq[pb[i]+j-1] == 'c':
                 SEQ[pb[i]+j-1][1] = 3
-            elif seq[pb[i]+j-1] == 'G':
+            elif seq[pb[i]+j-1] == 'G' or seq[pb[i]+j-1] == 'g':
                 SEQ[pb[i]+j-1][2] = 3
             else:
                 SEQ[pb[i]+j-1][3] = 3
@@ -200,11 +200,11 @@ def dsvm(wfile,seq):
                     alt = alt + d[kmer2]
                 else:
                     alt = alt + d[revcomp(kmer2)]
-        if seq[i] == 'A':
+        if seq[i] == 'A' or seq[i] == 'a':
             S[i][0] = ref-alt/3.0
-        elif seq[i] == 'C':
+        elif seq[i] == 'C' or seq[i] == 'c':
             S[i][1] = ref-alt/3.0
-        elif seq[i] == 'G':
+        elif seq[i] == 'G' or seq[i] == 'g':
             S[i][2] = ref-alt/3.0
         else:
             S[i][3]= ref-alt/3.0
@@ -215,11 +215,11 @@ def revcomp(kmer):
     L = len(kmer)
     s=''
     for i in range(L):
-        if kmer[i] == 'A':
+        if kmer[i] == 'A' or kmer[i] == 'a':
             s='T'+s
-        elif kmer[i] == 'C':
+        elif kmer[i] == 'C' or kmer[i] == 'c':
             s='G'+s
-        elif kmer[i] == 'G':
+        elif kmer[i] == 'G' or kmer[i] == 'g':
             s='C'+s
         else:
             s='A'+s
@@ -230,15 +230,15 @@ def makevar(kmer,loc):
     kmerv=[]
     s = kmer
     loc2=loc+1
-    if kmer[loc] == 'A':
+    if kmer[loc] == 'A' or kmer[loc] == 'a':
         kmerv.append(s[:loc] + 'C' + s[loc2:])
         kmerv.append(s[:loc] + 'G' + s[loc2:])
         kmerv.append(s[:loc] + 'T' + s[loc2:])
-    elif kmer[loc] == 'C':
+    elif kmer[loc] == 'C' or kmer[loc] == 'c':
         kmerv.append(s[:loc] + 'A' + s[loc2:])
         kmerv.append(s[:loc] + 'G' + s[loc2:])
         kmerv.append(s[:loc] + 'T' + s[loc2:])
-    elif kmer[loc] == 'G':
+    elif kmer[loc] == 'G' or kmer[loc] == 'g':
         kmerv.append(s[:loc] + 'A' + s[loc2:])
         kmerv.append(s[:loc] + 'C' + s[loc2:])
         kmerv.append(s[:loc] + 'T' + s[loc2:])
