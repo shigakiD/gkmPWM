@@ -186,7 +186,7 @@ def dsvm(wfile,seq):
         kmer = seq[start:end]
         ref = 0
         for j in range(kmerlen):
-            kmer2 = kmer[(j):(l+j)]
+            kmer2 = uppercase(kmer[(j):(l+j)])
             if kmer2 in d:
                 ref = ref + d[kmer2]
             else:
@@ -195,7 +195,7 @@ def dsvm(wfile,seq):
         alt = 0;
         for i2 in range(3):
             for j in range(kmerlen):
-                kmer2 = kmerv[i2][(j):(l+j)]
+                kmer2 = uppercase(kmerv[i2][(j):(l+j)])
                 if kmer2 in d:
                     alt = alt + d[kmer2]
                 else:
@@ -224,6 +224,23 @@ def revcomp(kmer):
         else:
             s='A'+s
     return s
+
+def uppercase(kmer):
+    L = len(kmer)
+    s=''
+    for i in range(L):
+        if kmer[i] == 'a':
+            s = s+'A'
+        elif kmer[i] == 'c':
+            s = s+'C'
+        elif kmer[i] == 'g':
+            s = s+'G'
+        elif kmer[i] == 't':
+            s = s+'T'
+        else:
+            s = s+kmer[i]
+    return s
+
 
 def makevar(kmer,loc):
     l = len(kmer)
