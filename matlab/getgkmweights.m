@@ -68,7 +68,9 @@ if nargin > 3
     f = find(strcmp('KmerFrac', varargin));
     if ~isempty(f);
         nfrac = varargin{f+1};
-        lk = [l_svm k_svm];
+        if nfrac < 1
+            lk = [l_svm k_svm];
+        end
         if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
             error(['KmerFrac must be a positive float in (0 1]'])
         end
@@ -86,8 +88,8 @@ if nfracLim && length(comb)*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     lk = ([l_svm k_svm]);
     [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
-    disp(['Using ' num2str(numel(comb)/k_svm*4^k_svm) ' gapped kmers'])
 end
+disp(['Using ' num2str(numel(comb)/k_svm*4^k_svm) ' gapped kmers'])
 disp('Counting gapped kmers')
 [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fn, l_svm, k_svm, lk, RC, comb,rcnum);
 negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
