@@ -43,7 +43,7 @@ void display_arguments() {
             "Author:    Dustin Shigaki, Gary Yang, Michael Beer\n"
             "Contact:   Report issues to the Github page\n"
             "\n\n"
-            "Usage:     mapTF [options] <sequence> <weight> <denovo motif> <lasso motif> <database> <output prefix>"
+            "Usage:     mapTF [options] <sequence> <weight> <denovo motif> <lasso motif> <database> <output prefix>\n"
             "\n"
             "Arguments:\n"
             "       sequence: The set of sequences to which the motifs will be mapped (fasta format)\n"

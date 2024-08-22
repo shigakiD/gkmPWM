@@ -1,6 +1,6 @@
 CC      := gcc
-CFLAGS  := -O3 -fPIC -fno-loop-optimize -fno-aggressive-loop-optimizations -Ic/include
-LDFLAGS := -Lc/lib -l:libopenblas_haswellp-r0.3.20.a -lm
+CFLAGS  := -O3 -fPIC -I/opt/homebrew/opt/openblas/include
+LDFLAGS := -L/opt/homebrew/opt/openblas/lib -lcblas -lm
 
 # Directories containing source files
 DIRS    := c/gkmPWMlasso c/gkmPWM c/mapTF c/getgkmweights

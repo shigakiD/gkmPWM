@@ -36,14 +36,14 @@ emxArray_char_T* allocate_for_charArray(char* str) {
 void display_arguments() {
     printf(
             "\n"
-            "gkmPWMlasso: A method to extract compact predictive motifs from sequence-based models of regulatory elements using a database of PWMs (meme format)." 
+            "gkmPWMlasso: A method to extract compact predictive motifs from sequence-based models of regulatory elements using a database of PWMs (meme format).\n" 
             "\n\n"
             "Version:   1.0\n"
             "Code:      https://github.com/shigakiD/gkmPWM/tree/main\n"
             "Author:    Dustin Shigaki, Gary Yang, Michael Beer\n"
             "Contact:   Report issues to the Github page\n"
             "\n\n"
-            "Usage:     gkmPWMlasso [options] <prefix> <database> <motif number>"
+            "Usage:     gkmPWMlasso [options] <prefix> <database> <motif number>\n"
             "\n"
             "Arguments:\n"
             "       prefix: prefix of a gkmSVM model, where the model files are either\n"
