@@ -1,5 +1,5 @@
 CC      := gcc
-CFLAGS  := -O3 -fPIC -fno-loop-optimize -fno-aggressive-loop-optimizations -Ic/include
+CFLAGS  := -O3 -fPIC -fno-loop-optimize -fno-aggressive-loop-optimizations -Ic/include -pthread
 LDFLAGS := -Lc/lib -l:libopenblas_haswellp-r0.3.20.a -lm
 
 # Directories containing source files
