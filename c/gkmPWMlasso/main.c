@@ -182,8 +182,10 @@ int main(int argc, char* argv[]) {
         printf("\n%s: %s", arr[counter-1], arr3[counter-10] ? "True" : "False");
     printf("\n\n=============================================================");
     printf("\n\n");
-    
+
+#if __linux__
     openblas_set_num_threads(1);
+#endif
     
     gkmPWMlasso(model_file,
                 motif_file, numPWM,

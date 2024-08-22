@@ -143,9 +143,11 @@ int main(int argc, char* argv[]) {
         printf("\n%s: %4.2f", arr[counter-1], arr2[counter-7]);
     printf("\n\n=============================================================");
     printf("\n\n");
-    
+
+#if __linux__    
     openblas_set_num_threads(1);
-    
+#endif
+
     mapTF(seq_file,
           weight_file, 
           denovo_file,

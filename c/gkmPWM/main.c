@@ -198,8 +198,10 @@ int main(int argc, char* argv[]) {
     printf("\n\n=============================================================");
     printf("\n\n");
     
+#if __linux__
     openblas_set_num_threads(1);
-    
+#endif
+
     gkmPWM(model_file,
            weight_file,
            motif_file, 

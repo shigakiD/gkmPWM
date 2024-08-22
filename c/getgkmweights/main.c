@@ -36,14 +36,14 @@ emxArray_char_T* allocate_for_charArray(char* str) {
 void display_arguments() {
     printf(
             "\n"
-            "gkmPWM: A method to extract compact and predictive motifs from sequence-based models of regulatory elements de novo.\n"
+            "getgkmweights: A method to generate the gapped kmers weights for a (l,k) pair\n"
             "\n\n"
             "Version:   1.0\n"
             "Code:      https://github.com/shigakiD/gkmPWM/tree/main\n"
             "Author:    Dustin Shigaki, Gary Yang, Michael Beer\n"
             "Contact:   Report issues to the Github page\n"
             "\n\n"
-            "Usage:     gkmPWM [options] <prefix> \n"
+            "Usage:     getgkmweights [options] <prefix> <l_svm> <k_svm>\n"
             "\n"
             "Arguments:\n"
             "                     prefix: prefix of a gkmSVM model, where the model files are either\n"
@@ -129,7 +129,9 @@ int main(int argc, char* argv[]) {
     printf("\n\n=============================================================");
     printf("\n\n");
     
+#if __linux__
     openblas_set_num_threads(1);
+#endif
 
     getgkmweights(model_file, lSVM, kSVM, reverseCompl, kmerFrac, kmerFracLimit);
     
