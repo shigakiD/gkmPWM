@@ -25,15 +25,9 @@ If you are on a Mac, run
 ```bash
 make -f macos.mk
 ```
-If you are using a Windows environment, please either use the Matlab code or run the C code within Windows Subsystem for Linux.
+There will be three executables: gkmPWMlasso, gkmPWM, and mapTF that appear in the directory. If you are using a Windows environment, please either use the Matlab code or run the C code within Windows Subsystem for Linux.
 
 Prior to running any of the funtions the matlab directory, run <i>addpath('dir/gkmPWM/matlab')</i> in matlab.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
-
-To run the C code, in the gkmPWM directory, run
-```bash
-make 
-```
-There will be three executables: gkmPWMlasso, gkmPWM, and mapTF that appear in the directory.
 
 There isn't really any advantage over running the MATLAB script over the C script and vice versa.  They run with comparable computation time and memory.  
   
