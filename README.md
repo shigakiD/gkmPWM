@@ -21,7 +21,11 @@ Currently, the C code supports only the Linux and macOS environments. If you are
 ```bash
 make -f linux.mk
 ```
-If you are on a Mac, run 
+If you are on a Mac, first install openblas by running 
+```bash
+brew install openblas
+```
+and then run 
 ```bash
 make -f macos.mk
 ```
