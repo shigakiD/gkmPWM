@@ -17,7 +17,15 @@ This repository is organized into 4 directories.  Two of them, matlab and c cont
 
 <b>mapTF</b>: a method to map the PWMs from gkmPWMlasso and gkmPWM to a set of sequences.  
 
-Currently, the C code can only be run in a Linux environment. If you are using a Mac or Windows environment, please use the Matlab code instead.
+Currently, the C code supports only the Linux and macOS environments. If you are using Linux, run 
+```bash
+make -f linux.mk
+```
+If you are on a Mac, run 
+```bash
+make -f macos.mk
+```
+If you are using a Windows environment, please either use the Matlab code or run the C code within Windows Subsystem for Linux.
 
 Prior to running any of the funtions the matlab directory, run <i>addpath('dir/gkmPWM/matlab')</i> in matlab.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
 
