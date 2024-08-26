@@ -10431,11 +10431,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   int lk_size[2];
   unsigned int a;
   int b_i;
+  int b_j1;
   int b_loop_ub;
   int c_loop_ub;
   int i;
   int i1;
-  int i2;
   int j2;
   int loop_ub;
   int m;
@@ -10525,6 +10525,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       nfrac = rt_roundd(5.0E+7 / nfrac / (double)(comb->size[0] * comb->size[1])
                         * varargin_9) / 100.0;
 
+      /* 'gkmPWM:47' fprintf('Combination of (l,k) yields too many gapped kmers.  Using %f of the total gapped kmers', nfrac); */
+      printf("Combination of (l,k) yields too many gapped kmers.  Using %f of the total gapped kmers",
+             nfrac);
+      fflush(stdout);
+
       /* 'gkmPWM:48' lk = [l_svm k_svm]; */
       lk_size[0] = 1;
       lk_size[1] = 2;
@@ -10534,9 +10539,6 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       /* 'gkmPWM:49' [comb,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac); */
       genIndex(varargin_8, varargin_9, nfrac, comb, rc, diffc, indc, xc, &rcnum);
       comb_data = comb->data;
-        
-      printf("WARNING: Using %d gapped kmers\n", (int)((double)(comb->size[0] * comb->size[1]) / varargin_9 * pow(4.0, varargin_9)));
-      fflush(stdout); 
     }
   }
 
@@ -10665,13 +10667,13 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   for (b_i = 0; b_i < i; b_i++) {
     /* 'BGkmer:14' p{i+1} = p{i}*mat; */
     for (i1 = 0; i1 < 4; i1++) {
-      for (i2 = 0; i2 < 4; i2++) {
+      for (b_j1 = 0; b_j1 < 4; b_j1++) {
         nfrac = 0.0;
         for (m = 0; m < 4; m++) {
-          nfrac += p_data[b_i].f1[i1 + (m << 2)] * mat[m + (i2 << 2)];
+          nfrac += p_data[b_i].f1[i1 + (m << 2)] * mat[m + (b_j1 << 2)];
         }
 
-        mat2[i1 + (i2 << 2)] = nfrac;
+        mat2[i1 + (b_j1 << 2)] = nfrac;
       }
     }
 
@@ -10686,7 +10688,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   i = seqvec->size[0] * seqvec->size[1];
   i1 = (int)c_tmp;
   seqvec->size[0] = (int)c_tmp;
-  i2 = (int)varargin_9;
+  b_j1 = (int)varargin_9;
   seqvec->size[1] = (int)varargin_9;
   emxEnsureCapacity_real_T(seqvec, i);
   seqvec_data = seqvec->data;
@@ -10696,7 +10698,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   }
 
   /* 'BGkmer:17' for i = 1:k */
-  for (b_i = 0; b_i < i2; b_i++) {
+  for (b_i = 0; b_i < b_j1; b_i++) {
     /* 'BGkmer:18' for j = 1:4^k */
     for (m = 0; m < i1; m++) {
       /* 'BGkmer:19' seqvec(j,i) = mod(floor((j-1)/4^(i-1)), 4)+1; */
@@ -10720,11 +10722,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
     m = seqvec->size[0];
     nd2 = seqvec->size[1] >> 1;
-    for (loop_ub = 0; loop_ub < nd2; loop_ub++) {
-      j2 = (seqvec->size[1] - loop_ub) - 1;
+    for (b_j1 = 0; b_j1 < nd2; b_j1++) {
+      j2 = (seqvec->size[1] - b_j1) - 1;
       for (b_i = 0; b_i < m; b_i++) {
-        nfrac = seqvec2_data[b_i + seqvec2->size[0] * loop_ub];
-        seqvec2_data[b_i + seqvec2->size[0] * loop_ub] = seqvec2_data[b_i +
+        nfrac = seqvec2_data[b_i + seqvec2->size[0] * b_j1];
+        seqvec2_data[b_i + seqvec2->size[0] * b_j1] = seqvec2_data[b_i +
           seqvec2->size[0] * j2];
         seqvec2_data[b_i + seqvec2->size[0] * j2] = nfrac;
       }
@@ -10748,11 +10750,11 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
     m = comb->size[0];
     nd2 = comb->size[1] >> 1;
-    for (loop_ub = 0; loop_ub < nd2; loop_ub++) {
-      j2 = (comb->size[1] - loop_ub) - 1;
+    for (b_j1 = 0; b_j1 < nd2; b_j1++) {
+      j2 = (comb->size[1] - b_j1) - 1;
       for (b_i = 0; b_i < m; b_i++) {
-        nfrac = c2_data[b_i + c2->size[0] * loop_ub];
-        c2_data[b_i + c2->size[0] * loop_ub] = c2_data[b_i + c2->size[0] * j2];
+        nfrac = c2_data[b_i + c2->size[0] * b_j1];
+        c2_data[b_i + c2->size[0] * b_j1] = c2_data[b_i + c2->size[0] * j2];
         c2_data[b_i + c2->size[0] * j2] = nfrac;
       }
     }
@@ -10792,8 +10794,8 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
     for (i1 = 0; i1 < 4; i1++) {
       nfrac = 0.0;
-      for (i2 = 0; i2 < 4; i2++) {
-        nfrac += GCmat[i2] * mat2[i2 + (i1 << 2)];
+      for (b_j1 = 0; b_j1 < 4; b_j1++) {
+        nfrac += GCmat[b_j1] * mat2[b_j1 + (i1 << 2)];
       }
 
       startvec[i1] = nfrac;
@@ -10832,8 +10834,8 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
       }
 
       /* 'BGkmer:39' for iii = 1:k-1 */
-      i2 = (int)(varargin_9 - 1.0);
-      for (j2 = 0; j2 < i2; j2++) {
+      b_j1 = (int)(varargin_9 - 1.0);
+      for (j2 = 0; j2 < b_j1; j2++) {
         /* 'BGkmer:40' matt = p{dc(iii)+1}; */
         /* 'BGkmer:41' negweights(a) = negweights(a)*matt(seqvec(ii,iii), seqvec(ii,iii+1)); */
         negvec_data[m] *= p_data[(int)(dc_data[j2] + 1.0) - 1].f1[((int)
@@ -10875,21 +10877,21 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     if (nfrac > negvec->size[0]) {
       i = 1;
       i1 = -1;
-      i2 = 0;
+      b_j1 = 0;
     } else {
       i = (int)nfrac;
       i1 = (int)nfrac - 2;
-      i2 = negvec->size[0];
+      b_j1 = negvec->size[0];
     }
 
-    m = (i2 - i1) - 1;
-    i2 = b_comb->size[0] * b_comb->size[1];
+    m = (b_j1 - i1) - 1;
+    b_j1 = b_comb->size[0] * b_comb->size[1];
     b_comb->size[0] = 1;
     b_comb->size[1] = m;
-    emxEnsureCapacity_real_T(b_comb, i2);
+    emxEnsureCapacity_real_T(b_comb, b_j1);
     b_comb_data = b_comb->data;
-    for (i2 = 0; i2 < m; i2++) {
-      b_comb_data[i2] = negvec_data[(i + i2) - 1] / 1.4142135623730951;
+    for (b_j1 = 0; b_j1 < m; b_j1++) {
+      b_comb_data[b_j1] = negvec_data[(i + b_j1) - 1] / 1.4142135623730951;
     }
 
     loop_ub = b_comb->size[1];
@@ -10952,23 +10954,23 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     emxFree_cell_wrap_1(&seed2);
     for (nd2 = 0; nd2 < i; nd2++) {
       /* 'gkmPWM:75' kmers{end + 1} = kmers2{cur_idx}; */
-      m = kmers->size[0] + 1;
+      b_j1 = kmers->size[0] + 1;
       i1 = kmers->size[0] * kmers->size[1];
       kmers->size[0]++;
       kmers->size[1] = 1;
       emxEnsureCapacity_cell_wrap_0(kmers, i1);
       kmers_data = kmers->data;
       loop_ub = kmers2_data[nd2].f1->size[1] - 1;
-      i1 = kmers_data[m - 1].f1->size[0] * kmers_data[m - 1].f1->size[1];
-      kmers_data[m - 1].f1->size[0] = 1;
-      emxEnsureCapacity_char_T(kmers_data[m - 1].f1, i1);
+      i1 = kmers_data[b_j1 - 1].f1->size[0] * kmers_data[b_j1 - 1].f1->size[1];
+      kmers_data[b_j1 - 1].f1->size[0] = 1;
+      emxEnsureCapacity_char_T(kmers_data[b_j1 - 1].f1, i1);
       i1 = kmers_data[kmers->size[0] - 1].f1->size[0] * kmers_data[kmers->size[0]
         - 1].f1->size[1];
       kmers_data[kmers->size[0] - 1].f1->size[1] = kmers2_data[nd2].f1->size[1];
       emxEnsureCapacity_char_T(kmers_data[kmers->size[0] - 1].f1, i1);
-      m = kmers->size[0] - 1;
+      b_j1 = kmers->size[0] - 1;
       for (i1 = 0; i1 <= loop_ub; i1++) {
-        kmers_data[m].f1->data[i1] = kmers2_data[nd2].f1->data[i1];
+        kmers_data[b_j1].f1->data[i1] = kmers2_data[nd2].f1->data[i1];
       }
     }
 
@@ -11054,20 +11056,21 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
     emxEnsureCapacity_real_T(c_mat, i1);
     c2_data = c_mat->data;
     for (i1 = 0; i1 < 4; i1++) {
-      for (i2 = 0; i2 < b_loop_ub; i2++) {
-        c2_data[i2 + c_mat->size[0] * i1] = comb_data[i2 + b_mat->size[0] * i1];
+      for (b_j1 = 0; b_j1 < b_loop_ub; b_j1++) {
+        c2_data[b_j1 + c_mat->size[0] * i1] = comb_data[b_j1 + b_mat->size[0] *
+          i1];
       }
 
-      for (i2 = 0; i2 < loop_ub; i2++) {
-        c2_data[(i2 + b_mat->size[0]) + c_mat->size[0] * i1] = b_p_data[b_i].
-          f1->data[i2 + b_p_data[b_i].f1->size[0] * i1];
+      for (b_j1 = 0; b_j1 < loop_ub; b_j1++) {
+        c2_data[(b_j1 + b_mat->size[0]) + c_mat->size[0] * i1] = b_p_data[b_i].
+          f1->data[b_j1 + b_p_data[b_i].f1->size[0] * i1];
       }
     }
 
     for (i1 = 0; i1 < 4; i1++) {
-      for (i2 = 0; i2 < c_loop_ub; i2++) {
-        c2_data[((i2 + b_mat->size[0]) + b_p_data[b_i].f1->size[0]) +
-          c_mat->size[0] * i1] = comb_data[i2 + b_mat->size[0] * i1];
+      for (b_j1 = 0; b_j1 < c_loop_ub; b_j1++) {
+        c2_data[((b_j1 + b_mat->size[0]) + b_p_data[b_i].f1->size[0]) +
+          c_mat->size[0] * i1] = comb_data[b_j1 + b_mat->size[0] * i1];
       }
     }
 
@@ -11123,11 +11126,10 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   dc2_data = dc2->data;
 
   /*  createMEME([fileprefix '_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum)], pp, memefile,GCneg1, C, r, R, rcorr, E, Rd); */
-  /* 'gkmPWM:103' createMEME(sprintf("%s_%d_%d_%d_%d", fileprefix, int32(l_svm), int32(k_svm), int32(reg), int32(mnum)), pp, memefile, GCneg1, C, r, R, rcorr, E, Rd); */
+  /* 'gkmPWM:103' createMEME(sprintf("%s_%d_%d_%0.3f_%d", fileprefix, int32(l_svm), int32(k_svm), reg, int32(mnum)), pp, memefile, GCneg1, C, r, R, rcorr, E, Rd); */
   nd2 = (int)rt_roundd(varargin_8);
   j2 = (int)rt_roundd(varargin_9);
-  b_loop_ub = (int)rt_roundd(varargin_7);
-  c_loop_ub = (int)rt_roundd(varargin_4);
+  b_j1 = (int)rt_roundd(varargin_4);
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
@@ -11159,15 +11161,15 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
   emxInit_char_T(&charStr, 2);
   charStr_data[varargin_1->size[1]] = '\x00';
-  m = snprintf(NULL, 0, "%s_%d_%d_%d_%d", &charStr_data[0], nd2, j2, b_loop_ub,
-               c_loop_ub);
+  m = snprintf(NULL, 0, "%s_%d_%d_%0.3f_%d", &charStr_data[0], nd2, j2,
+               varargin_7, b_j1);
   i = charStr->size[0] * charStr->size[1];
   charStr->size[0] = 1;
   charStr->size[1] = m + 1;
   emxEnsureCapacity_char_T(charStr, i);
   charStr_data = charStr->data;
-  snprintf(&charStr_data[0], (size_t)(m + 1), "%s_%d_%d_%d_%d",
-           &b_varargin_1_data[0], nd2, j2, b_loop_ub, c_loop_ub);
+  snprintf(&charStr_data[0], (size_t)(m + 1), "%s_%d_%d_%0.3f_%d",
+           &b_varargin_1_data[0], nd2, j2, varargin_7, b_j1);
   i = charStr->size[0] * charStr->size[1];
   if (1 > m) {
     charStr->size[1] = 0;
@@ -11179,7 +11181,7 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
   createMEME(charStr, pp, varargin_3, GCneg1, C, nfrac, R, varargin_6, E, dc);
 
   /*  dlmwrite([fileprefix '_' num2str(l_svm) '_' num2str(k_svm) '_' num2str(reg) '_' num2str(mnum) '_error.out'],scorevec'); */
-  /* 'gkmPWM:106' fidw = fopen(sprintf("%s_%d_%d_%d_%d_error.out", fileprefix, int32(l_svm), int32(k_svm), int32(reg), int32(mnum)), 'w'); */
+  /* 'gkmPWM:106' fidw = fopen(sprintf("%s_%d_%d_%0.3f_%d_error.out", fileprefix, int32(l_svm), int32(k_svm), reg, int32(mnum)), 'w'); */
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
@@ -11209,15 +11211,15 @@ void gkmPWM(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2
 
   emxInit_char_T(&b_charStr, 2);
   charStr_data[varargin_1->size[1]] = '\x00';
-  m = snprintf(NULL, 0, "%s_%d_%d_%d_%d_error.out", &charStr_data[0], nd2, j2,
-               b_loop_ub, c_loop_ub);
+  m = snprintf(NULL, 0, "%s_%d_%d_%0.3f_%d_error.out", &charStr_data[0], nd2, j2,
+               varargin_7, b_j1);
   i = b_charStr->size[0] * b_charStr->size[1];
   b_charStr->size[0] = 1;
   b_charStr->size[1] = m + 1;
   emxEnsureCapacity_char_T(b_charStr, i);
   charStr_data = b_charStr->data;
-  snprintf(&charStr_data[0], (size_t)(m + 1), "%s_%d_%d_%d_%d_error.out",
-           &b_varargin_1_data[0], nd2, j2, b_loop_ub, c_loop_ub);
+  snprintf(&charStr_data[0], (size_t)(m + 1), "%s_%d_%d_%0.3f_%d_error.out",
+           &b_varargin_1_data[0], nd2, j2, varargin_7, b_j1);
   i = b_charStr->size[0] * b_charStr->size[1];
   if (1 > m) {
     b_charStr->size[1] = 0;
