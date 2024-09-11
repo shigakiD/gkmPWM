@@ -35,6 +35,15 @@ function mapTF(varargin)
 %                     the PWM probabilities for each k-mer.  Needs around 15GB
 %                     of RAM.  Only set this if you have enough RAM.  
 %                     (default: false)
+%
+%     'PWMcorrcut'    The correlation cutoff to remove redundant motifs in the 
+%                     gkmPWM and gkmPWMlasso list.  Motif selection is prioritized
+%                     by the regression weight.  (default: 0.80)
+%
+%     'dSVMcorrcut'   The correlation cutoff to remove motifs calls that do not fit
+%                     the deltaSVM scores for all variants in the predicted TFBS.
+%                     (default: 0.60)
+%
 % 
 %     Outputs 2 files named:
 %     outputprefix_TFBS_locations.out
@@ -62,13 +71,15 @@ ofn = varargin{6};
 l_svm = 11;
 k_svm = 7;
 nfrac = 1;
+PWMcorrcut = 0.8;
+dsvmcut = 0.6;
 LS = false;
 if nargin > 6
     if mod(nargin,2) == 1
         error('Incorrect number of inputs')
     end
     vec = 7:2:nargin;
-    inputlib = {'l', 'k','KmerFrac','LS'};
+    inputlib = {'l', 'k','KmerFrac','LS', 'PWMcorrcut', 'dSVMcorrcut'};
     for i = 1:length(vec)
         f = strcmp(varargin{vec(i)},inputlib);
         if sum(f) == 0
@@ -94,7 +105,23 @@ if nargin > 6
         nfrac = varargin{f+1};
         lk = [l_svm k_svm];
         if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
-            error(['KmerFrac must be a positive float in (0 1]'])
+            error(['KmerFrac must be a positive fraction in (0 1]'])
+        end
+    end
+    f = find(strcmp('PWMcorrcut', varargin));
+    if ~isempty(f);
+        PWMcorrcut = varargin{f+1};
+        lk = [l_svm k_svm];
+        if ~isa(PWMcorrcut , 'double') || PWMcorrcut  < -1 || PWMcorrcut  >1
+            error(['PWMcorrcut must be a fraction in [-1 1]'])
+        end
+    end
+    f = find(strcmp('dSVMcorrcut', varargin));
+    if ~isempty(f);
+        PWMcorrcut = varargin{f+1};
+        lk = [l_svm k_svm];
+        if ~isa(dsvmcut , 'double') || dsvmcut  < -1 || dsvmcut  >1
+            error(['dSVMcorrcut must be a fraction in [-1 1]'])
         end
     end
     f = find(strcmp('LS', varargin));
@@ -107,7 +134,7 @@ if nargin > 6
 end
 
 disp('processing motifs')
-process_motifs(mfn1, mfn2, memefn, ofn)
+process_motifs(mfn1, mfn2, memefn, ofn, PWMcorrcut)
 mfn = [ofn '_motifs.out'];
 [P,V, seqindmat, ss, seq] = seq2pv(fn, wfn,l_svm);
 GC = countGC(ss);
@@ -240,7 +267,7 @@ for I = 1:length(ss)
 end
 fprintf('%d out of %d sequences done...\n', length(ss), length(ss));
 clear kmat
-PWM_corr(ofn, VV, NN, LL, seq);
+PWM_corr(ofn, VV, NN, LL, seq, dsvmcut);
 
 function [Lmat, NAME] = MAPTF(fn, ss, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, gkmprob, names, a, b)
 L = length(ss)-l_svm+1;
@@ -379,7 +406,7 @@ else
 end
 fclose(fid);
 
-function PWM_corr(fn, VV, NN, LL, seq);
+function PWM_corr(fn, VV, NN, LL, seq, dsvmcut);
 n = length(VV);
 fid1 = fopen([fn '_TFBS_locations.out'],'w');
 for j = 1:n
@@ -389,7 +416,7 @@ for j = 1:n
     s = seq{j*2};
     L = length(NAME);
     for i = 1:L
-        if varscore(i) > 0.6
+        if varscore(i) > dsvmcut
             fprintf(fid1, '%d\t%s\t%d\t%d\t%d\t%f\t%f\t%s\n', j, NAME{i}, Lmat(i,1), Lmat(i,2), Lmat(i,3), Lmat(i,4), varscore(i), s(Lmat(i,2):Lmat(i,3)));
         end
     end
@@ -519,7 +546,7 @@ for i = 1:length(s)
 end
 GC = GC/L;
 
-function process_motifs(dfn, lfn, memefn, ofn)
+function process_motifs(dfn, lfn, memefn, ofn, PWMcorrcut)
 %dfn: file name for denovo motifs
 %lfn: file name for lasso motifs
 %memefn: file name for the meme input for gkmPWMlasso
@@ -539,7 +566,7 @@ w = [w; zeros(n,1)];
 for i = 1:n
     f = find(X{1}==i);
     vec(i) = X{2}(f(1));
-    vec2(i) = X{5}(f(1));
+    vec2(i) /= X{5}(f(1));
     w(i+N) = X{4}(f(1));
 end
 P = getmotif(memefn,vec);
@@ -552,13 +579,13 @@ for ii = 1:length(w)
     if ii > N
         hal = true;
         [~,cor] = ppmsim([pp{ii} PWM2], [len(ii) LEN_2]);
-        if cor > 0.8 || vec2(ii-N) < 1.5
+        if cor > PWMcorrcut || vec2(ii-N) < 1.5
             hal = false;
         end
     elseif ii > 1 && a > 2
         hal = true;
         [~,cor] = ppmsim([pp{ii} PWM2], [len(ii) LEN_2]);
-        if cor > 0.8
+        if cor > PWMcorrcut
             hal = false;
         end
     end

@@ -112,7 +112,7 @@ if nargin > 4
     if ~isempty(f);
         rcorr = varargin{f+1};
         if ~isa(rcorr, 'double') || rcorr <= 0
-            error(['MaxCorr must be a positive float'])
+            error(['MaxCorr must be a positive fraction'])
         end
     end
     f = find(strcmp('MaxIter', varargin));
@@ -126,14 +126,16 @@ if nargin > 4
     if ~isempty(f);
         pnr = varargin{f+1};
         if ~isa(pnr, 'double') || pnr < 0
-            error(['PNratio must be a positive float'])
+            error(['PNratio must be a positive fraction'])
         end
     end
     f = find(strcmp('RegFrac', varargin));
     if ~isempty(f);
         reg = varargin{f+1};
         if ~isa(reg, 'double') || reg < 0 || reg >= 1
-            error('RegFrac must be a positive float in [0,1)')
+            error('RegFrac must be a positive fraction in [0,1)')
+        elseif reg > 0.05
+            disp(['Warning: Recommended values for RegFrac are in the interval [0, 0.05].  Still running with RegFrac = ' num2str(reg)]);
         end
     end
     f = find(strcmp('l', varargin));
@@ -167,7 +169,7 @@ if nargin > 4
         nfrac = varargin{f+1};
         lk = [l_svm k_svm];
         if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
-            error(['KmerFrac must be a positive float in (0 1]'])
+            error(['KmerFrac must be a positive fraction in (0 1]'])
         end
     end
     f = find(strcmp('KmerFracLimit', varargin));

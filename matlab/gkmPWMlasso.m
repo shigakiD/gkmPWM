@@ -107,14 +107,14 @@ if nargin > 2
     if ~isempty(f);
         minInfo = varargin{f+1};
         if ~isa(minInfo, 'double') || minInfo <= 0
-            error(['MinInfo must be a positive float'])
+            error(['MinInfo must be a positive fraction'])
         end
     end
     f = find(strcmp('CorrCutoff', varargin));
     if ~isempty(f);
         corrCut = varargin{f+1};
         if ~isa(corrCut, 'double') || corrCut <= 0
-            error(['CorrCutoff must be a positive float'])
+            error(['CorrCutoff must be a positive fraction'])
         end
     end
     f = find(strcmp('l', varargin));
@@ -139,7 +139,7 @@ if nargin > 2
     if ~isempty(f);
         RC = varargin{f+1};
         if ~islogical(RC)
-            error(['RC must be a boolean'])
+            error(['RC must be a boolean (true or false)'])
         end
     end
     f = find(strcmp('KmerFrac', varargin));
@@ -147,18 +147,19 @@ if nargin > 2
         nfrac = varargin{f+1};
         lk = [l_svm k_svm];
         if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
-            error(['KmerFrac must be a positive float in (0 1]'])
+            error(['KmerFrac must be a positive fraction in (0 1]'])
         end
     end
     f = find(strcmp('KmerFracLimit', varargin));
     if ~isempty(f);
         nfracLim = varargin{f+1};
         if ~islogical(nfracLim)
-            error(['KmerFracLimit must be a boolean'])
+            error(['KmerFracLimit must be a boolean (true or false)'])
         end
     end
 end
 
+disp(['Running gkmPWMlasso on: ' filename ' for ' num2str(d) ' motifs'])
 [comb,comb2,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);%generate gapped positions, adjusted for reverse complements
 
 if nfracLim && numel(comb)/k_svm*4^k_svm > 5*10^5
@@ -186,6 +187,8 @@ negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
 
 disp('Filtering motifs')
 num = length(strfind(fileread(memefile),'MOTIF'));
+mem = round(numel(comb)/k_svm  * 4^k_svm * 2 * num  * 4 / 10^7)/100;;
+disp(['Estimated memory usage: ' num2str(mem) 'GB']);
 p = getmotif(memefile,1:num);
 for i = 1:num
     [r c] = size(p{i});
