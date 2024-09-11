@@ -118,7 +118,7 @@ if nargin > 6
     end
     f = find(strcmp('dSVMcorrcut', varargin));
     if ~isempty(f);
-        PWMcorrcut = varargin{f+1};
+        dsvmcut = varargin{f+1};
         lk = [l_svm k_svm];
         if ~isa(dsvmcut , 'double') || dsvmcut  < -1 || dsvmcut  >1
             error(['dSVMcorrcut must be a fraction in [-1 1]'])
@@ -566,7 +566,7 @@ w = [w; zeros(n,1)];
 for i = 1:n
     f = find(X{1}==i);
     vec(i) = X{2}(f(1));
-    vec2(i) /= X{5}(f(1));
+    vec2(i) = X{5}(f(1));
     w(i+N) = X{4}(f(1));
 end
 P = getmotif(memefn,vec);
