@@ -33,6 +33,12 @@ function gkmPWMlasso(varargin)
 %     'CorrCutoff'    PWMs with a pearson correlation greater than CorrCutoff
 %                     will be clustered together to prevent linear dependence
 %                     and redundant features (default: 0.83)
+%     'UseAllMotifs'  Uses all motifs in the meme file provided.  No filtering
+%                     for low information PWMs will be done.  The clustering
+%                     step for PWMs will be skipped.  If there are PWMs that 
+%                     very similar, you may get singular matrices in the lasso
+%                     part of the code, and the results will be poor.  
+%                     (default: false)
 %     'l'             The full length of the gapped k-mer.  This DOES NOT need
 %                     to be the same as the l in the gkmSVM model (default: 11)
 %     'k'             The number of ungapped positions of the gapped k-mer.
@@ -72,7 +78,7 @@ elseif nargin > 3
         error('Incorrect number of inputs')
      else
         vec = 4:2:nargin;
-        inputlib = {'MinLength', 'MinInfo', 'CorrCutoff', 'l', 'k', 'Mode', 'RC', 'KmerFrac', 'KmerFracLimit'};
+        inputlib = {'MinLength', 'MinInfo', 'CorrCutoff', 'UseAllMotifs', 'l', 'k', 'Mode', 'RC', 'KmerFrac', 'KmerFracLimit'};
         for i = 1:length(vec)
             f = strcmp(varargin{vec(i)},inputlib);
             if sum(f) == 0
@@ -95,6 +101,7 @@ RC = true;
 nfrac = 1;
 nfracLim = true;
 lk = 1;
+AllMotifs = false;
 if nargin > 2
     f = find(strcmp('MinLength', varargin));
     if ~isempty(f);
@@ -113,8 +120,22 @@ if nargin > 2
     f = find(strcmp('CorrCutoff', varargin));
     if ~isempty(f);
         corrCut = varargin{f+1};
-        if ~isa(corrCut, 'double') || corrCut <= 0
-            error(['CorrCutoff must be a positive fraction'])
+        if ~isa(corrCut, 'double') || corrCut < -1 || corrCut > 1
+            error(['CorrCutoff must be a fraction in [-1, 1]'])
+        end
+    end
+    f = find(strcmp('UseAllMotifs', varargin));
+    if ~isempty(f);
+        AllMotifs = varargin{f+1};
+        if ~islogical(AllMotifs)
+            error(['UseAllMotifs must be a boolean (true or false)'])
+        else
+            if AllMotifs
+                disp(['Using all motifs in meme file and skipping clustering'])
+                minL = 0;
+                minInfo = 0;
+                corrCut = 2;
+            end
         end
     end
     f = find(strcmp('l', varargin));
@@ -175,6 +196,9 @@ else
 end
 
 disp('Counting gapped kmers')
+num = length(strfind(fileread(memefile),'MOTIF'));
+mem = max([round(numel(comb)/k_svm*4^k_svm*2*num*8/10^7)/100; 1+round(numel(comb)/k_svm*2*4^l_svm*8/10^7)/100]);
+disp(['Estimated maximum memory usage: ' num2str(mem) 'GB']);
 
 [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(filename, l_svm, k_svm, lk, RC, comb,rcnum);
 if BG_GC == 1
@@ -186,9 +210,6 @@ disp('Generating negative set')
 negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
 
 disp('Filtering motifs')
-num = length(strfind(fileread(memefile),'MOTIF'));
-mem = round(numel(comb)/k_svm  * 4^k_svm * 2 * num  * 4 / 10^7)/100;;
-disp(['Estimated memory usage: ' num2str(mem) 'GB']);
 p = getmotif(memefile,1:num);
 for i = 1:num
     [r c] = size(p{i});
@@ -205,65 +226,90 @@ indvec = intersect(find(info./lenvec>=minInfo),find(lenvec>=minL));
 n = length(indvec);
 disp('Mapping PWMs to gkm space')
 lcnum = numel(comb)/k_svm;
-A=zeros(lcnum*4^k_svm,n);
 GCmat = repmat([0.5-GCpos1/2 GCpos1/2 GCpos1/2 0.5-GCpos1/2],l_svm-1,1);
-per = 10;
-normvec = zeros(n,1);
-for j = 1:n
-    if mod(j, floor(n/10))==0
-        fprintf('%d...', per);
-        per = per+10;
-    end
-    loc = zeros(l_svm*2-2+lenvec(indvec(j)), 1);
-    loc(l_svm:lenvec(indvec(j))+l_svm-1) = 1;
-    if RC
-        A(:,j) = PWM2kmers([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
-    else
-        A(:,j) = PWM2kmers_norc([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
-    end
-    A(:,j) = A(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
-    normvec(j) = sqrt(A(:,j)'*A(:,j));
-end
-fprintf('\n')
-disp('Clustering motifs')
-simmat = diag(normvec.^-1)*(A'*A)*diag(normvec.^-1);
-motclus = clus_simmat_eig(simmat,corrCut);
-clear simmat
-disp(['Number of motif clusters:' num2str(length(motclus))])
-
-disp('Selecting Motifs')
 cfile2 = cfile-negvec/sum(negvec)*sum(cfile);
 cfile2 = cfile2/std(cfile2);
-B = zeros((4^k_svm)*lcnum, length(motclus));
-corrvec = zeros(n,1);
-zvec = zeros(n,1);
-Z = zeros(length(motclus),1);
-for i = 1:n
-    [~,I] = sort(A(:,i),'descend');
-    zvec(i) = mean(cfile2(I(1:lcnum)));
-    if zvec(i) < 0
-        corrvec(i) = -1*corr(A(I(1:lcnum*10),i), cfile2(I(1:lcnum*10)));
-    else
-        corrvec(i) = corr(A(I(1:lcnum*10),i), cfile2(I(1:lcnum*10)));
+if AllMotifs
+    B=zeros(lcnum*4^k_svm,n);
+    per = 10;
+    motclus = cell(n,1);
+    Z = zeros(n,1);
+    for j = 1:n
+        motclus{j} = [j];
+        if mod(j, floor(n/10))==0
+            fprintf('%d...', per);
+            per = per+10;
+        end
+        loc = zeros(l_svm*2-2+lenvec(indvec(j)), 1);
+        loc(l_svm:lenvec(indvec(j))+l_svm-1) = 1;
+        if RC
+            B(:,j) = PWM2kmers([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
+        else
+            B(:,j) = PWM2kmers_norc([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
+        end
+        B(:,j) = B(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
+        [~,I] = sort(B(:,j),'descend');
+        Z(j) = mean(cfile2(I(1:lcnum)));
     end
-end
-for i = 1:length(motclus)
-    [a,b] = sort(zvec(motclus{i}),'descend');
-    f = find(a == a(1));
-    if length(f) > 1
-        [~,bb] = sort(abs(corrvec(motclus{i}(b(f)))), 'descend');
-        b(1:length(f)) = b(bb);
+else
+    A=zeros(lcnum*4^k_svm,n);
+    per = 10;
+    normvec = zeros(n,1);
+    for j = 1:n
+        if mod(j, floor(n/10))==0
+            fprintf('%d...', per);
+            per = per+10;
+        end
+        loc = zeros(l_svm*2-2+lenvec(indvec(j)), 1);
+        loc(l_svm:lenvec(indvec(j))+l_svm-1) = 1;
+        if RC
+            A(:,j) = PWM2kmers([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
+        else
+            A(:,j) = PWM2kmers_norc([GCmat;p{indvec(j)};GCmat],mat,comb2,diffc,indc,loc,xc,l_svm,k_svm,rcnum);
+        end
+        A(:,j) = A(:,j) - negvec*(l_svm-1+lenvec(indvec(j)));
+        normvec(j) = sqrt(A(:,j)'*A(:,j));
     end
-    B(:,i) = A(:,motclus{i}(b(1)));
-    motclus{i} = motclus{i}(b);
-    Z(i) = zvec(motclus{i}(1));
+    fprintf('\n')
+    
+    disp('Clustering motifs')
+    simmat = diag(normvec.^-1)*(A'*A)*diag(normvec.^-1);
+    motclus = clus_simmat_eig(simmat,corrCut);
+    clear simmat
+    
+    disp(['Number of motif clusters:' num2str(length(motclus))])
+    disp('Selecting Motifs')
+    B = zeros((4^k_svm)*lcnum, length(motclus));
+    corrvec = zeros(n,1);
+    zvec = zeros(n,1);
+    Z = zeros(length(motclus),1);
+    for i = 1:n
+        [~,I] = sort(A(:,i),'descend');
+        zvec(i) = mean(cfile2(I(1:lcnum)));
+        if zvec(i) < 0
+            corrvec(i) = -1*corr(A(I(1:lcnum*10),i), cfile2(I(1:lcnum*10)));
+        else
+            corrvec(i) = corr(A(I(1:lcnum*10),i), cfile2(I(1:lcnum*10)));
+        end
+    end
+    for i = 1:length(motclus)
+        [a,b] = sort(zvec(motclus{i}),'descend');
+        f = find(a == a(1));
+        if length(f) > 1
+            [~,bb] = sort(abs(corrvec(motclus{i}(b(f)))), 'descend');
+            b(1:length(f)) = b(bb);
+        end
+        B(:,i) = A(:,motclus{i}(b(1)));
+        motclus{i} = motclus{i}(b);
+        Z(i) = zvec(motclus{i}(1));
+    end
+    clear A loc mat
 end
 f = find(abs(Z)>1);
 B = B(:,f);
 B = B/std(B(:))';
 motclus = motclus(f);
 Z = Z(f);
-clear A loc mat GMmat
 
 if d == 0
 disp('Running LASSO')
