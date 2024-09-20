@@ -100,9 +100,9 @@ for i = 1:k_svm
     s = [s 'A'];
 end
 kmer = repmat(s,4^k_svm,1);
-vec = fliplr(0:4^k_svm-1);
+vec = 0:4^k_svm-1;
 for i = 1:k_svm
-    vec2 = mod(floor(vec/4^(k_svm-i)),4);
+    vec2 = mod(floor(vec/4^(i-1)),4);
     f = find(vec2==1);
     kmer(f,i) = 'C';
     f = find(vec2==2);
