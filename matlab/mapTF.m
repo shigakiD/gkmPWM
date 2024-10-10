@@ -25,6 +25,9 @@ function mapTF(varargin)
 %     'k'             The number of ungapped positions of the gapped k-mer.
 %                     This NEEDS to be the same as the k in the gkmSVM model
 %                     (default: 7)
+%     'Negative'      Call motifs that are predictive of the negative set.
+%                     Output files will have the "negative" added to the end 
+%                     e.g. "_negative_motifs.out" (default: false)
 %     'KmerFrac'      Set the fraction of the total number of gapped k-mers to
 %                     use with mapTF.  This reduces the memory and runtime
 %                     needed.  If the total number of gapped k-mers is too high
@@ -73,13 +76,14 @@ k_svm = 7;
 nfrac = 1;
 PWMcorrcut = 0.8;
 dsvmcut = 0.6;
+Negative = false;
 LS = false;
 if nargin > 6
     if mod(nargin,2) == 1
         error('Incorrect number of inputs')
     end
     vec = 7:2:nargin;
-    inputlib = {'l', 'k','KmerFrac','LS', 'PWMcorrcut', 'dSVMcorrcut'};
+    inputlib = {'l', 'k','KmerFrac','LS', 'PWMcorrcut', 'dSVMcorrcut', 'Negative'};
     for i = 1:length(vec)
         f = strcmp(varargin{vec(i)},inputlib);
         if sum(f) == 0
@@ -98,6 +102,13 @@ if nargin > 6
         k_svm = varargin{f+1};
         if ~isa(k_svm, 'double') || round(k_svm)-k_svm ~= 0 || k_svm <= 0 || k_svm > l_svm
             error(['k must be a positive integer less than or equal to l'])
+        end
+    end
+    f = find(strcmp('Negative', varargin));
+    if ~isempty(f);
+        Negative = varargin{f+1};
+        if ~isa(Negative, 'logical')
+            error(['Negative must be set to true or false'])
         end
     end
     f = find(strcmp('KmerFrac', varargin));
@@ -133,10 +144,14 @@ if nargin > 6
     end
 end
 
+if Negative
+    ofn = [ofn '_negative'];
+end
+
 disp('processing motifs')
-process_motifs(mfn1, mfn2, memefn, ofn, PWMcorrcut)
+process_motifs(mfn1, mfn2, memefn, ofn, PWMcorrcut, Negative)
 mfn = [ofn '_motifs.out'];
-[P,V, seqindmat, ss, seq] = seq2pv(fn, wfn,l_svm);
+[P,V, seqindmat, ss, seq] = seq2pv(fn, wfn,l_svm, Negative);
 GC = countGC(ss);
 GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2];
 b = 1;
@@ -268,7 +283,6 @@ end
 fprintf('%d out of %d sequences done...\n', length(ss), length(ss));
 clear kmat
 PWM_corr(ofn, VV, NN, LL, seq, dsvmcut);
-
 function [Lmat, NAME] = MAPTF(fn, ss, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, gkmprob, names, a, b)
 L = length(ss)-l_svm+1;
 n = sum(LEN)+1;
@@ -423,7 +437,7 @@ for j = 1:n
 end
 fclose(fid1);
 
-function [P,V,seqindmat,seqout,seq] = seq2pv(sfn, wfn, l_svm)
+function [P,V,seqindmat,seqout,seq] = seq2pv(sfn, wfn, l_svm, Negative)
 %sfn: fasta file
 %wfn: kmer weight file
 %ofn: output prefix
@@ -444,11 +458,16 @@ for i = 1:numel(X{2});
     w(ss*pow+1) = X{2}(i);
     w(rs*pow+1) = X{2}(i);
 end
-m = mean(X{2});
+if Negative
+    w = -1*w;
+    m = -1*mean(X{2});
+else
+    m = mean(X{2});
+end
 s = std(X{2});
 W = (1/2)*(1+erf((w-m)/s/sqrt(2)));
 W(W>0.99) = 0.99;
-%W(W<0.01) = 0.01;
+W(W<0.01) = 0.01;
 seq = importdata(sfn);
 n = length(seq)/2;
 seqout = cell(n,1);
@@ -472,13 +491,11 @@ for i = 1:n
     p(1) = W(I+1);
     for j = 2:L
         I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1);
-        %I2 = (I2-rs(j-1))/4+4^(l-1)*rs(j+l-1);
         I2 = (I2-rs(j-1)*4^(l-1))*4+rs(j+l-1);
         seqindmat{i}(j,1) = I+1;
         seqindmat{i}(j,2) = I2+1;
         p(j) = W(I+1);
     end
-    %seqindmat{i}(:,2) = flipud(seqindmat{i}(:,2));
     P{i} = p;
 end
 
@@ -546,7 +563,7 @@ for i = 1:length(s)
 end
 GC = GC/L;
 
-function process_motifs(dfn, lfn, memefn, ofn, PWMcorrcut)
+function process_motifs(dfn, lfn, memefn, ofn, PWMcorrcut,Negative)
 %dfn: file name for denovo motifs
 %lfn: file name for lasso motifs
 %memefn: file name for the meme input for gkmPWMlasso
@@ -568,6 +585,10 @@ for i = 1:n
     vec(i) = X{2}(f(1));
     vec2(i) = X{5}(f(1));
     w(i+N) = X{4}(f(1));
+end
+if Negative
+    w = -1*w;
+    vec2 = -1*vec2;
 end
 P = getmotif(memefn,vec);
 [pp, info, len] = trim_pwm([p;P],0.25);
