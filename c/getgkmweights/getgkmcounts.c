@@ -1152,6 +1152,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       emxCopyStruct_cell_wrap_6(&sequences_data[0].f1[0], &r);
       /* 'getgkmcounts:100' ver = 0; */
       ver = 0;
+      exit(1);
     }
   }
   emxFree_char_T(&d_fileid);

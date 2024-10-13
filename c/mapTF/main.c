@@ -65,7 +65,14 @@ void display_arguments() {
             "                  input weight model (default:  7)\n" 
             "    -L            if set, PWM probabilities for each k-mer will be saved. Setting this option speeds \n"
             "                  up mapTF; however, around 15GB of RAM is needed. Only set this if you have enough \n"
-            "                  RAM. (default: false) \n"           
+            "                  RAM. (default: false) \n"  
+            "    -N            if set, will call motifs that are predictive of the negative set. Output files \n"
+            "                  will have the 'negative' added to the end e.g. '_negative_motifs.out' \n"
+            "                  (default: false) \n"
+            "    -P <float>    The correlation cutoff to remove redundant motifs in the gkmPWM and gkmPWMlasso \n"
+            "                  list. Motif selection is prioritized by the regression weight. (default: 0.80) \n"
+            "    -d <float>    The correlation cutoff to remove motifs calls that do not fit the deltaSVM scores \n"
+            "                  for all variants in the predicted TFBS. (default: 0.60) \n"
             "\n");
     exit(0);
 }
@@ -79,11 +86,14 @@ int main(int argc, char* argv[]) {
     double lSVM = 11;
     double kSVM = 7 ;
     int LS = 0;
+    double PWMcorrcut = 0.8;
+    double dsvmcut = 0.6;
+    int Negative = 0;
 
     char * pEnd;
 
     int c;
-    while ((c = getopt(argc, argv, "Ll:k:f:")) != -1) {
+    while ((c = getopt(argc, argv, "LNl:k:f:P:d:")) != -1) {
         switch (c) {
             case 'f':
                 kmerFrac = strtod(optarg, &pEnd);
@@ -109,6 +119,23 @@ int main(int argc, char* argv[]) {
             case 'L':
                 LS = 1;
                 break;
+            case 'N':
+                Negative = 1;
+                break;
+            case 'P':
+                PWMcorrcut = strtod(optarg, &pEnd);
+                if (PWMcorrcut < -1 || PWMcorrcut > 1) {
+                    printf("ERROR: PWMcorrcut must be a fraction in [-1, 1]");
+                    exit(1);
+                }
+                break;
+            case 'd':
+                dsvmcut = strtod(optarg, &pEnd);
+                if (dsvmcut < -1 || dsvmcut > 1) {
+                    printf("ERROR: dSVMcorrcut must be a fraction in [-1, 1]");
+                    exit(1);
+                }
+                break;
             default:
                 fprintf(stderr, "Unknown option: -%c\n", c);
                 display_arguments();
@@ -132,14 +159,15 @@ int main(int argc, char* argv[]) {
     emxArray_char_T *motif_file    = allocate_for_charArray(argv[index++]);
     emxArray_char_T *output_prefix = allocate_for_charArray(argv[index++]);
     
-    char arr[10][30] = {"Sequence file", "K-mer weight file", "De novo motifs", "LASSO motifs", 
+    char arr[13][40] = {"Sequence file", "K-mer weight file", "De novo motifs", "LASSO motifs", 
                        "Motif file", "Output prefix", "K-mer fraction",
-                       "Total gapped k-mer length", "Number of ungapped positions", "Save sequences"};
-    double arr2[4] = {kmerFrac, lSVM, kSVM, LS};
+                       "Total gapped k-mer length", "Number of ungapped positions", "Save sequences", 
+                       "PWM correlation cutoff", "deltaSVM cutoff", "Call negative-set motifs"};
+    double arr2[7] = {kmerFrac, lSVM, kSVM, LS, PWMcorrcut, dsvmcut, Negative};
     printf("\n=====  Following Are The Command Line Arguments Passed  =====\n");
     for(int counter=1; counter<7; counter++)
         printf("\n%s: %s", arr[counter-1], argv[optind+counter-1]);
-    for(int counter=7; counter<11; counter++)
+    for(int counter=7; counter<14; counter++)
         printf("\n%s: %4.2f", arr[counter-1], arr2[counter-7]);
     printf("\n\n=============================================================");
     printf("\n\n");
@@ -157,7 +185,10 @@ int main(int argc, char* argv[]) {
           lSVM,
           kSVM,
           kmerFrac,
-          LS);
+          LS,
+          PWMcorrcut,
+          dsvmcut,
+          Negative);
                  
     emxFree_char_T(&seq_file);
     emxFree_char_T(&weight_file);                 

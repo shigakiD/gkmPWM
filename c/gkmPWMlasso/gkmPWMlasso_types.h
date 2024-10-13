@@ -25,12 +25,12 @@ typedef struct {
 } struct_T;
 #endif /* typedef_struct_T */
 
-#ifndef typedef_cell_wrap_12
-#define typedef_cell_wrap_12
+#ifndef typedef_cell_wrap_14
+#define typedef_cell_wrap_14
 typedef struct {
   double f1[16];
-} cell_wrap_12;
-#endif /* typedef_cell_wrap_12 */
+} cell_wrap_14;
+#endif /* typedef_cell_wrap_14 */
 
 #ifndef struct_emxArray_char_T
 #define struct_emxArray_char_T
@@ -177,41 +177,41 @@ struct emxArray_uint32_T {
 typedef struct emxArray_uint32_T emxArray_uint32_T;
 #endif /* typedef_emxArray_uint32_T */
 
-#ifndef typedef_cell_wrap_8
-#define typedef_cell_wrap_8
+#ifndef typedef_cell_wrap_10
+#define typedef_cell_wrap_10
 typedef struct {
   emxArray_char_T *f1;
-} cell_wrap_8;
-#endif /* typedef_cell_wrap_8 */
+} cell_wrap_10;
+#endif /* typedef_cell_wrap_10 */
 
-#ifndef typedef_cell_wrap_9
-#define typedef_cell_wrap_9
+#ifndef typedef_cell_wrap_11
+#define typedef_cell_wrap_11
 typedef struct {
-  cell_wrap_8 f1[1];
-} cell_wrap_9;
-#endif /* typedef_cell_wrap_9 */
+  cell_wrap_10 f1[1];
+} cell_wrap_11;
+#endif /* typedef_cell_wrap_11 */
 
-#ifndef typedef_emxArray_cell_wrap_9
-#define typedef_emxArray_cell_wrap_9
+#ifndef typedef_emxArray_cell_wrap_11
+#define typedef_emxArray_cell_wrap_11
 typedef struct {
-  cell_wrap_9 *data;
+  cell_wrap_11 *data;
   int *size;
   int allocatedSize;
   int numDimensions;
   bool canFreeData;
-} emxArray_cell_wrap_9;
-#endif /* typedef_emxArray_cell_wrap_9 */
+} emxArray_cell_wrap_11;
+#endif /* typedef_emxArray_cell_wrap_11 */
 
-#ifndef typedef_emxArray_cell_wrap_12
-#define typedef_emxArray_cell_wrap_12
+#ifndef typedef_emxArray_cell_wrap_14
+#define typedef_emxArray_cell_wrap_14
 typedef struct {
-  cell_wrap_12 *data;
+  cell_wrap_14 *data;
   int *size;
   int allocatedSize;
   int numDimensions;
   bool canFreeData;
-} emxArray_cell_wrap_12;
-#endif /* typedef_emxArray_cell_wrap_12 */
+} emxArray_cell_wrap_14;
+#endif /* typedef_emxArray_cell_wrap_14 */
 
 #ifndef typedef_emxArray_struct_T
 #define typedef_emxArray_struct_T
@@ -236,16 +236,16 @@ typedef struct {
 } coder_internal_list;
 #endif /* typedef_coder_internal_list */
 
-#ifndef typedef_emxArray_cell_wrap_8
-#define typedef_emxArray_cell_wrap_8
+#ifndef typedef_emxArray_cell_wrap_10
+#define typedef_emxArray_cell_wrap_10
 typedef struct {
-  cell_wrap_8 *data;
+  cell_wrap_10 *data;
   int *size;
   int allocatedSize;
   int numDimensions;
   bool canFreeData;
-} emxArray_cell_wrap_8;
-#endif /* typedef_emxArray_cell_wrap_8 */
+} emxArray_cell_wrap_10;
+#endif /* typedef_emxArray_cell_wrap_10 */
 
 #endif
 /* End of code generation (gkmPWMlasso_types.h) */

@@ -26,8 +26,8 @@ void BGkmer(const double mat[16], double GC, const emxArray_real_T *c,
             double rcnum, double l, double k, double RC,
             emxArray_real_T *negweights)
 {
-  cell_wrap_12 *p_data;
-  emxArray_cell_wrap_12 *p;
+  cell_wrap_14 *p_data;
+  emxArray_cell_wrap_14 *p;
   emxArray_real_T *b_c;
   emxArray_real_T *c2;
   emxArray_real_T *dc;
@@ -76,7 +76,7 @@ void BGkmer(const double mat[16], double GC, const emxArray_real_T *c,
   emxInit_real_T(&c2, 2);
   emxInit_real_T(&seqvec2, 2);
   emxInit_real_T(&dc2, 2);
-  emxInit_cell_wrap_12(&p);
+  emxInit_cell_wrap_14(&p);
   /* 'BGkmer:5' GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2]; */
   GCmat_idx_0_tmp = 0.5 - GC / 2.0;
   GCmat_idx_1 = GC / 2.0;
@@ -111,7 +111,7 @@ void BGkmer(const double mat[16], double GC, const emxArray_real_T *c,
   /* 'BGkmer:10' p = cell(l,1); */
   b_j1 = p->size[0];
   p->size[0] = (int)l;
-  emxEnsureCapacity_cell_wrap_12(p, b_j1);
+  emxEnsureCapacity_cell_wrap_14(p, b_j1);
   p_data = p->data;
   /* 'BGkmer:11' p = coder.nullcopy(p); */
   /* 'BGkmer:12' p{1} = eye(4); */
@@ -305,7 +305,7 @@ void BGkmer(const double mat[16], double GC, const emxArray_real_T *c,
     }
     a += b_i;
   }
-  emxFree_cell_wrap_12(&p);
+  emxFree_cell_wrap_14(&p);
   emxFree_real_T(&dc);
   emxFree_real_T(&seqvec);
   emxFree_real_T(&dc2);

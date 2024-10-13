@@ -404,7 +404,7 @@ static void lassoFit(const emxArray_real_T *X, const emxArray_real_T *Y,
   /*  constantPredictors = (range(X)==0); */
   /* 'lasso_cvmat:493' constantPredictors = ((max(X)-min(X))==0); */
   /* 'lasso_cvmat:494' ever_active = ever_active & ~constantPredictors; */
-  c_maximum(X, A);
+  d_maximum(X, A);
   bold_data = A->data;
   minimum(X, y);
   y_data = y->data;

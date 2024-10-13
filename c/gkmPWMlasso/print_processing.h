@@ -26,7 +26,7 @@ extern "C" {
 void print_processing(const emxArray_char_T *varargin_1,
                       const emxArray_char_T *varargin_2,
                       const emxArray_char_T *varargin_3,
-                      cell_wrap_8 validatedArgumetns[3]);
+                      cell_wrap_10 validatedArgumetns[3]);
 
 #ifdef __cplusplus
 }

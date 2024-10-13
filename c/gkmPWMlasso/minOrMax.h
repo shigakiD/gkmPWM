@@ -23,11 +23,13 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_maximum(const emxArray_real_T *x, double *ex, int *idx);
+double b_maximum(const double x[2]);
 
-void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex);
+void c_maximum(const emxArray_real_T *x, double *ex, int *idx);
 
-void d_maximum(const emxArray_real_T *x, double *ex, int *idx);
+void d_maximum(const emxArray_real_T *x, emxArray_real_T *ex);
+
+void e_maximum(const emxArray_real_T *x, double *ex, int *idx);
 
 double maximum(const emxArray_real_T *x);
 

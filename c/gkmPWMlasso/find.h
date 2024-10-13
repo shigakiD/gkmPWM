@@ -24,12 +24,12 @@ extern "C" {
 
 /* Function Declarations */
 void b_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *indc,
-                        const emxArray_real_T *BY);
+                        const emxArray_real_T *E);
 
 void b_eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i);
 
 void e_binary_expand_op(emxArray_int32_T *idx, const emxArray_real_T *loc,
-                        const emxArray_real_T *f, double varargin_5);
+                        const emxArray_real_T *lenvec, double varargin_5);
 
 void eml_find(const emxArray_boolean_T *x, emxArray_int32_T *i);
 

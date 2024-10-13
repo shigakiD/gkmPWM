@@ -200,11 +200,11 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
                const emxArray_real_T *x, double l, double k, double rcnum,
                emxArray_real_T *kweig)
 {
-  cell_wrap_12 *p_data;
+  cell_wrap_14 *p_data;
   cell_wrap_3 *KC_data;
   cell_wrap_3 *ktree2_data;
   cell_wrap_3 *ktree_data;
-  emxArray_cell_wrap_12 *p;
+  emxArray_cell_wrap_14 *p;
   emxArray_cell_wrap_3 *KC;
   emxArray_cell_wrap_3 *ktree;
   emxArray_cell_wrap_3 *ktree2;
@@ -260,12 +260,12 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   s_data = s->data;
   c_data = c->data;
   mat_data = mat->data;
-  emxInit_cell_wrap_12(&p);
+  emxInit_cell_wrap_14(&p);
   /* makes gkm-pwm faster */
   /* 'PWM2kmers:3' p = cell(l,1); */
   i = p->size[0];
   p->size[0] = (int)l;
-  emxEnsureCapacity_cell_wrap_12(p, i);
+  emxEnsureCapacity_cell_wrap_14(p, i);
   p_data = p->data;
   /* 'PWM2kmers:4' p = coder.nullcopy(p); */
   /* 'PWM2kmers:5' p{1} = eye(4); */
@@ -832,7 +832,7 @@ void PWM2kmers(const emxArray_real_T *mat, const double negmat[16],
   }
   emxFree_real_T(&b_r);
   emxFree_real_T(&a);
-  emxFree_cell_wrap_12(&p);
+  emxFree_cell_wrap_14(&p);
   emxFree_real_T(&repmatt);
   emxFree_real_T(&sPWM2);
   emxFree_real_T(&sPWM);
