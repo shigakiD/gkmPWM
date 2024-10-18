@@ -251,6 +251,7 @@ if AllMotifs
         [~,I] = sort(B(:,j),'descend');
         Z(j) = mean(cfile2(I(1:lcnum)));
     end
+    fprintf('\n')
 else
     A=zeros(lcnum*4^k_svm,n);
     per = 10;

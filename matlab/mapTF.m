@@ -114,7 +114,6 @@ if nargin > 6
     f = find(strcmp('KmerFrac', varargin));
     if ~isempty(f);
         nfrac = varargin{f+1};
-        lk = [l_svm k_svm];
         if ~isa(nfrac, 'double') || nfrac <= 0 || nfrac >1
             error(['KmerFrac must be a positive fraction in (0 1]'])
         end
@@ -122,7 +121,6 @@ if nargin > 6
     f = find(strcmp('PWMcorrcut', varargin));
     if ~isempty(f);
         PWMcorrcut = varargin{f+1};
-        lk = [l_svm k_svm];
         if ~isa(PWMcorrcut , 'double') || PWMcorrcut  < -1 || PWMcorrcut  >1
             error(['PWMcorrcut must be a fraction in [-1 1]'])
         end
@@ -130,7 +128,6 @@ if nargin > 6
     f = find(strcmp('dSVMcorrcut', varargin));
     if ~isempty(f);
         dsvmcut = varargin{f+1};
-        lk = [l_svm k_svm];
         if ~isa(dsvmcut , 'double') || dsvmcut  < -1 || dsvmcut  >1
             error(['dSVMcorrcut must be a fraction in [-1 1]'])
         end
