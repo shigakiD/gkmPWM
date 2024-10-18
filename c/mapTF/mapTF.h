@@ -29,7 +29,8 @@ extern void mapTF(const emxArray_char_T *varargin_1,
                   const emxArray_char_T *varargin_4,
                   const emxArray_char_T *varargin_5,
                   const emxArray_char_T *varargin_6, double varargin_7,
-                  double varargin_8, double varargin_9, double varargin_10);
+                  double varargin_8, double varargin_9, double varargin_10,
+                  double varargin_11, double varargin_12, double varargin_13);
 
 #ifdef __cplusplus
 }

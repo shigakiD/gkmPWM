@@ -113,21 +113,24 @@ int main(int argc, char* argv[]) {
             case 'c':
                 rCorr = strtod(optarg, &pEnd);
                 if (rCorr <= 0) {
-                    printf("ERROR: Correlation cutoff must be a positive value.\n");
+                    printf("ERROR: Correlation cutoff must be a positive fraction.\n");
                     exit(1);
                 }
                 break;            
             case 'r':
                 reg = strtod(optarg, &pEnd);
                 if (reg >= 1 || reg < 0) {
-                    printf("ERROR: regularization must be greater than or equal to 0 and less than 1\n");
+                    printf("ERROR: regularization must be a fraction greater than or equal to 0 and less than 1\n");
                     exit(1);
+                } else if (reg > 0.05) {
+                    printf("Warning: Recommended values for RegFrac are in the interval [0, 0.05]. Still running with RegFrac = %f.\n", reg);
                 }
+                
                 break;
             case 'P':
                 iPNRatio = strtod(optarg, &pEnd);
                 if (iPNRatio < 0) {
-                    printf("ERROR: Positive-Negative PWM ratio must be a positive value.\n");
+                    printf("ERROR: Positive-Negative PWM ratio must be a positive fraction.\n");
                     exit(1);
                 }
                 break;
@@ -155,7 +158,7 @@ int main(int argc, char* argv[]) {
             case 'f':
                 kmerFrac = strtod(optarg, &pEnd);
                 if (kmerFrac <= 0 || kmerFrac > 1) {
-                    printf("ERROR: Fraction K-mer used be a positive value in (0, 1].\n");
+                    printf("ERROR: Fraction K-mer used be a positive fraction in (0, 1].\n");
                     exit(1);
                 }
                 break;

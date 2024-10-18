@@ -72,6 +72,10 @@ void display_arguments() {
             "    -R            if set, consider reverse-complements of gapped k-mers to be distinct \n"
             "    -L            if set, WILL NOT automatically lower the fraction of gapped-kmer used. When set, \n"
             "                  the program will require more memory and need longer runtime \n"
+            "    -A            if set, will uses all motifs in the meme file provided. No filtering for low  \n"
+            "                  information PWMs will be done. The clustering step for PWMs will be skipped. If  \n"
+            "                  there are PWMs that are very similar, you may get singular matrices in the lasso part\n"
+            "                  of the code, and the results will be poor. \n"
             "\n");
     exit(0);
 }
@@ -90,10 +94,11 @@ int main(int argc, char* argv[]) {
     int backgroundGC = 0;
     int reverseCompl = 1;
     int kmerFracLimit = 1;
+    int AllMotifs = 0;
     char * pEnd;
 
     int c;
-    while ((c = getopt(argc, argv, "BRLd:m:i:c:l:k:f:")) != -1) {
+    while ((c = getopt(argc, argv, "BRLAd:m:i:c:l:k:f:")) != -1) {
         switch (c) {
             case 'B':
                 backgroundGC = 1;
@@ -103,6 +108,9 @@ int main(int argc, char* argv[]) {
                 break;
             case 'L':
                 kmerFracLimit = 0;
+                break;
+            case 'A':
+                AllMotifs = 1;
                 break;
             case 'm':
                 minLength = strtod(optarg, &pEnd);
@@ -114,21 +122,21 @@ int main(int argc, char* argv[]) {
             case 'i':
                 minInfo = strtod(optarg, &pEnd);
                 if (minInfo <= 0) {
-                    printf("ERROR: Minimum information content must be a positive value.\n");
+                    printf("ERROR: Minimum information content must be a positive fraction.\n");
                     exit(1);
                 }
                 break;
             case 'c':
                 corrCut = strtod(optarg, &pEnd);
-                if (corrCut <= 0) {
-                    printf("ERROR: Correlation cutoff must be a positive value.\n");
+                if (corrCut < -1 || corrCut > 1) {
+                    printf("ERROR: Correlation cutoff must be a positive fraction.\n");
                     exit(1);
                 }
                 break;
             case 'f':
                 kmerFrac = strtod(optarg, &pEnd);
                 if (kmerFrac <= 0 || kmerFrac > 1) {
-                    printf("ERROR: Fraction K-mer used be a positive value in (0, 1].\n");
+                    printf("ERROR: Fraction K-mer used be a positive fraction in (0, 1].\n");
                     exit(1);
                 }
                 break;
@@ -160,25 +168,31 @@ int main(int argc, char* argv[]) {
         printf("ERROR: k must be a positive integer smaller than l\n");
         exit(1);
     }
+    if (AllMotifs) {
+        minLength = 0;
+        minInfo = 0;
+        corrCut = 2;
+    }
+    
 
     int index = optind;
     emxArray_char_T *model_file = allocate_for_charArray(argv[index++]);
     emxArray_char_T *motif_file = allocate_for_charArray(argv[index++]);
     double numPWM = strtod(argv[index++], &pEnd);
 
-    char arr[12][50] = {"Model prefix", "Motif file", "Number of PWMs", "Minimum PWM length", 
+    char arr[13][50] = {"Model prefix", "Motif file", "Number of PWMs", "Minimum PWM length", 
                 "Minimum PWM information content", "Correlation cutoff", "K-mer fraction",
                 "Total gapped K-mer length", "Number of ungapped positions", 
                 "Average GC content", "Equivalent reverse complement K-mer", 
-                "Allow auto K-mer fraction adjustment"};
+                "Allow auto K-mer fraction adjustment", "User all motifs"};
     double arr2[6] = {minLength, minInfo, corrCut, kmerFrac, lSVM, kSVM};
-    int arr3[3] = {backgroundGC, reverseCompl, kmerFracLimit};
+    int arr3[4] = {backgroundGC, reverseCompl, kmerFracLimit, AllMotifs};
     printf("\n=====  Following Are The Command Line Arguments Passed  =====\n");
     for(int counter=1; counter<4; counter++)
         printf("\n%s: %s", arr[counter-1], argv[optind+counter-1]);
     for(int counter=4; counter<10; counter++)
         printf("\n%s: %4.2f", arr[counter-1], arr2[counter-4]);
-    for(int counter=10; counter<13; counter++)
+    for(int counter=10; counter<14; counter++)
         printf("\n%s: %s", arr[counter-1], arr3[counter-10] ? "True" : "False");
     printf("\n\n=============================================================");
     printf("\n\n");
@@ -197,7 +211,8 @@ int main(int argc, char* argv[]) {
                 backgroundGC,
                 reverseCompl,
                 kmerFrac, 
-                kmerFracLimit);
+                kmerFracLimit,
+                AllMotifs);
     
     emxFree_char_T(&model_file);
     emxFree_char_T(&motif_file);

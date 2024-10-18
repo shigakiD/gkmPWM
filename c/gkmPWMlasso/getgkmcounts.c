@@ -764,13 +764,13 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
                                'l', '.', 't', 'x', 't'};
   static const char cv[9] = {'_', 's', 'v', 's', 'e', 'q', '.', 'f', 'a'};
   cell_wrap_0 C[8];
-  cell_wrap_8 validatedHoleFilling[3];
-  cell_wrap_8 b_r;
-  cell_wrap_8 r1;
-  cell_wrap_9 *sequences_data;
+  cell_wrap_10 validatedHoleFilling[3];
+  cell_wrap_10 b_r;
+  cell_wrap_10 r1;
+  cell_wrap_11 *sequences_data;
   emxArray_boolean_T *b_x;
   emxArray_boolean_T *c_x;
-  emxArray_cell_wrap_9 *sequences;
+  emxArray_cell_wrap_11 *sequences;
   emxArray_char_T *b_fileid;
   emxArray_char_T *c_fileid;
   emxArray_char_T *cur_alpha;
@@ -841,7 +841,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   bool y;
   bool *b_x_data;
   filename_data = filename->data;
-  emxInitMatrix_cell_wrap_81(validatedHoleFilling);
+  emxInitMatrix_cell_wrap_101(validatedHoleFilling);
   /* gets the gapped kmer counts using the alphas to weight each support vector
    */
   /*  filename is the name of the support vector sequence fa ('_svseq.fa') */
@@ -870,9 +870,9 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   }
   emxInit_real_T(&alpha, 1);
   emxInit_char_T(&cur_alpha, 2);
-  emxInit_cell_wrap_9(&sequences);
-  emxInitStruct_cell_wrap_8(&b_r);
-  emxInitStruct_cell_wrap_8(&r1);
+  emxInit_cell_wrap_11(&sequences);
+  emxInitStruct_cell_wrap_10(&b_r);
+  emxInitStruct_cell_wrap_10(&r1);
   emxInit_char_T(&b_fileid, 2);
   emxInit_char_T(&c_fileid, 2);
   emxInit_char_T(&d_fileid, 2);
@@ -977,7 +977,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       vlen = (int)idx;
       i = sequences->size[0];
       sequences->size[0] = (int)idx;
-      emxEnsureCapacity_cell_wrap_9(sequences, i);
+      emxEnsureCapacity_cell_wrap_11(sequences, i);
       sequences_data = sequences->data;
       for (i = 0; i < vlen; i++) {
         sequences_data[i].f1[0].f1->size[1] = 0;
@@ -991,7 +991,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       }
       for (loop_ub = 0; loop_ub < vlen; loop_ub++) {
         /* 'getgkmcounts:41' sequences{cur_idx} = cellstr(""); */
-        emxCopyStruct_cell_wrap_8(&sequences_data[loop_ub].f1[0], &b_r);
+        emxCopyStruct_cell_wrap_10(&sequences_data[loop_ub].f1[0], &b_r);
       }
       /* 'getgkmcounts:43' frewind(fp); */
       frewind(fileid);
@@ -1000,7 +1000,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
         /* 'getgkmcounts:45' sequences{cur_idx,1} = cellstr(string(fgetl(fp)));
          */
         fgetl(fileid, r1.f1);
-        emxCopyStruct_cell_wrap_8(&sequences_data[loop_ub].f1[0], &r1);
+        emxCopyStruct_cell_wrap_10(&sequences_data[loop_ub].f1[0], &r1);
       }
       /* 'getgkmcounts:47' fclose(fp); */
       cfclose(fileid);
@@ -1081,7 +1081,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       /* 'getgkmcounts:76' sequences = cell(idx,1); */
       i = sequences->size[0];
       sequences->size[0] = (int)idx;
-      emxEnsureCapacity_cell_wrap_9(sequences, i);
+      emxEnsureCapacity_cell_wrap_11(sequences, i);
       sequences_data = sequences->data;
       for (i = 0; i < loop_ub_tmp; i++) {
         sequences_data[i].f1[0].f1->size[1] = 0;
@@ -1113,7 +1113,7 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
           /* 'getgkmcounts:85' sequences{cur_idx} =
            * cellstr(string(strip(cur_seq))); */
           strip(validatedHoleFilling[1].f1, b_r.f1);
-          emxCopyStruct_cell_wrap_8(&sequences_data[loop_ub].f1[0], &b_r);
+          emxCopyStruct_cell_wrap_10(&sequences_data[loop_ub].f1[0], &b_r);
           loop_ub++;
         }
       }
@@ -1132,7 +1132,6 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
           &validatedHoleFilling[1].f1->data[0],
           &validatedHoleFilling[2].f1->data[0]);
       fflush(stdout);
-      exit(1);
       /*  Dummy Initialization to Appease Matlab Coder */
       /* 'getgkmcounts:93' idx = 1; */
       /* 'getgkmcounts:94' alpha = zeros(idx,1); */
@@ -1145,22 +1144,23 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
       /* 'getgkmcounts:96' sequences = coder.nullcopy(sequences); */
       i = sequences->size[0];
       sequences->size[0] = 1;
-      emxEnsureCapacity_cell_wrap_9(sequences, i);
+      emxEnsureCapacity_cell_wrap_11(sequences, i);
       sequences_data = sequences->data;
       /* 'getgkmcounts:97' for cur_idx=1:idx */
       /* 'getgkmcounts:98' sequences{cur_idx} = cellstr(""); */
       b_r.f1->size[0] = 1;
       b_r.f1->size[1] = 0;
-      emxCopyStruct_cell_wrap_8(&sequences_data[0].f1[0], &b_r);
+      emxCopyStruct_cell_wrap_10(&sequences_data[0].f1[0], &b_r);
       /* 'getgkmcounts:100' ver = 0; */
       ver = 0;
+      exit(1);
     }
   }
   emxFree_char_T(&d_fileid);
   emxFree_char_T(&c_fileid);
   emxFree_char_T(&b_fileid);
-  emxFreeStruct_cell_wrap_8(&r1);
-  emxFreeStruct_cell_wrap_8(&b_r);
+  emxFreeStruct_cell_wrap_10(&r1);
+  emxFreeStruct_cell_wrap_10(&b_r);
   emxFree_char_T(&cur_alpha);
   /* 'getgkmcounts:103' if RC */
   emxInit_real_T(&x, 2);
@@ -1990,11 +1990,11 @@ void getgkmcounts(const emxArray_char_T *filename, double l, double k,
   emxFree_real_T(&r7);
   emxFree_real_T(&b_Ker);
   emxFree_boolean_T(&c_x);
-  emxFreeMatrix_cell_wrap_81(validatedHoleFilling);
+  emxFreeMatrix_cell_wrap_101(validatedHoleFilling);
   emxFree_real_T(&c_y);
   emxFree_int32_T(&r6);
   emxFree_real_T(&r4);
-  emxFree_cell_wrap_9(&sequences);
+  emxFree_cell_wrap_11(&sequences);
   emxFree_real_T(&M);
   emxFreeMatrix_cell_wrap_0(C);
   emxFree_real_T(&ss);

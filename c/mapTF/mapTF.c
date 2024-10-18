@@ -67,7 +67,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
                   emxArray_real_T *Lmat, emxArray_cell_wrap_4 *NAME);
 static void PWM_corr(const emxArray_char_T *fn, const emxArray_cell_wrap_0 *VV,
                      const emxArray_cell_wrap_7 *NN, const emxArray_cell_wrap_5 *
-                     LL, const emxArray_cell_wrap_4 *seq);
+                     LL, const emxArray_cell_wrap_4 *seq, double dsvmcut);
 static double countGC(const emxArray_cell_wrap_3 *s);
 static void d_binary_expand_op(emxArray_real_T *mat, const emxArray_real_T *D,
   int i, const emxArray_real_T *path, const emxArray_real_T *pwm_prob);
@@ -83,15 +83,16 @@ static void plus(emxArray_real_T *pwm_prob, const emxArray_real_T *b);
 static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
                    double *ind, double *M);
 static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
-  *lfn, const emxArray_char_T *memefn, const emxArray_char_T *ofn);
+  *lfn, const emxArray_char_T *memefn, const emxArray_char_T *ofn, double
+  PWMcorrcut, double Negative);
 static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
   emxArray_cell_wrap_5 *lPWM2, const emxArray_real_T *Lmat, const
   emxArray_real_T *ss, const emxArray_cell_wrap_6 *Smat, double l_svm, const
   emxArray_real_T *dsvm, emxArray_real_T *varscore);
 static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
-                   double l_svm, emxArray_cell_wrap_0 *P, emxArray_cell_wrap_1
-                   *V, emxArray_cell_wrap_2 *seqindmat, emxArray_cell_wrap_3
-                   *seqout, emxArray_cell_wrap_4 *seq);
+                   double l_svm, double Negative, emxArray_cell_wrap_0 *P,
+                   emxArray_cell_wrap_1 *V, emxArray_cell_wrap_2 *seqindmat,
+                   emxArray_cell_wrap_3 *seqout, emxArray_cell_wrap_4 *seq);
 static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
                      emxArray_real_T *len);
 
@@ -157,13 +158,13 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
   pwm_prob_data = pwm_prob->data;
   emxInit_real_T(&mat, 2);
 
-  /* 'mapTF:257' L = length(ss)-l_svm+1; */
+  /* 'mapTF:277' L = length(ss)-l_svm+1; */
   L = ((double)ss->size[1] - l_svm) + 1.0;
 
-  /* 'mapTF:258' n = sum(LEN)+1; */
+  /* 'mapTF:278' n = sum(LEN)+1; */
   name_len = blockedSummation(LEN, LEN->size[0]);
 
-  /* 'mapTF:259' mat = zeros(n,L)-Inf; */
+  /* 'mapTF:279' mat = zeros(n,L)-Inf; */
   i = mat->size[0] * mat->size[1];
   mat->size[0] = (int)(name_len + 1.0);
   loop_ub = (int)L;
@@ -177,7 +178,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 
   emxInit_int32_T(&ind, 2);
 
-  /* 'mapTF:260' ind = zeros(n,L); */
+  /* 'mapTF:280' ind = zeros(n,L); */
   i = ind->size[0] * ind->size[1];
   ind->size[0] = (int)(name_len + 1.0);
   ind->size[1] = (int)L;
@@ -189,7 +190,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 
   emxInit_real_T(&C, 1);
 
-  /* 'mapTF:261' LEN = [0;LEN]; */
+  /* 'mapTF:281' LEN = [0;LEN]; */
   i = C->size[0];
   C->size[0] = LEN->size[0] + 1;
   emxEnsureCapacity_real_T(C, i);
@@ -200,7 +201,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     C_data[i + 1] = LEN_data[i];
   }
 
-  /* 'mapTF:262' C = cumsum(LEN); */
+  /* 'mapTF:282' C = cumsum(LEN); */
   if (C->size[0] != 1) {
     i = C->size[0];
     for (k = 0; k <= i - 2; k++) {
@@ -208,7 +209,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     }
   }
 
-  /* 'mapTF:263' D = setdiff(1:C(end),C+1)'; */
+  /* 'mapTF:283' D = setdiff(1:C(end),C+1)'; */
   emxInit_real_T(&R, 2);
   R_data = R->data;
   if (rtIsNaN(C_data[C->size[0] - 1])) {
@@ -267,7 +268,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 
   emxFree_real_T(&c);
 
-  /* 'mapTF:264' C2 = [C(2:end);n]; */
+  /* 'mapTF:284' C2 = [C(2:end);n]; */
   if (2 > C->size[0]) {
     i = 0;
     i1 = 0;
@@ -289,8 +290,8 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
   emxInit_real_T(&neg, 1);
   C2_data[b_loop_ub] = name_len + 1.0;
 
-  /* 'mapTF:265' pos = log(gkmprob); */
-  /* 'mapTF:266' neg = log(1-gkmprob); */
+  /* 'mapTF:285' pos = log(gkmprob); */
+  /* 'mapTF:286' neg = log(1-gkmprob); */
   i = neg->size[0];
   neg->size[0] = gkmprob->size[0];
   emxEnsureCapacity_real_T(neg, i);
@@ -307,7 +308,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 
   emxInit_real_T(&path, 1);
 
-  /* 'mapTF:267' pwm_prob = pwm_prob+repmat(pos',n-1,1); */
+  /* 'mapTF:287' pwm_prob = pwm_prob+repmat(pos',n-1,1); */
   i = path->size[0];
   path->size[0] = gkmprob->size[0];
   emxEnsureCapacity_real_T(path, i);
@@ -347,18 +348,18 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     pwm_prob_data = pwm_prob->data;
   }
 
-  /* 'mapTF:268' for i = 1:a */
+  /* 'mapTF:288' for i = 1:a */
   i = (int)a;
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:269' mat(C(i)+1,1) = pwm_prob(C(i)+1,1); */
+    /* 'mapTF:289' mat(C(i)+1,1) = pwm_prob(C(i)+1,1); */
     nx = (int)(C_data[b_i] + 1.0) - 1;
     mat_data[nx] = pwm_prob_data[nx];
   }
 
-  /* 'mapTF:271' mat(n,1) = neg(1); */
+  /* 'mapTF:291' mat(n,1) = neg(1); */
   mat_data[(int)(name_len + 1.0) - 1] = neg_data[0];
 
-  /* 'mapTF:272' ind(D,:) = repmat(D-1,1,L); */
+  /* 'mapTF:292' ind(D,:) = repmat(D-1,1,L); */
   i1 = path->size[0];
   path->size[0] = D->size[0];
   emxEnsureCapacity_real_T(path, i1);
@@ -392,12 +393,12 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 
   emxFree_real_T(&b);
 
-  /* 'mapTF:273' for i = 2:L */
+  /* 'mapTF:293' for i = 2:L */
   i1 = (int)(L + -1.0);
   for (b_i = 0; b_i < i1; b_i++) {
-    /* 'mapTF:274' for j = 1:a */
+    /* 'mapTF:294' for j = 1:a */
     for (k = 0; k < i; k++) {
-      /* 'mapTF:275' [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(C2,i-1)+pwm_prob(C(j)+1,i)); */
+      /* 'mapTF:295' [mat(C(j)+1,i),ind(C(j)+1,i)] = max(mat(C2,i-1)+pwm_prob(C(j)+1,i)); */
       ibmat = (int)(C_data[k] + 1.0) - 1;
       b_pwm_prob = pwm_prob_data[ibmat + pwm_prob->size[0] * (b_i + 1)];
       i2 = b_C->size[0];
@@ -415,12 +416,12 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
         b_pwm_prob;
       ind_data[ibmat + ind->size[0] * (b_i + 1)] = nx;
 
-      /* 'mapTF:276' ind(C(j)+1,i) = C2(ind(C(j)+1,i)); */
+      /* 'mapTF:296' ind(C(j)+1,i) = C2(ind(C(j)+1,i)); */
       ind_data[ibmat + ind->size[0] * (b_i + 1)] = (int)C2_data[ind_data[ibmat +
         ind->size[0] * (b_i + 1)] - 1];
     }
 
-    /* 'mapTF:278' mat(D,i) = mat(D-1,i-1)+pwm_prob(D,i); */
+    /* 'mapTF:298' mat(D,i) = mat(D-1,i-1)+pwm_prob(D,i); */
     b_loop_ub = D->size[0];
     i2 = path->size[0];
     path->size[0] = D->size[0];
@@ -442,7 +443,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
       mat_data = mat->data;
     }
 
-    /* 'mapTF:279' [mat(n,i),ind(n,i)] = max(mat(C2,i-1)+neg(i)); */
+    /* 'mapTF:299' [mat(n,i),ind(n,i)] = max(mat(C2,i-1)+neg(i)); */
     i2 = b_C->size[0];
     b_C->size[0] = C2->size[0];
     emxEnsureCapacity_real_T(b_C, i2);
@@ -458,7 +459,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
       b_pwm_prob;
     ind_data[((int)(name_len + 1.0) + ind->size[0] * (b_i + 1)) - 1] = nx;
 
-    /* 'mapTF:280' ind(n,i) = C2(ind(n,i)); */
+    /* 'mapTF:300' ind(n,i) = C2(ind(n,i)); */
     ind_data[((int)(name_len + 1.0) + ind->size[0] * (b_i + 1)) - 1] = (int)
       C2_data[ind_data[((int)(name_len + 1.0) + ind->size[0] * (b_i + 1)) - 1] -
       1];
@@ -469,7 +470,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
   emxFree_real_T(&D);
   emxFree_real_T(&mat);
 
-  /* 'mapTF:282' path = zeros(L,1); */
+  /* 'mapTF:302' path = zeros(L,1); */
   i = path->size[0];
   path->size[0] = (int)L;
   emxEnsureCapacity_real_T(path, i);
@@ -478,15 +479,15 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     path_data[i] = 0.0;
   }
 
-  /* 'mapTF:283' path(end) = n; */
+  /* 'mapTF:303' path(end) = n; */
   path_data[(int)L - 1] = name_len + 1.0;
 
-  /* 'mapTF:285' for i = L-1:-1:1 */
+  /* 'mapTF:305' for i = L-1:-1:1 */
   i = (int)-((-1.0 - (L - 1.0)) + 1.0);
   for (b_i = 0; b_i < i; b_i++) {
     name_len = (L - 1.0) + -(double)b_i;
 
-    /* 'mapTF:286' path(i) = ind(path(i+1),i+1); */
+    /* 'mapTF:306' path(i) = ind(path(i+1),i+1); */
     path_data[(int)name_len - 1] = ind_data[((int)path_data[(int)(unsigned int)
       name_len] + ind->size[0] * (int)(unsigned int)name_len) - 1];
   }
@@ -495,18 +496,18 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
   emxInit_real_T(&L2, 2);
   C2_data = L2->data;
 
-  /* 'mapTF:289' total_len = length(ss); */
-  /* 'mapTF:290' for i = 1:a */
-  /* 'mapTF:303' L2 = []; */
+  /* 'mapTF:309' total_len = length(ss); */
+  /* 'mapTF:310' for i = 1:a */
+  /* 'mapTF:323' L2 = []; */
   L2->size[0] = 0;
   L2->size[1] = 4;
 
-  /* 'mapTF:304' for i = 1:length(LEN_2) */
+  /* 'mapTF:324' for i = 1:length(LEN_2) */
   i = LEN_2->size[0];
   emxInit_boolean_T(&b_path, 1);
   emxInit_real_T(&b_L2, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:305' f = find(path==C(i)+1); */
+    /* 'mapTF:325' f = find(path==C(i)+1); */
     loop_ub = path->size[0];
     i1 = b_path->size[0];
     b_path->size[0] = path->size[0];
@@ -519,17 +520,17 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     eml_find(b_path, f);
     ind_data = f->data;
 
-    /* 'mapTF:306' if ~isempty(f) */
+    /* 'mapTF:326' if ~isempty(f) */
     if (f->size[0] != 0) {
-      /* 'mapTF:307' for j = 1:length(f) */
+      /* 'mapTF:327' for j = 1:length(f) */
       i1 = f->size[0];
       for (k = 0; k < i1; k++) {
-        /* 'mapTF:308' if f(j)+shift(i)+LEN_2(i)< length(ss)-l_svm+1 && f(j)+shift(i) > l_svm-1 */
+        /* 'mapTF:328' if f(j)+shift(i)+LEN_2(i)< length(ss)-l_svm+1 && f(j)+shift(i) > l_svm-1 */
         i2 = ind_data[k];
         name_len = (double)i2 + shift_data[b_i];
         if ((name_len + LEN_2_data[b_i] < ((double)ss->size[1] - l_svm) + 1.0) &&
             (name_len > l_svm - 1.0)) {
-          /* 'mapTF:309' [~,ind] = max(gkmprob(f(j):f(j)+2*shift(i)+LEN_2(i)-l_svm)); */
+          /* 'mapTF:329' [~,ind] = max(gkmprob(f(j):f(j)+2*shift(i)+LEN_2(i)-l_svm)); */
           name_len = (((double)i2 + 2.0 * shift_data[b_i]) + LEN_2_data[b_i]) -
             l_svm;
           if (i2 > name_len) {
@@ -551,11 +552,11 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 
           d_maximum(b_C, &name_len, &nx);
 
-          /* 'mapTF:310' if f(j)-1+ind < 3 */
+          /* 'mapTF:330' if f(j)-1+ind < 3 */
           i2 = ind_data[k];
           name_len = ((double)i2 - 1.0) + (double)nx;
           if (name_len < 3.0) {
-            /* 'mapTF:311' R = 1:5; */
+            /* 'mapTF:331' R = 1:5; */
             nx = R->size[0] * R->size[1];
             R->size[0] = 1;
             R->size[1] = 5;
@@ -565,8 +566,8 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
               R_data[nx] = (double)nx + 1.0;
             }
           } else if (name_len > L - 2.0) {
-            /* 'mapTF:312' elseif f(j)-1+ind > L-2 */
-            /* 'mapTF:313' R = L-4:L; */
+            /* 'mapTF:332' elseif f(j)-1+ind > L-2 */
+            /* 'mapTF:333' R = L-4:L; */
             if (L < L - 4.0) {
               R->size[0] = 1;
               R->size[1] = 0;
@@ -592,8 +593,8 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
               R_data = R->data;
             }
           } else {
-            /* 'mapTF:314' else */
-            /* 'mapTF:315' R = f(j)+ind-3:f(j)+ind+1; */
+            /* 'mapTF:334' else */
+            /* 'mapTF:335' R = f(j)+ind-3:f(j)+ind+1; */
             name_len = (double)i2 + (double)nx;
             if (name_len + 1.0 < name_len - 3.0) {
               R->size[0] = 1;
@@ -614,7 +615,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
             }
           }
 
-          /* 'mapTF:317' L2 = [L2; f(j)+shift(i) f(j)+shift(i)+LEN_2(i)-1 mean(gkmprob(R)) i]; */
+          /* 'mapTF:337' L2 = [L2; f(j)+shift(i) f(j)+shift(i)+LEN_2(i)-1 mean(gkmprob(R)) i]; */
           nx = b_C->size[0];
           b_C->size[0] = R->size[1];
           emxEnsureCapacity_real_T(b_C, nx);
@@ -663,11 +664,11 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
   emxFree_real_T(&R);
   emxFree_real_T(&C);
 
-  /* 'mapTF:322' name_len = numel(L2)/4; */
+  /* 'mapTF:342' name_len = numel(L2)/4; */
   name_len = (double)(L2->size[0] << 2) / 4.0;
 
-  /* 'mapTF:323' NAME = cell(name_len,1); */
-  /* 'mapTF:324' Lmat = zeros(name_len,4); */
+  /* 'mapTF:343' NAME = cell(name_len,1); */
+  /* 'mapTF:344' Lmat = zeros(name_len,4); */
   i = (int)name_len;
   i1 = Lmat->size[0] * Lmat->size[1];
   Lmat->size[0] = (int)name_len;
@@ -679,20 +680,20 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     Lmat_data[i1] = 0.0;
   }
 
-  /* 'mapTF:325' for i=1:name_len */
+  /* 'mapTF:345' for i=1:name_len */
   i1 = NAME->size[0];
   NAME->size[0] = (int)name_len;
   emxEnsureCapacity_cell_wrap_4(NAME, i1);
   NAME_data = NAME->data;
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:326' NAME{i} = ''; */
+    /* 'mapTF:346' NAME{i} = ''; */
     NAME_data[b_i].f1->size[0] = 1;
     NAME_data[b_i].f1->size[1] = 0;
   }
 
-  /* 'mapTF:328' if ~isempty(L2) */
+  /* 'mapTF:348' if ~isempty(L2) */
   if (L2->size[0] != 0) {
-    /* 'mapTF:329' [~,b] = sort(L2(:,1)); */
+    /* 'mapTF:349' [~,b] = sort(L2(:,1)); */
     loop_ub = L2->size[0];
     i1 = path->size[0];
     path->size[0] = L2->size[0];
@@ -705,7 +706,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     sort(path, f);
     ind_data = f->data;
 
-    /* 'mapTF:330' L2 = L2(b,:); */
+    /* 'mapTF:350' L2 = L2(b,:); */
     i1 = b_L2->size[0] * b_L2->size[1];
     b_L2->size[0] = f->size[0];
     b_L2->size[1] = 4;
@@ -729,7 +730,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
       C2_data[i1] = Lmat_data[i1];
     }
 
-    /* 'mapTF:331' for i = 1:name_len */
+    /* 'mapTF:351' for i = 1:name_len */
     i1 = NAME->size[0];
     NAME->size[0] = (int)name_len;
     emxEnsureCapacity_cell_wrap_4(NAME, i1);
@@ -740,7 +741,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
     emxEnsureCapacity_real_T(Lmat, i1);
     Lmat_data = Lmat->data;
     for (b_i = 0; b_i < i; b_i++) {
-      /* 'mapTF:332' NAME{i} = names{L2(i,4)}; */
+      /* 'mapTF:352' NAME{i} = names{L2(i,4)}; */
       i1 = NAME_data[b_i].f1->size[0] * NAME_data[b_i].f1->size[1];
       NAME_data[b_i].f1->size[0] = 1;
       NAME_data[b_i].f1->size[1] = names_data[(int)C2_data[b_i + L2->size[0] * 3]
@@ -752,7 +753,7 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
           3] - 1].f1->data[i1];
       }
 
-      /* 'mapTF:333' Lmat(i,:) = [L2(i,4) L2(i,1) L2(i,2) L2(i,3)]; */
+      /* 'mapTF:353' Lmat(i,:) = [L2(i,4) L2(i,1) L2(i,2) L2(i,3)]; */
       Lmat_data[b_i] = C2_data[b_i + L2->size[0] * 3];
       Lmat_data[b_i + Lmat->size[0]] = C2_data[b_i];
       Lmat_data[b_i + Lmat->size[0] * 2] = C2_data[b_i + L2->size[0]];
@@ -767,11 +768,11 @@ static void MAPTF(const emxArray_real_T *ss, emxArray_real_T *pwm_prob, double
 }
 
 /*
- * function PWM_corr(fn, VV, NN, LL, seq)
+ * function PWM_corr(fn, VV, NN, LL, seq, dsvmcut)
  */
 static void PWM_corr(const emxArray_char_T *fn, const emxArray_cell_wrap_0 *VV,
                      const emxArray_cell_wrap_7 *NN, const emxArray_cell_wrap_5 *
-                     LL, const emxArray_cell_wrap_4 *seq)
+                     LL, const emxArray_cell_wrap_4 *seq, double dsvmcut)
 {
   static const char b_cv[19] = { '_', 'T', 'F', 'B', 'S', '_', 'l', 'o', 'c',
     'a', 't', 'i', 'o', 'n', 's', '.', 'o', 'u', 't' };
@@ -809,8 +810,8 @@ static void PWM_corr(const emxArray_char_T *fn, const emxArray_cell_wrap_0 *VV,
   fn_data = fn->data;
   emxInit_char_T(&s, 2);
 
-  /* 'mapTF:436' n = length(VV); */
-  /* 'mapTF:437' fid1 = fopen([fn '_TFBS_locations.out'],'w'); */
+  /* 'mapTF:456' n = length(VV); */
+  /* 'mapTF:457' fid1 = fopen([fn '_TFBS_locations.out'],'w'); */
   i = s->size[0] * s->size[1];
   s->size[0] = 1;
   s->size[1] = fn->size[1] + 19;
@@ -827,15 +828,15 @@ static void PWM_corr(const emxArray_char_T *fn, const emxArray_cell_wrap_0 *VV,
 
   fileid = cfopen(s, "wb");
 
-  /* 'mapTF:438' for j = 1:n */
+  /* 'mapTF:458' for j = 1:n */
   i = VV->size[0];
   emxInit_char_T(&varargin_2, 2);
   emxInit_char_T(&varargin_8, 2);
   for (j = 0; j < i; j++) {
-    /* 'mapTF:439' NAME = NN{j}; */
-    /* 'mapTF:440' Lmat = LL{j}; */
-    /* 'mapTF:441' varscore = VV{j}; */
-    /* 'mapTF:442' s = seq{j*2}; */
+    /* 'mapTF:459' NAME = NN{j}; */
+    /* 'mapTF:460' Lmat = LL{j}; */
+    /* 'mapTF:461' varscore = VV{j}; */
+    /* 'mapTF:462' s = seq{j*2}; */
     i1 = s->size[0] * s->size[1];
     s->size[0] = 1;
     loop_ub_tmp = ((j + 1) << 1) - 1;
@@ -847,15 +848,15 @@ static void PWM_corr(const emxArray_char_T *fn, const emxArray_cell_wrap_0 *VV,
       s_data[i1] = seq_data[loop_ub_tmp].f1->data[i1];
     }
 
-    /* 'mapTF:443' L = length(NAME); */
-    /* 'mapTF:444' for i = 1:L */
+    /* 'mapTF:463' L = length(NAME); */
+    /* 'mapTF:464' for i = 1:L */
     i1 = NN_data[j].f1->size[0];
     for (b_i = 0; b_i < i1; b_i++) {
-      /* 'mapTF:445' if varscore(i) > 0.6 */
-      if (VV_data[j].f1->data[b_i] > 0.6) {
-        /* 'mapTF:446' fprintf(fid1, '%d\t%s\t%d\t%d\t%d\t%f\t%f\t%s\n', int32(j), NAME{i}, ... */
-        /* 'mapTF:447'                 int32(Lmat(i,1)), int32(Lmat(i,2)), ... */
-        /* 'mapTF:448'                 int32(Lmat(i,3)), Lmat(i,4), varscore(i), s(Lmat(i,2):Lmat(i,3))); */
+      /* 'mapTF:465' if varscore(i) > dsvmcut */
+      if (VV_data[j].f1->data[b_i] > dsvmcut) {
+        /* 'mapTF:466' fprintf(fid1, '%d\t%s\t%d\t%d\t%d\t%f\t%f\t%s\n', int32(j), NAME{i}, ... */
+        /* 'mapTF:467'                 int32(Lmat(i,1)), int32(Lmat(i,2)), ... */
+        /* 'mapTF:468'                 int32(Lmat(i,3)), Lmat(i,4), varscore(i), s(Lmat(i,2):Lmat(i,3))); */
         d = LL_data[j].f1->data[b_i + LL_data[j].f1->size[0]];
         d1 = LL_data[j].f1->data[b_i + LL_data[j].f1->size[0] * 2];
         if (d > d1) {
@@ -911,7 +912,7 @@ static void PWM_corr(const emxArray_char_T *fn, const emxArray_cell_wrap_0 *VV,
   emxFree_char_T(&varargin_2);
   emxFree_char_T(&s);
 
-  /* 'mapTF:452' fclose(fid1); */
+  /* 'mapTF:472' fclose(fid1); */
   cfclose(fileid);
 }
 
@@ -930,33 +931,33 @@ static double countGC(const emxArray_cell_wrap_3 *s)
   int j;
   s_data = s->data;
 
-  /* 'mapTF:612' GC = 0; */
+  /* 'mapTF:637' GC = 0; */
   GC = 0.0;
 
-  /* 'mapTF:613' L = 0; */
+  /* 'mapTF:638' L = 0; */
   L = 0.0;
 
-  /* 'mapTF:614' for i = 1:length(s) */
+  /* 'mapTF:639' for i = 1:length(s) */
   i = s->size[0];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:615' S = s{i}; */
-    /* 'mapTF:616' N = length(S); */
-    /* 'mapTF:617' L = N + L; */
+    /* 'mapTF:640' S = s{i}; */
+    /* 'mapTF:641' N = length(S); */
+    /* 'mapTF:642' L = N + L; */
     i1 = s_data[b_i].f1->size[1];
     L += (double)s_data[b_i].f1->size[1];
 
-    /* 'mapTF:618' for j = 1:N */
+    /* 'mapTF:643' for j = 1:N */
     for (j = 0; j < i1; j++) {
-      /* 'mapTF:619' if S(j) == 2 || S(j) == 3 */
+      /* 'mapTF:644' if S(j) == 2 || S(j) == 3 */
       d = s_data[b_i].f1->data[j];
       if ((d == 2.0) || (d == 3.0)) {
-        /* 'mapTF:620' GC = GC + 1; */
+        /* 'mapTF:645' GC = GC + 1; */
         GC++;
       }
     }
   }
 
-  /* 'mapTF:624' GC = GC/L; */
+  /* 'mapTF:649' GC = GC/L; */
   GC /= L;
   return GC;
 }
@@ -1035,7 +1036,7 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
   bool b_bool;
   fn_data = fn->data;
 
-  /* 'mapTF:387' fid = fopen(fn); */
+  /* 'mapTF:407' fid = fopen(fn); */
   b_bool = false;
   if (fn->size[1] == 3) {
     ret = 0;
@@ -1061,15 +1062,15 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     fid = fileid;
   }
 
-  /* 'mapTF:388' if fid < 0 */
+  /* 'mapTF:408' if fid < 0 */
   if (fid < 0) {
-    /* 'mapTF:389' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
+    /* 'mapTF:409' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
     printf("ERROR: Cannot open gkmPWM motif files\n");
     fflush(stdout);
     exit(1);
   }
 
-  /* 'mapTF:391' curr_pos = ftell(fid); */
+  /* 'mapTF:411' curr_pos = ftell(fid); */
   getfilestar(fid, &filestar, &b_bool);
   if ((fid == 0) || (fid == 1) || (fid == 2)) {
     filestar = NULL;
@@ -1082,10 +1083,10 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     curr_pos = (double)position_t;
   }
 
-  /* 'mapTF:392' idx=0; */
+  /* 'mapTF:412' idx=0; */
   idx = 0.0;
 
-  /* 'mapTF:393' while ~feof(fid) */
+  /* 'mapTF:413' while ~feof(fid) */
   b_NULL = NULL;
   emxInit_char_T(&line, 2);
   do {
@@ -1099,11 +1100,11 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     }
 
     if (ret == 0) {
-      /* 'mapTF:394' line = fgetl(fid); */
+      /* 'mapTF:414' line = fgetl(fid); */
       fgetl(fid, line);
       line_data = line->data;
 
-      /* 'mapTF:395' if length(line) >= 5 && strcmp(line(1:5), 'MOTIF') */
+      /* 'mapTF:415' if length(line) >= 5 && strcmp(line(1:5), 'MOTIF') */
       if (line->size[1] >= 5) {
         for (i = 0; i < 5; i++) {
           a[i] = line_data[i];
@@ -1111,7 +1112,7 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
 
         ret = memcmp(&a[0], &b[0], 5);
         if (ret == 0) {
-          /* 'mapTF:396' idx=idx+1; */
+          /* 'mapTF:416' idx=idx+1; */
           idx++;
         }
       }
@@ -1120,7 +1121,7 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     }
   } while (exitg1 == 0);
 
-  /* 'mapTF:399' fseek(fid, curr_pos, 'bof'); */
+  /* 'mapTF:419' fseek(fid, curr_pos, 'bof'); */
   wherefrom = SEEK_SET;
   if ((!rtIsInf(curr_pos)) && (!rtIsNaN(curr_pos)) && (floor(curr_pos) ==
        curr_pos)) {
@@ -1134,15 +1135,15 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     }
   }
 
-  /* 'mapTF:401' mat = cell(idx, 1); */
+  /* 'mapTF:421' mat = cell(idx, 1); */
   ret = (int)idx;
   i = mat->size[0];
   mat->size[0] = (int)idx;
   emxEnsureCapacity_cell_wrap_5(mat, i);
   mat_data = mat->data;
 
-  /* 'mapTF:402' mat = coder.nullcopy(mat); */
-  /* 'mapTF:403' names = cell(idx, 1); */
+  /* 'mapTF:422' mat = coder.nullcopy(mat); */
+  /* 'mapTF:423' names = cell(idx, 1); */
   i = names->size[0];
   names->size[0] = (int)idx;
   emxEnsureCapacity_cell_wrap_4(names, i);
@@ -1154,8 +1155,8 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     names_data[i].f1->size[1] = 0;
   }
 
-  /* 'mapTF:404' names = coder.nullcopy(names); */
-  /* 'mapTF:405' len = zeros(idx, 1); */
+  /* 'mapTF:424' names = coder.nullcopy(names); */
+  /* 'mapTF:425' len = zeros(idx, 1); */
   i = len->size[0];
   len->size[0] = (int)idx;
   emxEnsureCapacity_real_T(len, i);
@@ -1164,10 +1165,10 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     len_data[i] = 0.0;
   }
 
-  /* 'mapTF:407' i=0; */
+  /* 'mapTF:427' i=0; */
   b_i = 0U;
 
-  /* 'mapTF:408' while ~feof(fid) */
+  /* 'mapTF:428' while ~feof(fid) */
   b_NULL = NULL;
   emxInit_real_T(&tmp, 2);
   emxInit_char_T(&v1, 2);
@@ -1185,11 +1186,11 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
     }
 
     if (ret == 0) {
-      /* 'mapTF:409' line = fgetl(fid); */
+      /* 'mapTF:429' line = fgetl(fid); */
       fgetl(fid, line);
       line_data = line->data;
 
-      /* 'mapTF:410' if length(line) < 5 || ~strcmp(line(1:5), 'MOTIF') */
+      /* 'mapTF:430' if length(line) < 5 || ~strcmp(line(1:5), 'MOTIF') */
       if (line->size[1] >= 5) {
         for (i = 0; i < 5; i++) {
           a[i] = line_data[i];
@@ -1197,18 +1198,18 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
 
         ret = memcmp(&a[0], &b[0], 5);
         if (ret == 0) {
-          /* 'mapTF:413' i = i + 1; */
+          /* 'mapTF:433' i = i + 1; */
           b_i++;
 
-          /* 'mapTF:414' names{i} = fgetl(fid); */
+          /* 'mapTF:434' names{i} = fgetl(fid); */
           fgetl(fid, names_data[(int)b_i - 1].f1);
 
-          /* 'mapTF:415' len(i) = real(str2double(fgetl(fid))); */
+          /* 'mapTF:435' len(i) = real(str2double(fgetl(fid))); */
           fgetl(fid, line);
           dc = str2double(line);
           len_data[(int)b_i - 1] = dc.re;
 
-          /* 'mapTF:416' tmp = zeros(len(i), 4); */
+          /* 'mapTF:436' tmp = zeros(len(i), 4); */
           i = (int)len_data[(int)b_i - 1];
           ret = tmp->size[0] * tmp->size[1];
           tmp->size[0] = i;
@@ -1220,27 +1221,27 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
             tmp_data[i] = 0.0;
           }
 
-          /* 'mapTF:417' line_count = 1; */
+          /* 'mapTF:437' line_count = 1; */
           line_count = 1U;
 
-          /* 'mapTF:418' line = fgetl(fid); */
+          /* 'mapTF:438' line = fgetl(fid); */
           fgetl(fid, line);
 
-          /* 'mapTF:419' while ~isempty(line) */
+          /* 'mapTF:439' while ~isempty(line) */
           while (line->size[1] != 0) {
-            /* 'mapTF:420' [v1, remain] = strtok(line); */
+            /* 'mapTF:440' [v1, remain] = strtok(line); */
             b_strtok(line, v1, remain);
 
-            /* 'mapTF:421' [v2, remain] = strtok(remain); */
+            /* 'mapTF:441' [v2, remain] = strtok(remain); */
             b_strtok(remain, v2, b_remain);
 
-            /* 'mapTF:422' [v3, v4] = strtok(remain); */
+            /* 'mapTF:442' [v3, v4] = strtok(remain); */
             b_strtok(b_remain, line, remain);
 
-            /* 'mapTF:423' vals = [real(str2double(v1)),  */
-            /* 'mapTF:424'                 real(str2double(v2)),  */
-            /* 'mapTF:425'                 real(str2double(v3)),  */
-            /* 'mapTF:426'                 real(str2double(v4))]'; */
+            /* 'mapTF:443' vals = [real(str2double(v1)),  */
+            /* 'mapTF:444'                 real(str2double(v2)),  */
+            /* 'mapTF:445'                 real(str2double(v3)),  */
+            /* 'mapTF:446'                 real(str2double(v4))]'; */
             dc = str2double(v1);
             dc1 = str2double(v2);
             dc2 = str2double(line);
@@ -1250,15 +1251,15 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
             tmp_data[((int)line_count + tmp->size[0] * 2) - 1] = dc2.re;
             tmp_data[((int)line_count + tmp->size[0] * 3) - 1] = dc3.re;
 
-            /* 'mapTF:427' tmp(line_count,:) = vals; */
-            /* 'mapTF:428' line = fgetl(fid); */
+            /* 'mapTF:447' tmp(line_count,:) = vals; */
+            /* 'mapTF:448' line = fgetl(fid); */
             fgetl(fid, line);
 
-            /* 'mapTF:429' line_count = line_count + 1; */
+            /* 'mapTF:449' line_count = line_count + 1; */
             line_count++;
           }
 
-          /* 'mapTF:431' mat{i} = tmp; */
+          /* 'mapTF:451' mat{i} = tmp; */
           i = mat_data[(int)b_i - 1].f1->size[0] * mat_data[(int)b_i - 1]
             .f1->size[1];
           mat_data[(int)b_i - 1].f1->size[0] = tmp->size[0];
@@ -1282,7 +1283,7 @@ static void getMOTIF(const emxArray_char_T *fn, emxArray_cell_wrap_5 *mat,
   emxFree_real_T(&tmp);
   emxFree_char_T(&line);
 
-  /* 'mapTF:433' fclose(fid); */
+  /* 'mapTF:453' fclose(fid); */
   cfclose(fid);
 }
 
@@ -1343,7 +1344,7 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
 
   /*  filename is the meme file that contains the motifs; */
   /*  n is the nth motif in the file */
-  /* 'mapTF:905' fid = fopen(filename); */
+  /* 'mapTF:934' fid = fopen(filename); */
   b_bool = false;
   if (filename->size[1] == 3) {
     ret = 0;
@@ -1369,15 +1370,15 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     fid = fileid;
   }
 
-  /* 'mapTF:906' if fid < 0 */
+  /* 'mapTF:935' if fid < 0 */
   if (fid < 0) {
-    /* 'mapTF:907' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
+    /* 'mapTF:936' fprintf('ERROR: Cannot open gkmPWM motif files\n'); */
     printf("ERROR: Cannot open gkmPWM motif files\n");
     fflush(stdout);
     exit(1);
   }
 
-  /* 'mapTF:909' curr_pos = ftell(fid); */
+  /* 'mapTF:938' curr_pos = ftell(fid); */
   getfilestar(fid, &filestar, &b_bool);
   if ((fid == 0) || (fid == 1) || (fid == 2)) {
     filestar = NULL;
@@ -1390,10 +1391,10 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     curr_pos = (double)position_t;
   }
 
-  /* 'mapTF:910' idx=0; */
+  /* 'mapTF:939' idx=0; */
   idx = 0.0;
 
-  /* 'mapTF:911' while ~feof(fid) */
+  /* 'mapTF:940' while ~feof(fid) */
   b_NULL = NULL;
   emxInit_char_T(&line, 2);
   do {
@@ -1407,11 +1408,11 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     }
 
     if (ret == 0) {
-      /* 'mapTF:912' line = fgetl(fid); */
+      /* 'mapTF:941' line = fgetl(fid); */
       fgetl(fid, line);
       line_data = line->data;
 
-      /* 'mapTF:913' if length(line) >= 5 && strcmp(line(1:5), 'MOTIF') */
+      /* 'mapTF:942' if length(line) >= 5 && strcmp(line(1:5), 'MOTIF') */
       if (line->size[1] >= 5) {
         for (i = 0; i < 5; i++) {
           a[i] = line_data[i];
@@ -1419,7 +1420,7 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
 
         ret = memcmp(&a[0], &b[0], 5);
         if (ret == 0) {
-          /* 'mapTF:914' idx=idx+1; */
+          /* 'mapTF:943' idx=idx+1; */
           idx++;
         }
       }
@@ -1428,7 +1429,7 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     }
   } while (exitg1 == 0);
 
-  /* 'mapTF:917' fseek(fid, curr_pos, 'bof'); */
+  /* 'mapTF:946' fseek(fid, curr_pos, 'bof'); */
   wherefrom = SEEK_SET;
   if ((!rtIsInf(curr_pos)) && (!rtIsNaN(curr_pos)) && (floor(curr_pos) ==
        curr_pos)) {
@@ -1442,7 +1443,7 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     }
   }
 
-  /* 'mapTF:919' mat = cell(idx, 1); */
+  /* 'mapTF:948' mat = cell(idx, 1); */
   ret = (int)idx;
   i = mat->size[0];
   mat->size[0] = (int)idx;
@@ -1453,8 +1454,8 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     mat_data[i].f1->size[1] = 0;
   }
 
-  /* 'mapTF:920' mat = coder.nullcopy(mat); */
-  /* 'mapTF:921' w = zeros(idx, 1); */
+  /* 'mapTF:949' mat = coder.nullcopy(mat); */
+  /* 'mapTF:950' w = zeros(idx, 1); */
   i = w->size[0];
   w->size[0] = (int)idx;
   emxEnsureCapacity_real_T(w, i);
@@ -1463,10 +1464,10 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     w_data[i] = 0.0;
   }
 
-  /* 'mapTF:923' i = 0; */
+  /* 'mapTF:952' i = 0; */
   b_i = 0U;
 
-  /* 'mapTF:924' while ~feof(fid) */
+  /* 'mapTF:953' while ~feof(fid) */
   b_NULL = NULL;
   emxInit_char_T(&a__9, 2);
   emxInit_char_T(&a__12, 2);
@@ -1488,11 +1489,11 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
     }
 
     if (ret == 0) {
-      /* 'mapTF:925' line = fgetl(fid); */
+      /* 'mapTF:954' line = fgetl(fid); */
       fgetl(fid, line);
       line_data = line->data;
 
-      /* 'mapTF:926' if length(line) < 5 || ~strcmp(line(1:5), 'MOTIF') */
+      /* 'mapTF:955' if length(line) < 5 || ~strcmp(line(1:5), 'MOTIF') */
       if (line->size[1] >= 5) {
         for (i = 0; i < 5; i++) {
           a[i] = line_data[i];
@@ -1500,42 +1501,42 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
 
         ret = memcmp(&a[0], &b[0], 5);
         if (ret == 0) {
-          /* 'mapTF:929' i = i + 1; */
+          /* 'mapTF:958' i = i + 1; */
           b_i++;
 
-          /* 'mapTF:930' line = fgetl(fid); */
+          /* 'mapTF:959' line = fgetl(fid); */
           fgetl(fid, line);
           line_data = line->data;
 
-          /* 'mapTF:932' [~, remain] = strtok(line); */
+          /* 'mapTF:961' [~, remain] = strtok(line); */
           b_strtok(line, a__9, remain);
 
-          /* 'mapTF:933' [curr_w, remain] = strtok(remain); */
+          /* 'mapTF:962' [curr_w, remain] = strtok(remain); */
           b_strtok(remain, curr_w, b_remain);
 
-          /* 'mapTF:934' [~, remain] = strtok(remain); */
+          /* 'mapTF:963' [~, remain] = strtok(remain); */
           b_strtok(b_remain, a__9, remain);
 
-          /* 'mapTF:935' [curr_alphabet, remain] = strtok(remain); */
+          /* 'mapTF:964' [curr_alphabet, remain] = strtok(remain); */
           b_strtok(remain, curr_alphabet, b_remain);
 
-          /* 'mapTF:936' [~, remain] = strtok(remain); */
+          /* 'mapTF:965' [~, remain] = strtok(remain); */
           b_strtok(b_remain, a__9, remain);
 
-          /* 'mapTF:937' [curr_length, ~] = strtok(remain); */
+          /* 'mapTF:966' [curr_length, ~] = strtok(remain); */
           b_strtok(remain, a__9, a__12);
 
-          /* 'mapTF:938' w(i) = real(str2double(curr_w)); */
+          /* 'mapTF:967' w(i) = real(str2double(curr_w)); */
           dc = str2double(curr_w);
           w_data[(int)b_i - 1] = dc.re;
 
-          /* 'mapTF:939' curr_alphabet = real(str2double(curr_alphabet)); */
+          /* 'mapTF:968' curr_alphabet = real(str2double(curr_alphabet)); */
           dc = str2double(curr_alphabet);
 
-          /* 'mapTF:940' curr_length = real(str2double(curr_length)); */
+          /* 'mapTF:969' curr_length = real(str2double(curr_length)); */
           dc1 = str2double(a__9);
 
-          /* 'mapTF:941' tmp = zeros(curr_length, curr_alphabet); */
+          /* 'mapTF:970' tmp = zeros(curr_length, curr_alphabet); */
           i = tmp->size[0] * tmp->size[1];
           tmp->size[0] = (int)dc1.re;
           tmp->size[1] = (int)dc.re;
@@ -1546,12 +1547,12 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
             tmp_data[i] = 0.0;
           }
 
-          /* 'mapTF:942' line_count = 1; */
+          /* 'mapTF:971' line_count = 1; */
           line_count = 1U;
 
-          /* 'mapTF:943' while ~isempty(line) */
+          /* 'mapTF:972' while ~isempty(line) */
           while (line->size[1] != 0) {
-            /* 'mapTF:944' if strfind(line, 'weight') */
+            /* 'mapTF:973' if strfind(line, 'weight') */
             i = matches->size[0] * matches->size[1];
             matches->size[0] = 1;
             matches->size[1] = line->size[1];
@@ -1585,23 +1586,23 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
             }
 
             if (out_size[1] != 0) {
-              /* 'mapTF:945' line = fgetl(fid); */
+              /* 'mapTF:974' line = fgetl(fid); */
               fgetl(fid, line);
             }
 
-            /* 'mapTF:947' [v1, remain] = strtok(line); */
+            /* 'mapTF:976' [v1, remain] = strtok(line); */
             b_strtok(line, curr_w, remain);
 
-            /* 'mapTF:948' [v2, remain] = strtok(remain); */
+            /* 'mapTF:977' [v2, remain] = strtok(remain); */
             b_strtok(remain, curr_alphabet, b_remain);
 
-            /* 'mapTF:949' [v3, v4] = strtok(remain); */
+            /* 'mapTF:978' [v3, v4] = strtok(remain); */
             b_strtok(b_remain, a__9, a__12);
 
-            /* 'mapTF:950' vals = [real(str2double(v1)),  */
-            /* 'mapTF:951'                 real(str2double(v2)),  */
-            /* 'mapTF:952'                 real(str2double(v3)),  */
-            /* 'mapTF:953'                 real(str2double(v4))]'; */
+            /* 'mapTF:979' vals = [real(str2double(v1)),  */
+            /* 'mapTF:980'                 real(str2double(v2)),  */
+            /* 'mapTF:981'                 real(str2double(v3)),  */
+            /* 'mapTF:982'                 real(str2double(v4))]'; */
             dc = str2double(curr_w);
             dc1 = str2double(curr_alphabet);
             dc2 = str2double(a__9);
@@ -1611,21 +1612,21 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
             vals[2] = dc2.re;
             vals[3] = dc3.re;
 
-            /* 'mapTF:954' tmp(line_count,:) = vals; */
+            /* 'mapTF:983' tmp(line_count,:) = vals; */
             ret = tmp->size[1];
             for (i = 0; i < ret; i++) {
               tmp_data[((int)line_count + tmp->size[0] * i) - 1] = vals[i];
             }
 
-            /* 'mapTF:955' line = fgetl(fid); */
+            /* 'mapTF:984' line = fgetl(fid); */
             fgetl(fid, line);
             line_data = line->data;
 
-            /* 'mapTF:956' line_count = line_count + 1; */
+            /* 'mapTF:985' line_count = line_count + 1; */
             line_count++;
           }
 
-          /* 'mapTF:958' mat{i} = tmp; */
+          /* 'mapTF:987' mat{i} = tmp; */
           i = mat_data[(int)b_i - 1].f1->size[0] * mat_data[(int)b_i - 1]
             .f1->size[1];
           mat_data[(int)b_i - 1].f1->size[0] = tmp->size[0];
@@ -1653,7 +1654,7 @@ static void getdenovomotif(const emxArray_char_T *filename, emxArray_cell_wrap_6
   emxFree_char_T(&a__9);
   emxFree_char_T(&line);
 
-  /* 'mapTF:960' fclose(fid); */
+  /* 'mapTF:989' fclose(fid); */
   cfclose(fid);
 }
 
@@ -1737,33 +1738,33 @@ static void letterconvert(const emxArray_char_T *s, emxArray_real_T *en)
   char c;
   s_data = s->data;
 
-  /* 'mapTF:369' l = length(s); */
-  /* 'mapTF:370' en = zeros(1,l); */
+  /* 'mapTF:389' l = length(s); */
+  /* 'mapTF:390' en = zeros(1,l); */
   i = en->size[0] * en->size[1];
   en->size[0] = 1;
   en->size[1] = s->size[1];
   emxEnsureCapacity_real_T(en, i);
   en_data = en->data;
 
-  /* 'mapTF:371' for i = 1:l */
+  /* 'mapTF:391' for i = 1:l */
   i = s->size[1];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:372' if strcmp(s(i),'A') || strcmp(s(i), 'a') */
+    /* 'mapTF:392' if strcmp(s(i),'A') || strcmp(s(i), 'a') */
     c = s_data[b_i];
     if ((!(c != 'A')) || (!(c != 'a'))) {
-      /* 'mapTF:373' en(i) = 0; */
+      /* 'mapTF:393' en(i) = 0; */
       en_data[b_i] = 0.0;
     } else if ((!(c != 'C')) || (!(c != 'c'))) {
-      /* 'mapTF:374' elseif strcmp(s(i),'C') || strcmp(s(i),'c') */
-      /* 'mapTF:375' en(i) = 1; */
+      /* 'mapTF:394' elseif strcmp(s(i),'C') || strcmp(s(i),'c') */
+      /* 'mapTF:395' en(i) = 1; */
       en_data[b_i] = 1.0;
     } else if ((!(c != 'G')) || (!(c != 'g'))) {
-      /* 'mapTF:376' elseif strcmp(s(i),'G') || strcmp(s(i),'g') */
-      /* 'mapTF:377' en(i) = 2; */
+      /* 'mapTF:396' elseif strcmp(s(i),'G') || strcmp(s(i),'g') */
+      /* 'mapTF:397' en(i) = 2; */
       en_data[b_i] = 2.0;
     } else {
-      /* 'mapTF:378' else */
-      /* 'mapTF:379' en(i) = 3; */
+      /* 'mapTF:398' else */
+      /* 'mapTF:399' en(i) = 3; */
       en_data[b_i] = 3.0;
     }
   }
@@ -1919,20 +1920,20 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
   int loop_ub;
   mot_data = mot->data;
 
-  /* 'mapTF:878' n = length(lenvec)-1; */
-  /* 'mapTF:879' simmat = ones(n-1,1); */
-  /* 'mapTF:880' for i = 1:n+1 */
+  /* 'mapTF:907' n = length(lenvec)-1; */
+  /* 'mapTF:908' simmat = ones(n-1,1); */
+  /* 'mapTF:909' for i = 1:n+1 */
   i = lenvec->size[0];
   emxInit_real_T(&diag_a, 2);
   emxInit_real_T(&A, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:881' mot{i} = mot{i}-1/4; */
+    /* 'mapTF:910' mot{i} = mot{i}-1/4; */
     loop_ub = mot_data[b_i].f1->size[0] * mot_data[b_i].f1->size[1];
     for (i1 = 0; i1 < loop_ub; i1++) {
       mot_data[b_i].f1->data[i1] -= 0.25;
     }
 
-    /* 'mapTF:882' mot{i} = mot{i}/sqrt(sum(sum(mot{i}.^2))); */
+    /* 'mapTF:911' mot{i} = mot{i}/sqrt(sum(sum(mot{i}.^2))); */
     i1 = A->size[0] * A->size[1];
     A->size[0] = mot_data[b_i].f1->size[0];
     A->size[1] = mot_data[b_i].f1->size[1];
@@ -1952,20 +1953,20 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
     }
   }
 
-  /* 'mapTF:884' M = 0; */
+  /* 'mapTF:913' M = 0; */
   *M = 0.0;
 
-  /* 'mapTF:885' ind = 1; */
+  /* 'mapTF:914' ind = 1; */
   *ind = 1.0;
 
-  /* 'mapTF:886' for j = 2:n+1 */
+  /* 'mapTF:915' for j = 2:n+1 */
   i = lenvec->size[0];
   emxInit_real_T(&mat, 2);
   emxInit_real_T(&rmat, 2);
   emxInit_real_T(&diag_b, 2);
   emxInit_real_T(&diag_overall, 1);
   for (b_i = 0; b_i <= i - 2; b_i++) {
-    /* 'mapTF:887' mat = mot{1}*mot{j}'; */
+    /* 'mapTF:916' mat = mot{1}*mot{j}'; */
     if ((mot_data[0].f1->size[0] == 0) || (mot_data[0].f1->size[1] == 0) ||
         (mot_data[b_i + 1].f1->size[0] == 0) || (mot_data[b_i + 1].f1->size[1] ==
          0)) {
@@ -1992,7 +1993,7 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
                   (blasint)mot_data[0].f1->size[0]);
     }
 
-    /* 'mapTF:888' rmat = rot90(mot{1},2)*mot{j}'; */
+    /* 'mapTF:917' rmat = rot90(mot{1},2)*mot{j}'; */
     rot90(mot_data[0].f1, A);
     mat_data = A->data;
     if ((A->size[0] == 0) || (A->size[1] == 0) || (mot_data[b_i + 1].f1->size[0]
@@ -2020,17 +2021,17 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
     }
 
     /*  MM = max([sum(spdiags(mat)) sum(spdiags(rmat))]); */
-    /* 'mapTF:890' diag_a = sum(spdiags(mat)); */
+    /* 'mapTF:919' diag_a = sum(spdiags(mat)); */
     spdiags(mat, A);
     b_sum(A, diag_a);
     mat_data = diag_a->data;
 
-    /* 'mapTF:891' diag_b = sum(spdiags(rmat)); */
+    /* 'mapTF:920' diag_b = sum(spdiags(rmat)); */
     spdiags(rmat, A);
     b_sum(A, diag_b);
     rmat_data = diag_b->data;
 
-    /* 'mapTF:892' diag_overall = zeros(length(diag_a)+length(diag_b),1); */
+    /* 'mapTF:921' diag_overall = zeros(length(diag_a)+length(diag_b),1); */
     i1 = diag_overall->size[0];
     diag_overall->size[0] = (int)((unsigned int)diag_a->size[1] + diag_b->size[1]);
     emxEnsureCapacity_real_T(diag_overall, i1);
@@ -2040,13 +2041,13 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
       diag_overall_data[i1] = 0.0;
     }
 
-    /* 'mapTF:893' diag_overall(1:length(diag_a)) = diag_a; */
+    /* 'mapTF:922' diag_overall(1:length(diag_a)) = diag_a; */
     loop_ub = diag_a->size[1];
     for (i1 = 0; i1 < loop_ub; i1++) {
       diag_overall_data[i1] = mat_data[i1];
     }
 
-    /* 'mapTF:894' diag_overall(length(diag_a)+1:end) = diag_b; */
+    /* 'mapTF:923' diag_overall(length(diag_a)+1:end) = diag_b; */
     if (diag_a->size[1] + 1U > (unsigned int)diag_overall->size[0]) {
       i1 = 0;
     } else {
@@ -2058,15 +2059,15 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
       diag_overall_data[i1 + i2] = rmat_data[i2];
     }
 
-    /* 'mapTF:895' MM = max(diag_overall); */
+    /* 'mapTF:924' MM = max(diag_overall); */
     MM = maximum(diag_overall);
 
-    /* 'mapTF:896' if MM > M */
+    /* 'mapTF:925' if MM > M */
     if (MM > *M) {
-      /* 'mapTF:897' M = MM; */
+      /* 'mapTF:926' M = MM; */
       *M = MM;
 
-      /* 'mapTF:898' ind = j-1; */
+      /* 'mapTF:927' ind = j-1; */
       *ind = ((double)b_i + 2.0) - 1.0;
     }
   }
@@ -2080,10 +2081,11 @@ static void ppmsim(emxArray_cell_wrap_6 *mot, const emxArray_real_T *lenvec,
 }
 
 /*
- * function process_motifs(dfn, lfn, memefn, ofn)
+ * function process_motifs(dfn, lfn, memefn, ofn, PWMcorrcut, Negative)
  */
 static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
-  *lfn, const emxArray_char_T *memefn, const emxArray_char_T *ofn)
+  *lfn, const emxArray_char_T *memefn, const emxArray_char_T *ofn, double
+  PWMcorrcut, double Negative)
 {
   static const char b_cv[5] = { 'M', 'O', 'T', 'I', 'F' };
 
@@ -2177,28 +2179,28 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   /* lfn: file name for lasso motifs */
   /* memefn: file name for the meme input for gkmPWMlasso */
   /* ofn: output filename */
-  /* 'mapTF:631' a = 1; */
+  /* 'mapTF:656' a = 1; */
   a = 1.0;
 
-  /* 'mapTF:632' LEN = zeros(1,1); */
-  /* 'mapTF:633' shift = zeros(1,1); */
-  /* 'mapTF:634' [p,w] = getdenovomotif(dfn); */
+  /* 'mapTF:657' LEN = zeros(1,1); */
+  /* 'mapTF:658' shift = zeros(1,1); */
+  /* 'mapTF:659' [p,w] = getdenovomotif(dfn); */
   getdenovomotif(dfn, cur_PWM_tmp, f);
   f_data = f->data;
   cur_PWM_tmp_data = cur_PWM_tmp->data;
 
-  /* 'mapTF:635' N = numel(w); */
+  /* 'mapTF:660' N = numel(w); */
   N = f->size[0];
 
   /*  fid = fopen(lfn,'r'); */
   /*  X = textscan(fid,'%f\t%f\t%s\t%f\t%f\t%f\n','delimiter', '\t', 'headerlines', 4); */
   /*  fclose(fid); */
-  /* 'mapTF:640' fid = fopen(lfn, 'r'); */
+  /* 'mapTF:665' fid = fopen(lfn, 'r'); */
   fileid = cfopen(lfn, "rb");
 
-  /* 'mapTF:641' if fid == -1 */
+  /* 'mapTF:666' if fid == -1 */
   if (fileid == -1) {
-    /* 'mapTF:642' fprintf("ERROR: gkmPWMlasso output file cannot be opened.\n") */
+    /* 'mapTF:667' fprintf("ERROR: gkmPWMlasso output file cannot be opened.\n") */
     printf("ERROR: gkmPWMlasso output file cannot be opened.\n");
     fflush(stdout);
     exit(1);
@@ -2209,25 +2211,25 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxInit_char_T(&d_fileid, 2);
   emxInit_char_T(&e_fileid, 2);
 
-  /* 'mapTF:645' fgetl(fid); */
+  /* 'mapTF:670' fgetl(fid); */
   b_fgets(fileid, b_fileid);
 
-  /* 'mapTF:646' fgetl(fid); */
+  /* 'mapTF:671' fgetl(fid); */
   b_fgets(fileid, c_fileid);
 
-  /* 'mapTF:647' fgetl(fid); */
+  /* 'mapTF:672' fgetl(fid); */
   b_fgets(fileid, d_fileid);
 
-  /* 'mapTF:648' fgetl(fid); */
+  /* 'mapTF:673' fgetl(fid); */
   b_fgets(fileid, e_fileid);
 
-  /* 'mapTF:649' curr_pos = ftell(fid); */
+  /* 'mapTF:674' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
 
-  /* 'mapTF:650' idx=0; */
+  /* 'mapTF:675' idx=0; */
   idx = 0.0;
 
-  /* 'mapTF:651' while ~feof(fid) */
+  /* 'mapTF:676' while ~feof(fid) */
   emxFree_char_T(&e_fileid);
   emxFree_char_T(&d_fileid);
   emxFree_char_T(&c_fileid);
@@ -2237,10 +2239,10 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     exitg1 = 0;
     x = b_feof(fileid);
     if (!(x != 0.0)) {
-      /* 'mapTF:652' idx=idx+1; */
+      /* 'mapTF:677' idx=idx+1; */
       idx++;
 
-      /* 'mapTF:653' fgetl(fid); */
+      /* 'mapTF:678' fgetl(fid); */
       b_fgets(fileid, f_fileid);
     } else {
       exitg1 = 1;
@@ -2250,10 +2252,10 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxFree_char_T(&f_fileid);
   emxInit_real_T(&clus, 1);
 
-  /* 'mapTF:655' fseek(fid, curr_pos, 'bof'); */
+  /* 'mapTF:680' fseek(fid, curr_pos, 'bof'); */
   b_fseek(fileid, curr_pos);
 
-  /* 'mapTF:656' clus = zeros(idx, 1); */
+  /* 'mapTF:681' clus = zeros(idx, 1); */
   match_idx = (int)idx;
   i = clus->size[0];
   clus->size[0] = (int)idx;
@@ -2265,7 +2267,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
 
   emxInit_real_T(&uid, 1);
 
-  /* 'mapTF:657' uid = zeros(idx, 1); */
+  /* 'mapTF:682' uid = zeros(idx, 1); */
   i = uid->size[0];
   uid->size[0] = (int)idx;
   emxEnsureCapacity_real_T(uid, i);
@@ -2276,7 +2278,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
 
   emxInit_real_T(&lasso_weight, 1);
 
-  /* 'mapTF:658' lasso_weight = zeros(idx, 1); */
+  /* 'mapTF:683' lasso_weight = zeros(idx, 1); */
   i = lasso_weight->size[0];
   lasso_weight->size[0] = (int)idx;
   emxEnsureCapacity_real_T(lasso_weight, i);
@@ -2287,7 +2289,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
 
   emxInit_real_T(&zscore, 1);
 
-  /* 'mapTF:659' zscore = zeros(idx, 1); */
+  /* 'mapTF:684' zscore = zeros(idx, 1); */
   i = zscore->size[0];
   zscore->size[0] = (int)idx;
   emxEnsureCapacity_real_T(zscore, i);
@@ -2296,7 +2298,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     zscore_data[i] = 0.0;
   }
 
-  /* 'mapTF:661' for cur_idx=1:idx */
+  /* 'mapTF:686' for cur_idx=1:idx */
   cur_idx = 0;
   emxInit_char_T(&cur_line, 2);
   emxInit_char_T(&p1, 2);
@@ -2306,10 +2308,10 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxInit_char_T(&p4, 2);
   exitg2 = false;
   while ((!exitg2) && (cur_idx <= (int)idx - 1)) {
-    /* 'mapTF:662' cur_line = fgetl(fid); */
+    /* 'mapTF:687' cur_line = fgetl(fid); */
     fgetl(fileid, cur_line);
 
-    /* 'mapTF:663' if cur_line == -1 */
+    /* 'mapTF:688' if cur_line == -1 */
     for (i = 0; i < 2; i++) {
       x_size[i] = cur_line->size[i];
     }
@@ -2322,34 +2324,34 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     if (hal) {
       exitg2 = true;
     } else {
-      /* 'mapTF:666' [p1, remain] = strtok(cur_line, char(9)); */
+      /* 'mapTF:691' [p1, remain] = strtok(cur_line, char(9)); */
       c_strtok(cur_line, p1, remain);
 
-      /* 'mapTF:667' [p2, remain] = strtok(remain, char(9)); */
+      /* 'mapTF:692' [p2, remain] = strtok(remain, char(9)); */
       c_strtok(remain, p2, b_remain);
 
-      /* 'mapTF:668' [p3, remain] = strtok(remain, char(9)); */
+      /* 'mapTF:693' [p3, remain] = strtok(remain, char(9)); */
       c_strtok(b_remain, cur_line, remain);
 
-      /* 'mapTF:669' [p4, remain] = strtok(remain, char(9)); */
+      /* 'mapTF:694' [p4, remain] = strtok(remain, char(9)); */
       c_strtok(remain, p4, b_remain);
 
-      /* 'mapTF:670' [p5, p6] = strtok(remain, char(9)); */
+      /* 'mapTF:695' [p5, p6] = strtok(remain, char(9)); */
       c_strtok(b_remain, cur_line, remain);
 
-      /* 'mapTF:671' clus(cur_idx, 1) = real(str2double(p1)); */
+      /* 'mapTF:696' clus(cur_idx, 1) = real(str2double(p1)); */
       dc = str2double(p1);
       clus_data[cur_idx] = dc.re;
 
-      /* 'mapTF:672' uid(cur_idx, 1) = real(str2double(p2)); */
+      /* 'mapTF:697' uid(cur_idx, 1) = real(str2double(p2)); */
       dc = str2double(p2);
       uid_data[cur_idx] = dc.re;
 
-      /* 'mapTF:673' lasso_weight(cur_idx, 1) = real(str2double(p4)); */
+      /* 'mapTF:698' lasso_weight(cur_idx, 1) = real(str2double(p4)); */
       dc = str2double(p4);
       lasso_weight_data[cur_idx] = dc.re;
 
-      /* 'mapTF:674' zscore(cur_idx, 1) = real(str2double(p5)); */
+      /* 'mapTF:699' zscore(cur_idx, 1) = real(str2double(p5)); */
       dc = str2double(cur_line);
       zscore_data[cur_idx] = dc.re;
       cur_idx++;
@@ -2365,24 +2367,24 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxInit_real_T(&vec, 1);
   emxInit_real_T(&vec2, 1);
 
-  /* 'mapTF:676' fclose(fid); */
+  /* 'mapTF:701' fclose(fid); */
   cfclose(fileid);
 
   /*  n = X{1}(end); */
-  /* 'mapTF:680' n = clus(end); */
-  /* 'mapTF:681' vec = zeros(n,1); */
+  /* 'mapTF:705' n = clus(end); */
+  /* 'mapTF:706' vec = zeros(n,1); */
   i = vec->size[0];
   vec->size[0] = (int)clus_data[clus->size[0] - 1];
   emxEnsureCapacity_real_T(vec, i);
   vec_data = vec->data;
 
-  /* 'mapTF:682' vec2 = zeros(n,1); */
+  /* 'mapTF:707' vec2 = zeros(n,1); */
   i = vec2->size[0];
   vec2->size[0] = (int)clus_data[clus->size[0] - 1];
   emxEnsureCapacity_real_T(vec2, i);
   vec2_data = vec2->data;
 
-  /* 'mapTF:683' w = [w; zeros(n,1)]; */
+  /* 'mapTF:708' w = [w; zeros(n,1)]; */
   i = w->size[0];
   w->size[0] = f->size[0] + (int)clus_data[clus->size[0] - 1];
   emxEnsureCapacity_real_T(w, i);
@@ -2397,7 +2399,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     w_data[i + f->size[0]] = 0.0;
   }
 
-  /* 'mapTF:684' for i = 1:n */
+  /* 'mapTF:709' for i = 1:n */
   i = (int)clus_data[clus->size[0] - 1];
   emxInit_int32_T(&r, 1);
   emxInit_boolean_T(&b_clus, 1);
@@ -2406,7 +2408,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     /*      vec(i) = X{2}(f(1)); */
     /*      vec2(i) = X{5}(f(1)); */
     /*      w(i+N) = X{4}(f(1)); */
-    /* 'mapTF:689' f = find(clus == i); */
+    /* 'mapTF:714' f = find(clus == i); */
     loop_ub = clus->size[0];
     i1 = b_clus->size[0];
     b_clus->size[0] = clus->size[0];
@@ -2427,30 +2429,46 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
       f_data[i1] = matches_data[i1];
     }
 
-    /* 'mapTF:690' vec(i) = uid(f(1)); */
+    /* 'mapTF:715' vec(i) = uid(f(1)); */
     vec_data[b_i] = uid_data[(int)f_data[0] - 1];
 
-    /* 'mapTF:691' vec2(i) = zscore(f(1)); */
+    /* 'mapTF:716' vec2(i) = zscore(f(1)); */
     vec2_data[b_i] = zscore_data[(int)f_data[0] - 1];
 
-    /* 'mapTF:692' w(i+N) = lasso_weight(f(1)); */
+    /* 'mapTF:717' w(i+N) = lasso_weight(f(1)); */
     w_data[(int)((unsigned int)b_i + N)] = lasso_weight_data[(int)f_data[0] - 1];
   }
 
   emxFree_boolean_T(&b_clus);
   emxFree_int32_T(&r);
   emxFree_real_T(&zscore);
+
+  /* 'mapTF:719' if Negative */
+  if (Negative != 0.0) {
+    /* 'mapTF:720' w = -1 * w; */
+    loop_ub = w->size[0];
+    for (i = 0; i < loop_ub; i++) {
+      w_data[i] = -w_data[i];
+    }
+
+    /* 'mapTF:721' vec2 = -1 * vec2; */
+    loop_ub = vec2->size[0];
+    for (i = 0; i < loop_ub; i++) {
+      vec2_data[i] = -vec2_data[i];
+    }
+  }
+
   emxInit_cell_wrap_6(&P, 1);
   emxInit_cell_wrap_6(&cur_PWM, 1);
 
-  /* 'mapTF:694' P = getmotif(memefn,vec); */
+  /* 'mapTF:723' P = getmotif(memefn,vec); */
   getmotif(memefn, vec, P);
   P_data = P->data;
 
   /*  [pp, info, len] = trim_pwm([p;P],0.25); */
-  /* 'mapTF:697' denovo_len = length(p); */
-  /* 'mapTF:698' database_len = length(P); */
-  /* 'mapTF:699' cur_PWM = cell(denovo_len+database_len,1); */
+  /* 'mapTF:726' denovo_len = length(p); */
+  /* 'mapTF:727' database_len = length(P); */
+  /* 'mapTF:728' cur_PWM = cell(denovo_len+database_len,1); */
   unnamed_idx_0 = (int)((unsigned int)cur_PWM_tmp->size[0] + P->size[0]);
   i = cur_PWM->size[0];
   cur_PWM->size[0] = (int)((unsigned int)cur_PWM_tmp->size[0] + P->size[0]);
@@ -2462,11 +2480,11 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     cur_PWM_data[i].f1->size[1] = 0;
   }
 
-  /* 'mapTF:700' cur_PWM = coder.nullcopy(cur_PWM); */
-  /* 'mapTF:701' for cur_idx=1:denovo_len */
+  /* 'mapTF:729' cur_PWM = coder.nullcopy(cur_PWM); */
+  /* 'mapTF:730' for cur_idx=1:denovo_len */
   i = cur_PWM_tmp->size[0];
   for (cur_idx = 0; cur_idx < i; cur_idx++) {
-    /* 'mapTF:702' cur_PWM{cur_idx} = p{cur_idx}; */
+    /* 'mapTF:731' cur_PWM{cur_idx} = p{cur_idx}; */
     i1 = cur_PWM_data[cur_idx].f1->size[0] * cur_PWM_data[cur_idx].f1->size[1];
     cur_PWM_data[cur_idx].f1->size[0] = cur_PWM_tmp_data[cur_idx].f1->size[0];
     cur_PWM_data[cur_idx].f1->size[1] = cur_PWM_tmp_data[cur_idx].f1->size[1];
@@ -2478,12 +2496,12 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     }
   }
 
-  /* 'mapTF:704' for cur_idx=denovo_len+1:denovo_len+database_len */
+  /* 'mapTF:733' for cur_idx=denovo_len+1:denovo_len+database_len */
   i = P->size[0];
   for (cur_idx = 0; cur_idx < i; cur_idx++) {
     b_cur_idx = ((unsigned int)cur_PWM_tmp->size[0] + cur_idx) + 1U;
 
-    /* 'mapTF:705' cur_PWM{cur_idx} = P{cur_idx-denovo_len}; */
+    /* 'mapTF:734' cur_PWM{cur_idx} = P{cur_idx-denovo_len}; */
     i1 = cur_PWM_data[(int)b_cur_idx - 1].f1->size[0] * cur_PWM_data[(int)
       b_cur_idx - 1].f1->size[1];
     cur_PWM_data[(int)b_cur_idx - 1].f1->size[0] = P_data[(int)((double)
@@ -2503,14 +2521,14 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxFree_cell_wrap_6(&P);
   emxInitStruct_cell_wrap_6(&r1);
 
-  /* 'mapTF:707' [pp, info, len] = trim_pwm(cur_PWM,0.25); */
+  /* 'mapTF:736' [pp, info, len] = trim_pwm(cur_PWM,0.25); */
   trim_pwm(cur_PWM, lasso_weight, uid);
   uid_data = uid->data;
   lasso_weight_data = lasso_weight->data;
   cur_PWM_data = cur_PWM->data;
 
-  /* 'mapTF:709' coder.varsize("PWM2"); */
-  /* 'mapTF:710' PWM2 = {pp{1}}; */
+  /* 'mapTF:738' coder.varsize("PWM2"); */
+  /* 'mapTF:739' PWM2 = {pp{1}}; */
   i = r1.f1->size[0] * r1.f1->size[1];
   r1.f1->size[0] = cur_PWM_data[0].f1->size[0];
   r1.f1->size[1] = cur_PWM_data[0].f1->size[1];
@@ -2530,8 +2548,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   PWM2_data = PWM2->data;
   emxCopyStruct_cell_wrap_6(&PWM2_data[0], &r1);
 
-  /* 'mapTF:711' coder.varsize("LEN_2"); */
-  /* 'mapTF:712' LEN_2 = zeros(1,1); */
+  /* 'mapTF:740' coder.varsize("LEN_2"); */
+  /* 'mapTF:741' LEN_2 = zeros(1,1); */
   i = LEN_2->size[0] * LEN_2->size[1];
   LEN_2->size[0] = 1;
   LEN_2->size[1] = 1;
@@ -2539,8 +2557,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   vec_data = LEN_2->data;
   vec_data[0] = 0.0;
 
-  /* 'mapTF:713' coder.varsize("I_2"); */
-  /* 'mapTF:714' I_2 = zeros(1,1); */
+  /* 'mapTF:742' coder.varsize("I_2"); */
+  /* 'mapTF:743' I_2 = zeros(1,1); */
   i = I_2->size[0] * I_2->size[1];
   I_2->size[0] = 1;
   I_2->size[1] = 1;
@@ -2548,10 +2566,10 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   I_2_data = I_2->data;
   I_2_data[0] = 0.0;
 
-  /* 'mapTF:715' hal = true; */
+  /* 'mapTF:744' hal = true; */
   hal = true;
 
-  /* 'mapTF:716' for ii = 1:length(w) */
+  /* 'mapTF:745' for ii = 1:length(w) */
   i = w->size[0];
   emxFreeStruct_cell_wrap_6(&r1);
   emxInit_cell_wrap_6(&b_cur_PWM_tmp, 1);
@@ -2559,19 +2577,19 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxInit_cell_wrap_6(&c_cur_PWM_tmp, 1);
   emxInit_cell_wrap_6(&b_new_PWM2, 1);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:717' if ii > N */
+    /* 'mapTF:746' if ii > N */
     if (b_i + 1 > N) {
-      /* 'mapTF:718' hal = true; */
+      /* 'mapTF:747' hal = true; */
       hal = true;
 
       /*  [~,cor] = ppmsim([pp{ii} PWM2], [len(ii) LEN_2]); */
-      /* 'mapTF:720' PWM2_len = length(PWM2); */
+      /* 'mapTF:749' PWM2_len = length(PWM2); */
       u0 = PWM2->size[0];
       if (u0 < 1) {
         u0 = 1;
       }
 
-      /* 'mapTF:721' cur_PWM_tmp = cell(PWM2_len+1,1); */
+      /* 'mapTF:750' cur_PWM_tmp = cell(PWM2_len+1,1); */
       unnamed_idx_0 = u0 + 1;
       i1 = c_cur_PWM_tmp->size[0];
       c_cur_PWM_tmp->size[0] = u0 + 1;
@@ -2582,13 +2600,13 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         cur_PWM_tmp_data[i1].f1->size[1] = 0;
       }
 
-      /* 'mapTF:722' cur_PWM_tmp = coder.nullcopy(cur_PWM_tmp); */
+      /* 'mapTF:751' cur_PWM_tmp = coder.nullcopy(cur_PWM_tmp); */
       i1 = cur_PWM_tmp->size[0];
       cur_PWM_tmp->size[0] = c_cur_PWM_tmp->size[0];
       emxEnsureCapacity_cell_wrap_6(cur_PWM_tmp, i1);
       cur_PWM_tmp_data = cur_PWM_tmp->data;
 
-      /* 'mapTF:723' cur_PWM_tmp{1} = pp{ii}; */
+      /* 'mapTF:752' cur_PWM_tmp{1} = pp{ii}; */
       i1 = cur_PWM_tmp_data[0].f1->size[0] * cur_PWM_tmp_data[0].f1->size[1];
       cur_PWM_tmp_data[0].f1->size[0] = cur_PWM_data[b_i].f1->size[0];
       cur_PWM_tmp_data[0].f1->size[1] = cur_PWM_data[b_i].f1->size[1];
@@ -2598,9 +2616,9 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         cur_PWM_tmp_data[0].f1->data[i1] = cur_PWM_data[b_i].f1->data[i1];
       }
 
-      /* 'mapTF:724' for cur_idx=1:PWM2_len */
+      /* 'mapTF:753' for cur_idx=1:PWM2_len */
       for (cur_idx = 0; cur_idx < u0; cur_idx++) {
-        /* 'mapTF:725' cur_PWM_tmp{cur_idx+1} = PWM2{cur_idx}; */
+        /* 'mapTF:754' cur_PWM_tmp{cur_idx+1} = PWM2{cur_idx}; */
         i1 = cur_PWM_tmp_data[cur_idx + 1].f1->size[0] *
           cur_PWM_tmp_data[cur_idx + 1].f1->size[1];
         cur_PWM_tmp_data[cur_idx + 1].f1->size[0] = PWM2_data[cur_idx].f1->size
@@ -2615,7 +2633,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         }
       }
 
-      /* 'mapTF:727' cur_length = zeros(length(LEN_2)+1,1); */
+      /* 'mapTF:756' cur_length = zeros(length(LEN_2)+1,1); */
       u0 = LEN_2->size[0];
       if (u0 < 1) {
         u0 = 1;
@@ -2629,35 +2647,35 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         f_data[i1] = 0.0;
       }
 
-      /* 'mapTF:728' cur_length(1) = len(ii); */
+      /* 'mapTF:757' cur_length(1) = len(ii); */
       f_data[0] = uid_data[b_i];
 
-      /* 'mapTF:729' cur_length(2:end) = LEN_2; */
+      /* 'mapTF:758' cur_length(2:end) = LEN_2; */
       for (i1 = 0; i1 < u0; i1++) {
         f_data[i1 + 1] = vec_data[i1];
       }
 
-      /* 'mapTF:730' [~,cor] = ppmsim(cur_PWM_tmp, cur_length); */
+      /* 'mapTF:759' [~,cor] = ppmsim(cur_PWM_tmp, cur_length); */
       ppmsim(cur_PWM_tmp, f, &curr_pos, &idx);
 
-      /* 'mapTF:732' if cor > 0.8 || vec2(ii-N) < 1.5 */
-      if ((idx > 0.8) || (vec2_data[b_i - N] < 1.5)) {
-        /* 'mapTF:733' hal = false; */
+      /* 'mapTF:761' if cor > PWMcorrcut || vec2(ii-N) < 1.5 */
+      if ((idx > PWMcorrcut) || (vec2_data[b_i - N] < 1.5)) {
+        /* 'mapTF:762' hal = false; */
         hal = false;
       }
     } else if ((b_i + 1 > 1) && (a > 2.0)) {
-      /* 'mapTF:735' elseif ii > 1 && a > 2 */
-      /* 'mapTF:736' hal = true; */
+      /* 'mapTF:764' elseif ii > 1 && a > 2 */
+      /* 'mapTF:765' hal = true; */
       hal = true;
 
       /*  [~,cor] = ppmsim([pp{ii} PWM2], [len(ii) LEN_2]); */
-      /* 'mapTF:738' PWM2_len = length(PWM2); */
+      /* 'mapTF:767' PWM2_len = length(PWM2); */
       u0 = PWM2->size[0];
       if (u0 < 1) {
         u0 = 1;
       }
 
-      /* 'mapTF:739' cur_PWM_tmp = cell(PWM2_len+1,1); */
+      /* 'mapTF:768' cur_PWM_tmp = cell(PWM2_len+1,1); */
       unnamed_idx_0 = u0 + 1;
       i1 = b_cur_PWM_tmp->size[0];
       b_cur_PWM_tmp->size[0] = u0 + 1;
@@ -2668,13 +2686,13 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         P_data[i1].f1->size[1] = 0;
       }
 
-      /* 'mapTF:740' cur_PWM_tmp = coder.nullcopy(cur_PWM_tmp); */
+      /* 'mapTF:769' cur_PWM_tmp = coder.nullcopy(cur_PWM_tmp); */
       i1 = cur_PWM_tmp->size[0];
       cur_PWM_tmp->size[0] = b_cur_PWM_tmp->size[0];
       emxEnsureCapacity_cell_wrap_6(cur_PWM_tmp, i1);
       cur_PWM_tmp_data = cur_PWM_tmp->data;
 
-      /* 'mapTF:741' cur_PWM_tmp{1} = pp{ii}; */
+      /* 'mapTF:770' cur_PWM_tmp{1} = pp{ii}; */
       i1 = cur_PWM_tmp_data[0].f1->size[0] * cur_PWM_tmp_data[0].f1->size[1];
       cur_PWM_tmp_data[0].f1->size[0] = cur_PWM_data[b_i].f1->size[0];
       cur_PWM_tmp_data[0].f1->size[1] = cur_PWM_data[b_i].f1->size[1];
@@ -2684,9 +2702,9 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         cur_PWM_tmp_data[0].f1->data[i1] = cur_PWM_data[b_i].f1->data[i1];
       }
 
-      /* 'mapTF:742' for cur_idx=1:PWM2_len */
+      /* 'mapTF:771' for cur_idx=1:PWM2_len */
       for (cur_idx = 0; cur_idx < u0; cur_idx++) {
-        /* 'mapTF:743' cur_PWM_tmp{cur_idx+1} = PWM2{cur_idx}; */
+        /* 'mapTF:772' cur_PWM_tmp{cur_idx+1} = PWM2{cur_idx}; */
         i1 = cur_PWM_tmp_data[cur_idx + 1].f1->size[0] *
           cur_PWM_tmp_data[cur_idx + 1].f1->size[1];
         cur_PWM_tmp_data[cur_idx + 1].f1->size[0] = PWM2_data[cur_idx].f1->size
@@ -2701,7 +2719,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         }
       }
 
-      /* 'mapTF:745' cur_length = zeros(length(LEN_2)+1,1); */
+      /* 'mapTF:774' cur_length = zeros(length(LEN_2)+1,1); */
       u0 = LEN_2->size[0];
       if (u0 < 1) {
         u0 = 1;
@@ -2715,29 +2733,29 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         f_data[i1] = 0.0;
       }
 
-      /* 'mapTF:746' cur_length(1) = len(ii); */
+      /* 'mapTF:775' cur_length(1) = len(ii); */
       f_data[0] = uid_data[b_i];
 
-      /* 'mapTF:747' cur_length(2:end) = LEN_2; */
+      /* 'mapTF:776' cur_length(2:end) = LEN_2; */
       for (i1 = 0; i1 < u0; i1++) {
         f_data[i1 + 1] = vec_data[i1];
       }
 
-      /* 'mapTF:748' [~,cor] = ppmsim(cur_PWM_tmp, cur_length); */
+      /* 'mapTF:777' [~,cor] = ppmsim(cur_PWM_tmp, cur_length); */
       ppmsim(cur_PWM_tmp, f, &curr_pos, &idx);
 
-      /* 'mapTF:750' if cor > 0.8 */
-      if (idx > 0.8) {
-        /* 'mapTF:751' hal = false; */
+      /* 'mapTF:779' if cor > PWMcorrcut */
+      if (idx > PWMcorrcut) {
+        /* 'mapTF:780' hal = false; */
         hal = false;
       }
     }
 
-    /* 'mapTF:754' if hal && w(ii) > 0 && len(ii) >= 6 */
+    /* 'mapTF:783' if hal && w(ii) > 0 && len(ii) >= 6 */
     if (hal && (w_data[b_i] > 0.0) && (uid_data[b_i] >= 6.0)) {
-      /* 'mapTF:755' if len(ii) > 10 */
+      /* 'mapTF:784' if len(ii) > 10 */
       if (uid_data[b_i] > 10.0) {
-        /* 'mapTF:756' if info(ii)/len(ii) > 0.7 */
+        /* 'mapTF:785' if info(ii)/len(ii) > 0.7 */
         if (lasso_weight_data[b_i] / uid_data[b_i] > 0.7) {
           /*  PWM2{a} = pp{ii}; */
           /*  LEN_2(a) = len(ii); */
@@ -2747,8 +2765,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           /*  LEN_2(a) = LEN_2(a-1); */
           /*  I_2(a) = I_2(a-1); */
           /*  a = a+1; */
-          /* 'mapTF:766' new_len = a+1; */
-          /* 'mapTF:767' new_PWM2 = cell(new_len,1); */
+          /* 'mapTF:795' new_len = a+1; */
+          /* 'mapTF:796' new_PWM2 = cell(new_len,1); */
           match_idx = (int)(a + 1.0);
           i1 = b_new_PWM2->size[0];
           b_new_PWM2->size[0] = (int)(a + 1.0);
@@ -2759,17 +2777,17 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             P_data[i1].f1->size[1] = 0;
           }
 
-          /* 'mapTF:768' new_PWM2 = coder.nullcopy(new_PWM2); */
+          /* 'mapTF:797' new_PWM2 = coder.nullcopy(new_PWM2); */
           i1 = cur_PWM_tmp->size[0];
           cur_PWM_tmp->size[0] = b_new_PWM2->size[0];
           emxEnsureCapacity_cell_wrap_6(cur_PWM_tmp, i1);
           cur_PWM_tmp_data = cur_PWM_tmp->data;
 
-          /* 'mapTF:769' for idx = 1:new_len */
+          /* 'mapTF:798' for idx = 1:new_len */
           for (unnamed_idx_0 = 0; unnamed_idx_0 < match_idx; unnamed_idx_0++) {
-            /* 'mapTF:770' if idx <= a-1 */
+            /* 'mapTF:799' if idx <= a-1 */
             if ((double)unnamed_idx_0 + 1.0 <= a - 1.0) {
-              /* 'mapTF:771' new_PWM2{idx} = PWM2{idx}; */
+              /* 'mapTF:800' new_PWM2{idx} = PWM2{idx}; */
               i1 = cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] *
                 cur_PWM_tmp_data[unnamed_idx_0].f1->size[1];
               cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] =
@@ -2784,8 +2802,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
                   PWM2_data[unnamed_idx_0].f1->data[i1];
               }
             } else if ((double)unnamed_idx_0 + 1.0 == a) {
-              /* 'mapTF:772' elseif idx == a */
-              /* 'mapTF:773' new_PWM2{idx} = pp{ii}; */
+              /* 'mapTF:801' elseif idx == a */
+              /* 'mapTF:802' new_PWM2{idx} = pp{ii}; */
               i1 = cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] *
                 cur_PWM_tmp_data[unnamed_idx_0].f1->size[1];
               cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] = cur_PWM_data[b_i].
@@ -2800,15 +2818,15 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
                   .f1->data[i1];
               }
             } else if ((double)unnamed_idx_0 + 1.0 == a + 1.0) {
-              /* 'mapTF:774' elseif idx == a+1 */
-              /* 'mapTF:775' new_PWM2{a+1} = rot90(pp{ii},2); */
+              /* 'mapTF:803' elseif idx == a+1 */
+              /* 'mapTF:804' new_PWM2{a+1} = rot90(pp{ii},2); */
               rot90(cur_PWM_data[b_i].f1, cur_PWM_tmp_data[(int)(a + 1.0) - 1].
                     f1);
             }
           }
 
-          /* 'mapTF:778' PWM2_len = length(new_PWM2); */
-          /* 'mapTF:779' PWM2 = cell(PWM2_len, 1); */
+          /* 'mapTF:807' PWM2_len = length(new_PWM2); */
+          /* 'mapTF:808' PWM2 = cell(PWM2_len, 1); */
           x_size[0] = cur_PWM_tmp->size[0];
           i1 = PWM2->size[0] * PWM2->size[1];
           PWM2->size[0] = cur_PWM_tmp->size[0];
@@ -2820,11 +2838,11 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             PWM2_data[i1].f1->size[1] = 0;
           }
 
-          /* 'mapTF:780' PWM2 = coder.nullcopy(PWM2); */
-          /* 'mapTF:781' for cur_idx = 1:PWM2_len */
+          /* 'mapTF:809' PWM2 = coder.nullcopy(PWM2); */
+          /* 'mapTF:810' for cur_idx = 1:PWM2_len */
           i1 = cur_PWM_tmp->size[0];
           for (cur_idx = 0; cur_idx < i1; cur_idx++) {
-            /* 'mapTF:782' PWM2{cur_idx} = new_PWM2{cur_idx}; */
+            /* 'mapTF:811' PWM2{cur_idx} = new_PWM2{cur_idx}; */
             unnamed_idx_0 = PWM2_data[cur_idx].f1->size[0] * PWM2_data[cur_idx].
               f1->size[1];
             PWM2_data[cur_idx].f1->size[0] = cur_PWM_tmp_data[cur_idx].f1->size
@@ -2840,7 +2858,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             }
           }
 
-          /* 'mapTF:784' LEN_2_new = zeros(a+1,1); */
+          /* 'mapTF:813' LEN_2_new = zeros(a+1,1); */
           i1 = f->size[0];
           f->size[0] = (int)(a + 1.0);
           emxEnsureCapacity_real_T(f, i1);
@@ -2849,7 +2867,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             f_data[i1] = 0.0;
           }
 
-          /* 'mapTF:785' LEN_2_new(1:a-1) = LEN_2(1:a-1); */
+          /* 'mapTF:814' LEN_2_new(1:a-1) = LEN_2(1:a-1); */
           if (1.0 > a - 1.0) {
             loop_ub = 0;
           } else {
@@ -2860,7 +2878,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             f_data[i1] = vec_data[i1];
           }
 
-          /* 'mapTF:786' LEN_2_new(a:a+1) = [len(ii), len(ii)]; */
+          /* 'mapTF:815' LEN_2_new(a:a+1) = [len(ii), len(ii)]; */
           for (i1 = 0; i1 < 2; i1++) {
             LEN_2_new_tmp[i1] = a + (double)i1;
           }
@@ -2868,7 +2886,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           f_data[(int)LEN_2_new_tmp[0] - 1] = uid_data[b_i];
           f_data[(int)LEN_2_new_tmp[1] - 1] = uid_data[b_i];
 
-          /* 'mapTF:788' I_2_new = zeros(a+1,1); */
+          /* 'mapTF:817' I_2_new = zeros(a+1,1); */
           i1 = clus->size[0];
           clus->size[0] = (int)(a + 1.0);
           emxEnsureCapacity_real_T(clus, i1);
@@ -2877,7 +2895,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             clus_data[i1] = 0.0;
           }
 
-          /* 'mapTF:789' I_2_new(1:a-1) = I_2(1:a-1); */
+          /* 'mapTF:818' I_2_new(1:a-1) = I_2(1:a-1); */
           if (1.0 > a - 1.0) {
             loop_ub = 0;
           } else {
@@ -2888,11 +2906,11 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             clus_data[i1] = I_2_data[i1];
           }
 
-          /* 'mapTF:790' I_2_new(a:a+1) = [info(ii), info(ii)]; */
+          /* 'mapTF:819' I_2_new(a:a+1) = [info(ii), info(ii)]; */
           clus_data[(int)LEN_2_new_tmp[0] - 1] = lasso_weight_data[b_i];
           clus_data[(int)LEN_2_new_tmp[1] - 1] = lasso_weight_data[b_i];
 
-          /* 'mapTF:792' LEN_2 = LEN_2_new; */
+          /* 'mapTF:821' LEN_2 = LEN_2_new; */
           i1 = LEN_2->size[0] * LEN_2->size[1];
           LEN_2->size[0] = f->size[0];
           LEN_2->size[1] = 1;
@@ -2903,7 +2921,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             vec_data[i1] = f_data[i1];
           }
 
-          /* 'mapTF:793' I_2 = I_2_new; */
+          /* 'mapTF:822' I_2 = I_2_new; */
           i1 = I_2->size[0] * I_2->size[1];
           I_2->size[0] = clus->size[0];
           I_2->size[1] = 1;
@@ -2914,15 +2932,15 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
             I_2_data[i1] = clus_data[i1];
           }
 
-          /* 'mapTF:794' a = a+1; */
+          /* 'mapTF:823' a = a+1; */
           a++;
 
-          /* 'mapTF:795' a = a+1; */
+          /* 'mapTF:824' a = a+1; */
           a++;
         }
       } else if ((lasso_weight_data[b_i] > 6.0) || (lasso_weight_data[b_i] /
                   uid_data[b_i] > 1.0)) {
-        /* 'mapTF:797' elseif info(ii) > 6 || info(ii)/len(ii) > 1 */
+        /* 'mapTF:826' elseif info(ii) > 6 || info(ii)/len(ii) > 1 */
         /*  PWM2{a} = pp{ii}; */
         /*  LEN_2(a) = len(ii); */
         /*  I_2(a) = info(ii); */
@@ -2931,8 +2949,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         /*  LEN_2(a) = LEN_2(a-1); */
         /*  I_2(a) = I_2(a-1); */
         /*  a = a+1; */
-        /* 'mapTF:806' new_len = a+1; */
-        /* 'mapTF:807' new_PWM2 = cell(new_len,1); */
+        /* 'mapTF:835' new_len = a+1; */
+        /* 'mapTF:836' new_PWM2 = cell(new_len,1); */
         match_idx = (int)(a + 1.0);
         i1 = new_PWM2->size[0];
         new_PWM2->size[0] = (int)(a + 1.0);
@@ -2943,17 +2961,17 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           P_data[i1].f1->size[1] = 0;
         }
 
-        /* 'mapTF:808' new_PWM2 = coder.nullcopy(new_PWM2); */
+        /* 'mapTF:837' new_PWM2 = coder.nullcopy(new_PWM2); */
         i1 = cur_PWM_tmp->size[0];
         cur_PWM_tmp->size[0] = new_PWM2->size[0];
         emxEnsureCapacity_cell_wrap_6(cur_PWM_tmp, i1);
         cur_PWM_tmp_data = cur_PWM_tmp->data;
 
-        /* 'mapTF:809' for idx = 1:new_len */
+        /* 'mapTF:838' for idx = 1:new_len */
         for (unnamed_idx_0 = 0; unnamed_idx_0 < match_idx; unnamed_idx_0++) {
-          /* 'mapTF:810' if idx <= a-1 */
+          /* 'mapTF:839' if idx <= a-1 */
           if ((double)unnamed_idx_0 + 1.0 <= a - 1.0) {
-            /* 'mapTF:811' new_PWM2{idx} = PWM2{idx}; */
+            /* 'mapTF:840' new_PWM2{idx} = PWM2{idx}; */
             i1 = cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] *
               cur_PWM_tmp_data[unnamed_idx_0].f1->size[1];
             cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] =
@@ -2968,8 +2986,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
                 PWM2_data[unnamed_idx_0].f1->data[i1];
             }
           } else if ((double)unnamed_idx_0 + 1.0 == a) {
-            /* 'mapTF:812' elseif idx == a */
-            /* 'mapTF:813' new_PWM2{idx} = pp{ii}; */
+            /* 'mapTF:841' elseif idx == a */
+            /* 'mapTF:842' new_PWM2{idx} = pp{ii}; */
             i1 = cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] *
               cur_PWM_tmp_data[unnamed_idx_0].f1->size[1];
             cur_PWM_tmp_data[unnamed_idx_0].f1->size[0] = cur_PWM_data[b_i]
@@ -2984,14 +3002,14 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
                 f1->data[i1];
             }
           } else if ((double)unnamed_idx_0 + 1.0 == a + 1.0) {
-            /* 'mapTF:814' elseif idx == a+1 */
-            /* 'mapTF:815' new_PWM2{a+1} = rot90(pp{ii},2); */
+            /* 'mapTF:843' elseif idx == a+1 */
+            /* 'mapTF:844' new_PWM2{a+1} = rot90(pp{ii},2); */
             rot90(cur_PWM_data[b_i].f1, cur_PWM_tmp_data[(int)(a + 1.0) - 1].f1);
           }
         }
 
-        /* 'mapTF:818' PWM2_len = length(new_PWM2); */
-        /* 'mapTF:819' PWM2 = cell(PWM2_len, 1); */
+        /* 'mapTF:847' PWM2_len = length(new_PWM2); */
+        /* 'mapTF:848' PWM2 = cell(PWM2_len, 1); */
         x_size[0] = cur_PWM_tmp->size[0];
         i1 = PWM2->size[0] * PWM2->size[1];
         PWM2->size[0] = cur_PWM_tmp->size[0];
@@ -3003,11 +3021,11 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           PWM2_data[i1].f1->size[1] = 0;
         }
 
-        /* 'mapTF:820' PWM2 = coder.nullcopy(PWM2); */
-        /* 'mapTF:821' for cur_idx = 1:PWM2_len */
+        /* 'mapTF:849' PWM2 = coder.nullcopy(PWM2); */
+        /* 'mapTF:850' for cur_idx = 1:PWM2_len */
         i1 = cur_PWM_tmp->size[0];
         for (cur_idx = 0; cur_idx < i1; cur_idx++) {
-          /* 'mapTF:822' PWM2{cur_idx} = new_PWM2{cur_idx}; */
+          /* 'mapTF:851' PWM2{cur_idx} = new_PWM2{cur_idx}; */
           unnamed_idx_0 = PWM2_data[cur_idx].f1->size[0] * PWM2_data[cur_idx].
             f1->size[1];
           PWM2_data[cur_idx].f1->size[0] = cur_PWM_tmp_data[cur_idx].f1->size[0];
@@ -3021,7 +3039,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           }
         }
 
-        /* 'mapTF:824' LEN_2_new = zeros(a+1,1); */
+        /* 'mapTF:853' LEN_2_new = zeros(a+1,1); */
         i1 = f->size[0];
         f->size[0] = (int)(a + 1.0);
         emxEnsureCapacity_real_T(f, i1);
@@ -3030,7 +3048,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           f_data[i1] = 0.0;
         }
 
-        /* 'mapTF:825' LEN_2_new(1:a-1) = LEN_2(1:a-1); */
+        /* 'mapTF:854' LEN_2_new(1:a-1) = LEN_2(1:a-1); */
         if (1.0 > a - 1.0) {
           loop_ub = 0;
         } else {
@@ -3041,7 +3059,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           f_data[i1] = vec_data[i1];
         }
 
-        /* 'mapTF:826' LEN_2_new(a:a+1) = [len(ii), len(ii)]; */
+        /* 'mapTF:855' LEN_2_new(a:a+1) = [len(ii), len(ii)]; */
         for (i1 = 0; i1 < 2; i1++) {
           LEN_2_new_tmp[i1] = a + (double)i1;
         }
@@ -3049,7 +3067,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         f_data[(int)LEN_2_new_tmp[0] - 1] = uid_data[b_i];
         f_data[(int)LEN_2_new_tmp[1] - 1] = uid_data[b_i];
 
-        /* 'mapTF:828' I_2_new = zeros(a+1,1); */
+        /* 'mapTF:857' I_2_new = zeros(a+1,1); */
         i1 = clus->size[0];
         clus->size[0] = (int)(a + 1.0);
         emxEnsureCapacity_real_T(clus, i1);
@@ -3058,7 +3076,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           clus_data[i1] = 0.0;
         }
 
-        /* 'mapTF:829' I_2_new(1:a-1) = I_2(1:a-1); */
+        /* 'mapTF:858' I_2_new(1:a-1) = I_2(1:a-1); */
         if (1.0 > a - 1.0) {
           loop_ub = 0;
         } else {
@@ -3069,11 +3087,11 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           clus_data[i1] = I_2_data[i1];
         }
 
-        /* 'mapTF:830' I_2_new(a:a+1) = [info(ii), info(ii)]; */
+        /* 'mapTF:859' I_2_new(a:a+1) = [info(ii), info(ii)]; */
         clus_data[(int)LEN_2_new_tmp[0] - 1] = lasso_weight_data[b_i];
         clus_data[(int)LEN_2_new_tmp[1] - 1] = lasso_weight_data[b_i];
 
-        /* 'mapTF:832' LEN_2 = LEN_2_new; */
+        /* 'mapTF:861' LEN_2 = LEN_2_new; */
         i1 = LEN_2->size[0] * LEN_2->size[1];
         LEN_2->size[0] = f->size[0];
         LEN_2->size[1] = 1;
@@ -3084,7 +3102,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           vec_data[i1] = f_data[i1];
         }
 
-        /* 'mapTF:833' I_2 = I_2_new; */
+        /* 'mapTF:862' I_2 = I_2_new; */
         i1 = I_2->size[0] * I_2->size[1];
         I_2->size[0] = clus->size[0];
         I_2->size[1] = 1;
@@ -3095,10 +3113,10 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           I_2_data[i1] = clus_data[i1];
         }
 
-        /* 'mapTF:834' a = a+1; */
+        /* 'mapTF:863' a = a+1; */
         a++;
 
-        /* 'mapTF:835' a = a+1; */
+        /* 'mapTF:864' a = a+1; */
         a++;
       }
     }
@@ -3112,7 +3130,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxFree_real_T(&uid);
   emxFree_real_T(&w);
 
-  /* 'mapTF:840' num2 = length(strfind(fileread(memefn),'MOTIF')); */
+  /* 'mapTF:869' num2 = length(strfind(fileread(memefn),'MOTIF')); */
   fileread(memefn, cur_line);
   cur_line_data = cur_line->data;
   if (cur_line->size[1] == 0) {
@@ -3158,7 +3176,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     emxFree_int32_T(&match_out);
   }
 
-  /* 'mapTF:841' [p,names] = getmotif(memefn,1:num2); */
+  /* 'mapTF:870' [p,names] = getmotif(memefn,1:num2); */
   emxInit_real_T(&y, 2);
   if (x_size[1] < 1) {
     y->size[0] = 1;
@@ -3179,12 +3197,12 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   b_getmotif(memefn, y, cur_PWM_tmp, names);
   names_data = names->data;
 
-  /* 'mapTF:842' [p,info,lenvec] = trim_pwm(p,0.25); */
+  /* 'mapTF:871' [p,info,lenvec] = trim_pwm(p,0.25); */
   trim_pwm(cur_PWM_tmp, lasso_weight, f);
   f_data = f->data;
   cur_PWM_tmp_data = cur_PWM_tmp->data;
 
-  /* 'mapTF:843' fid = fopen([ofn '_motifs.out'], 'w'); */
+  /* 'mapTF:872' fid = fopen([ofn '_motifs.out'], 'w'); */
   i = cur_line->size[0] * cur_line->size[1];
   cur_line->size[0] = 1;
   cur_line->size[1] = ofn->size[1] + 11;
@@ -3203,18 +3221,18 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
 
   fileid = cfopen(cur_line, "wb");
 
-  /* 'mapTF:844' if fid == -1 */
+  /* 'mapTF:873' if fid == -1 */
   if (fileid == -1) {
-    /* 'mapTF:845' fprintf("ERROR: Cannot create the combined motif file\n"); */
+    /* 'mapTF:874' fprintf("ERROR: Cannot create the combined motif file\n"); */
     printf("ERROR: Cannot create the combined motif file\n");
     fflush(stdout);
     exit(1);
   }
 
-  /* 'mapTF:847' a = 1; */
+  /* 'mapTF:876' a = 1; */
   a = 1.0;
 
-  /* 'mapTF:848' for i = 1:length(PWM2) */
+  /* 'mapTF:877' for i = 1:length(PWM2) */
   u0 = PWM2->size[0];
   if (u0 < 1) {
     u0 = 1;
@@ -3226,8 +3244,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxInit_cell_wrap_6(&d_cur_PWM_tmp, 1);
   for (b_i = 0; b_i < u0; b_i++) {
     /*  [ind, r] = ppmsim([PWM2{i};p], [LEN_2(i);lenvec]); */
-    /* 'mapTF:850' p_len = length(p); */
-    /* 'mapTF:851' cur_PWM_tmp = cell(p_len+1,1); */
+    /* 'mapTF:879' p_len = length(p); */
+    /* 'mapTF:880' cur_PWM_tmp = cell(p_len+1,1); */
     i1 = d_cur_PWM_tmp->size[0];
     d_cur_PWM_tmp->size[0] = unnamed_idx_0;
     emxEnsureCapacity_cell_wrap_6(d_cur_PWM_tmp, i1);
@@ -3237,13 +3255,13 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
       P_data[i1].f1->size[1] = 0;
     }
 
-    /* 'mapTF:852' cur_PWM_tmp = coder.nullcopy(cur_PWM_tmp); */
+    /* 'mapTF:881' cur_PWM_tmp = coder.nullcopy(cur_PWM_tmp); */
     i1 = b_cur_PWM_tmp->size[0];
     b_cur_PWM_tmp->size[0] = d_cur_PWM_tmp->size[0];
     emxEnsureCapacity_cell_wrap_6(b_cur_PWM_tmp, i1);
     P_data = b_cur_PWM_tmp->data;
 
-    /* 'mapTF:853' cur_PWM_tmp{1} = PWM2{i}; */
+    /* 'mapTF:882' cur_PWM_tmp{1} = PWM2{i}; */
     i1 = P_data[0].f1->size[0] * P_data[0].f1->size[1];
     P_data[0].f1->size[0] = PWM2_data[b_i].f1->size[0];
     P_data[0].f1->size[1] = PWM2_data[b_i].f1->size[1];
@@ -3253,9 +3271,9 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
       P_data[0].f1->data[i1] = PWM2_data[b_i].f1->data[i1];
     }
 
-    /* 'mapTF:854' for cur_idx=1:p_len */
+    /* 'mapTF:883' for cur_idx=1:p_len */
     for (cur_idx = 0; cur_idx < i; cur_idx++) {
-      /* 'mapTF:855' cur_PWM_tmp{cur_idx+1} = p{cur_idx}; */
+      /* 'mapTF:884' cur_PWM_tmp{cur_idx+1} = p{cur_idx}; */
       i1 = P_data[cur_idx + 1].f1->size[0] * P_data[cur_idx + 1].f1->size[1];
       P_data[cur_idx + 1].f1->size[0] = cur_PWM_tmp_data[cur_idx].f1->size[0];
       P_data[cur_idx + 1].f1->size[1] = cur_PWM_tmp_data[cur_idx].f1->size[1];
@@ -3267,7 +3285,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
       }
     }
 
-    /* 'mapTF:857' [ind, r] = ppmsim(cur_PWM_tmp, [LEN_2(i);lenvec]); */
+    /* 'mapTF:886' [ind, r] = ppmsim(cur_PWM_tmp, [LEN_2(i);lenvec]); */
     i1 = clus->size[0];
     clus->size[0] = f->size[0] + 1;
     emxEnsureCapacity_real_T(clus, i1);
@@ -3279,9 +3297,9 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
 
     ppmsim(b_cur_PWM_tmp, clus, &curr_pos, &idx);
 
-    /* 'mapTF:859' if r > 0.80 */
+    /* 'mapTF:888' if r > 0.80 */
     if (idx > 0.8) {
-      /* 'mapTF:860' fprintf(fid,'MOTIF %d\n%s\n%d\n', int32(a), names{ind}, int32(LEN_2(i))); */
+      /* 'mapTF:889' fprintf(fid,'MOTIF %d\n%s\n%d\n', int32(a), names{ind}, int32(LEN_2(i))); */
       i1 = cur_line->size[0] * cur_line->size[1];
       cur_line->size[0] = 1;
       cur_line->size[1] = names_data[(int)curr_pos - 1].f1->size[1] + 1;
@@ -3303,17 +3321,17 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         }
       }
 
-      /* 'mapTF:861' a = a+1; */
+      /* 'mapTF:890' a = a+1; */
       a++;
 
-      /* 'mapTF:862' for j = 1:LEN_2(i) */
+      /* 'mapTF:891' for j = 1:LEN_2(i) */
       i1 = (int)vec_data[b_i];
       if (0 <= i1 - 1) {
         d_NULL = NULL;
       }
 
       for (N = 0; N < i1; N++) {
-        /* 'mapTF:863' fprintf(fid,'%0.3f %0.3f %0.3f %0.3f\n',PWM2{i}(j,1),PWM2{i}(j,2),PWM2{i}(j,3),PWM2{i}(j,4)); */
+        /* 'mapTF:892' fprintf(fid,'%0.3f %0.3f %0.3f %0.3f\n',PWM2{i}(j,1),PWM2{i}(j,2),PWM2{i}(j,3),PWM2{i}(j,4)); */
         print_processing(PWM2_data[b_i].f1->data[N], PWM2_data[b_i].f1->data[N +
                          PWM2_data[b_i].f1->size[0]], PWM2_data[b_i].f1->data[N
                          + PWM2_data[b_i].f1->size[0] * 2], PWM2_data[b_i]
@@ -3330,7 +3348,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
         }
       }
 
-      /* 'mapTF:865' fprintf(fid, '\n'); */
+      /* 'mapTF:894' fprintf(fid, '\n'); */
       b_NULL = NULL;
       getfilestar(fileid, &filestar, &hal);
       if (!(filestar == b_NULL)) {
@@ -3342,8 +3360,8 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
     } else {
       curr_pos = vec_data[b_i];
       if (I_2_data[b_i] / curr_pos > 1.0) {
-        /* 'mapTF:866' elseif I_2(i)/LEN_2(i) > 1 */
-        /* 'mapTF:867' fprintf(fid,'MOTIF %d\n%s\n%d\n', int32(a), consen(PWM2{i}, LEN_2(i)), int32(LEN_2(i))); */
+        /* 'mapTF:895' elseif I_2(i)/LEN_2(i) > 1 */
+        /* 'mapTF:896' fprintf(fid,'MOTIF %d\n%s\n%d\n', int32(a), consen(PWM2{i}, LEN_2(i)), int32(LEN_2(i))); */
         b_NULL = NULL;
         getfilestar(fileid, &filestar, &hal);
         if (!(filestar == b_NULL)) {
@@ -3354,17 +3372,17 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           }
         }
 
-        /* 'mapTF:868' a = a+1; */
+        /* 'mapTF:897' a = a+1; */
         a++;
 
-        /* 'mapTF:869' for j = 1:LEN_2(i) */
+        /* 'mapTF:898' for j = 1:LEN_2(i) */
         i1 = (int)curr_pos;
         if (0 <= (int)curr_pos - 1) {
           c_NULL = NULL;
         }
 
         for (N = 0; N < i1; N++) {
-          /* 'mapTF:870' fprintf(fid,'%0.3f %0.3f %0.3f %0.3f\n',PWM2{i}(j,1),PWM2{i}(j,2),PWM2{i}(j,3),PWM2{i}(j,4)); */
+          /* 'mapTF:899' fprintf(fid,'%0.3f %0.3f %0.3f %0.3f\n',PWM2{i}(j,1),PWM2{i}(j,2),PWM2{i}(j,3),PWM2{i}(j,4)); */
           print_processing(PWM2_data[b_i].f1->data[N], PWM2_data[b_i].f1->data[N
                            + PWM2_data[b_i].f1->size[0]], PWM2_data[b_i]
                            .f1->data[N + PWM2_data[b_i].f1->size[0] * 2],
@@ -3381,7 +3399,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
           }
         }
 
-        /* 'mapTF:872' fprintf(fid, '\n'); */
+        /* 'mapTF:901' fprintf(fid, '\n'); */
         b_NULL = NULL;
         getfilestar(fileid, &filestar, &hal);
         if (!(filestar == b_NULL)) {
@@ -3405,7 +3423,7 @@ static void process_motifs(const emxArray_char_T *dfn, const emxArray_char_T
   emxFree_char_T(&cur_line);
   emxFree_real_T(&clus);
 
-  /* 'mapTF:875' fclose(fid); */
+  /* 'mapTF:904' fclose(fid); */
   cfclose(fileid);
 }
 
@@ -3467,19 +3485,19 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
   lPWM2_data = lPWM2->data;
   PWM2_data = PWM2->data;
 
-  /* 'mapTF:338' varc = [2 3 4; 1 3 4;1 2 4;1 2 3]; */
-  /* 'mapTF:339' O = ones(1,l_svm-1); */
-  /* 'mapTF:340' n = numel(Lmat)/4; */
+  /* 'mapTF:358' varc = [2 3 4; 1 3 4;1 2 4;1 2 3]; */
+  /* 'mapTF:359' O = ones(1,l_svm-1); */
+  /* 'mapTF:360' n = numel(Lmat)/4; */
   n = (double)(Lmat->size[0] << 2) / 4.0;
 
-  /* 'mapTF:341' varscore = zeros(n,1); */
+  /* 'mapTF:361' varscore = zeros(n,1); */
   i = varscore->size[0];
   i1 = (int)n;
   varscore->size[0] = (int)n;
   emxEnsureCapacity_real_T(varscore, i);
   varscore_data = varscore->data;
 
-  /* 'mapTF:342' for i = 1:n */
+  /* 'mapTF:362' for i = 1:n */
   if (0 <= (int)n - 1) {
     unnamed_idx_1 = (int)(l_svm - 1.0);
     loop_ub = (int)(l_svm - 1.0);
@@ -3493,10 +3511,10 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
   emxInit_real_T(&B, 2);
   emxInit_real_T(&b_dsvm, 2);
   for (b_i = 0; b_i < i1; b_i++) {
-    /* 'mapTF:343' M = Lmat(i,1); */
+    /* 'mapTF:363' M = Lmat(i,1); */
     M = Lmat_data[b_i];
 
-    /* 'mapTF:344' ind = [O ss(Lmat(i,2):Lmat(i,3)) O]; */
+    /* 'mapTF:364' ind = [O ss(Lmat(i,2):Lmat(i,3)) O]; */
     d = Lmat_data[b_i + Lmat->size[0]];
     n = Lmat_data[b_i + Lmat->size[0] * 2];
     if (d > n) {
@@ -3526,7 +3544,7 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
       ind_data[((i3 + (int)(l_svm - 1.0)) + i2) - i] = 1.0;
     }
 
-    /* 'mapTF:345' DSVM = dsvm(Lmat(i,2):Lmat(i,3),:); */
+    /* 'mapTF:365' DSVM = dsvm(Lmat(i,2):Lmat(i,3),:); */
     d = Lmat_data[b_i + Lmat->size[0]];
     n = Lmat_data[b_i + Lmat->size[0] * 2];
     if (d > n) {
@@ -3537,10 +3555,10 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
       i2 = (int)n - 1;
     }
 
-    /* 'mapTF:346' L = Lmat(i,3)-Lmat(i,2)+1; */
+    /* 'mapTF:366' L = Lmat(i,3)-Lmat(i,2)+1; */
     L = (n - d) + 1.0;
 
-    /* 'mapTF:347' matscore = zeros(L,3); */
+    /* 'mapTF:367' matscore = zeros(L,3); */
     i3 = (int)((n - d) + 1.0);
     i4 = matscore->size[0] * matscore->size[1];
     matscore->size[0] = (int)L;
@@ -3552,17 +3570,17 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
       matscore_data[i4] = 0.0;
     }
 
-    /* 'mapTF:348' for ii = 1:L */
+    /* 'mapTF:368' for ii = 1:L */
     if (0 <= (int)L - 1) {
       loop_ub_tmp = (int)(2.0 * l_svm - 1.0);
       i5 = (int)l_svm;
     }
 
     for (ii = 0; ii < i3; ii++) {
-      /* 'mapTF:349' Lind = l_svm-1+ii; */
+      /* 'mapTF:369' Lind = l_svm-1+ii; */
       n = (l_svm - 1.0) + ((double)ii + 1.0);
 
-      /* 'mapTF:350' scores = zeros(2*l_svm-1,1); */
+      /* 'mapTF:370' scores = zeros(2*l_svm-1,1); */
       i4 = scores->size[0];
       scores->size[0] = (int)(2.0 * l_svm - 1.0);
       emxEnsureCapacity_real_T(scores, i4);
@@ -3571,23 +3589,23 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
         scores_data[i4] = 0.0;
       }
 
-      /* 'mapTF:351' for j = 1:2*l_svm-1 */
+      /* 'mapTF:371' for j = 1:2*l_svm-1 */
       for (j = 0; j < loop_ub_tmp; j++) {
-        /* 'mapTF:352' scores(j) = lPWM2{M}(Lind-l_svm+j,ind(Lind-l_svm+j)); */
+        /* 'mapTF:372' scores(j) = lPWM2{M}(Lind-l_svm+j,ind(Lind-l_svm+j)); */
         nx = (int)((n - l_svm) + ((double)j + 1.0));
         scores_data[j] = lPWM2_data[(int)M - 1].f1->data[(nx + lPWM2_data[(int)M
           - 1].f1->size[0] * ((int)ind_data[nx - 1] - 1)) - 1];
       }
 
-      /* 'mapTF:354' evec = 0; */
+      /* 'mapTF:374' evec = 0; */
       evec = 0.0;
 
-      /* 'mapTF:355' scores(l_svm) = 0; */
+      /* 'mapTF:375' scores(l_svm) = 0; */
       scores_data[(int)l_svm - 1] = 0.0;
 
-      /* 'mapTF:356' for j = 1:l_svm */
+      /* 'mapTF:376' for j = 1:l_svm */
       for (j = 0; j < i5; j++) {
-        /* 'mapTF:357' evec = evec+sum(exp(Smat{l_svm-j+1}*scores(j:l_svm+j-1))); */
+        /* 'mapTF:377' evec = evec+sum(exp(Smat{l_svm-j+1}*scores(j:l_svm+j-1))); */
         d = (l_svm + ((double)j + 1.0)) - 1.0;
         if ((double)j + 1.0 > d) {
           i4 = 0;
@@ -3651,10 +3669,10 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
         evec += blockedSummation(y, y->size[0]);
       }
 
-      /* 'mapTF:359' for iii = 1:3 */
+      /* 'mapTF:379' for iii = 1:3 */
       for (k = 0; k < 3; k++) {
-        /* 'mapTF:360' V = PWM2{M}(Lind,varc(ind(Lind),iii))-PWM2{M}(Lind,ind(Lind)); */
-        /* 'mapTF:361' matscore(ii,iii) = evec*V; */
+        /* 'mapTF:380' V = PWM2{M}(Lind,varc(ind(Lind),iii))-PWM2{M}(Lind,ind(Lind)); */
+        /* 'mapTF:381' matscore(ii,iii) = evec*V; */
         nx = (int)ind_data[(int)n - 1];
         matscore_data[ii + matscore->size[0] * k] = evec * (PWM2_data[(int)M - 1]
           .f1->data[((int)n + PWM2_data[(int)M - 1].f1->size[0] * (varc[(nx + (k
@@ -3663,7 +3681,7 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
       }
     }
 
-    /* 'mapTF:364' varscore(i) = ip(matscore(:), DSVM(:)); */
+    /* 'mapTF:384' varscore(i) = ip(matscore(:), DSVM(:)); */
     i3 = scores->size[0];
     scores->size[0] = matscore->size[0] * 3;
     emxEnsureCapacity_real_T(scores, i3);
@@ -3695,7 +3713,7 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
       y_data[i3] = ind_data[i3];
     }
 
-    /* 'mapTF:384' c = x'*y/sqrt(x'*x)/sqrt(y'*y); */
+    /* 'mapTF:404' c = x'*y/sqrt(x'*x)/sqrt(y'*y); */
     if (matscore->size[0] * 3 < 1) {
       n = 0.0;
       L = 0.0;
@@ -3728,12 +3746,12 @@ static void scoreseqkmer(const emxArray_cell_wrap_5 *PWM2, const
 }
 
 /*
- * function [P,V,seqindmat,seqout,seq] = seq2pv(sfn, wfn, l_svm)
+ * function [P,V,seqindmat,seqout,seq] = seq2pv(sfn, wfn, l_svm, Negative)
  */
 static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
-                   double l_svm, emxArray_cell_wrap_0 *P, emxArray_cell_wrap_1
-                   *V, emxArray_cell_wrap_2 *seqindmat, emxArray_cell_wrap_3
-                   *seqout, emxArray_cell_wrap_4 *seq)
+                   double l_svm, double Negative, emxArray_cell_wrap_0 *P,
+                   emxArray_cell_wrap_1 *V, emxArray_cell_wrap_2 *seqindmat,
+                   emxArray_cell_wrap_3 *seqout, emxArray_cell_wrap_4 *seq)
 {
   static const signed char mat[12] = { 1, 0, 0, 0, 2, 2, 1, 1, 3, 3, 3, 2 };
 
@@ -3803,33 +3821,33 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
   /* sfn: fasta file */
   /* wfn: kmer weight file */
   /* ofn: output prefix */
-  /* 'mapTF:458' fid = fopen(wfn, 'r'); */
+  /* 'mapTF:478' fid = fopen(wfn, 'r'); */
   fileid = cfopen(wfn, "rb");
 
-  /* 'mapTF:459' if fid == -1 */
+  /* 'mapTF:479' if fid == -1 */
   if (fileid == -1) {
-    /* 'mapTF:460' fprintf("ERROR: Weight file cannot be opened.\n") */
+    /* 'mapTF:480' fprintf("ERROR: Weight file cannot be opened.\n") */
     printf("ERROR: Weight file cannot be opened.\n");
     fflush(stdout);
     exit(1);
   }
 
-  /* 'mapTF:463' curr_pos = ftell(fid); */
+  /* 'mapTF:483' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
 
-  /* 'mapTF:464' idx=0; */
+  /* 'mapTF:484' idx=0; */
   idx = 0.0;
 
-  /* 'mapTF:465' while ~feof(fid) */
+  /* 'mapTF:485' while ~feof(fid) */
   emxInit_char_T(&b_fileid, 2);
   do {
     exitg1 = 0;
     I2 = b_feof(fileid);
     if (!(I2 != 0.0)) {
-      /* 'mapTF:466' idx=idx+1; */
+      /* 'mapTF:486' idx=idx+1; */
       idx++;
 
-      /* 'mapTF:467' fgetl(fid); */
+      /* 'mapTF:487' fgetl(fid); */
       b_fgets(fileid, b_fileid);
     } else {
       exitg1 = 1;
@@ -3839,10 +3857,10 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
   emxFree_char_T(&b_fileid);
   emxInit_cell_wrap_4(&sequences);
 
-  /* 'mapTF:469' fseek(fid, curr_pos, 'bof'); */
+  /* 'mapTF:489' fseek(fid, curr_pos, 'bof'); */
   b_fseek(fileid, curr_pos);
 
-  /* 'mapTF:470' sequences = cell(idx, 1); */
+  /* 'mapTF:490' sequences = cell(idx, 1); */
   m = (int)idx;
   i = sequences->size[0];
   sequences->size[0] = (int)idx;
@@ -3855,8 +3873,8 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
   emxInit_real_T(&alpha, 1);
 
-  /* 'mapTF:471' sequences = coder.nullcopy(sequences); */
-  /* 'mapTF:472' alpha = zeros(idx, 1); */
+  /* 'mapTF:491' sequences = coder.nullcopy(sequences); */
+  /* 'mapTF:492' alpha = zeros(idx, 1); */
   i = alpha->size[0];
   alpha->size[0] = (int)idx;
   emxEnsureCapacity_real_T(alpha, i);
@@ -3865,17 +3883,17 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     alpha_data[i] = 0.0;
   }
 
-  /* 'mapTF:473' for cur_idx=1:idx */
+  /* 'mapTF:493' for cur_idx=1:idx */
   m = 0;
   emxInit_char_T(&cur_line, 2);
   emxInit_char_T(&cur_seq, 2);
   emxInit_char_T(&cur_alpha, 2);
   exitg2 = false;
   while ((!exitg2) && (m <= (int)idx - 1)) {
-    /* 'mapTF:474' cur_line = fgetl(fid); */
+    /* 'mapTF:494' cur_line = fgetl(fid); */
     fgetl(fileid, cur_line);
 
-    /* 'mapTF:475' if cur_line == -1 */
+    /* 'mapTF:495' if cur_line == -1 */
     for (i = 0; i < 2; i++) {
       x_size[i] = cur_line->size[i];
     }
@@ -3888,14 +3906,14 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     if (y) {
       exitg2 = true;
     } else {
-      /* 'mapTF:478' [cur_seq, cur_alpha] = strtok(cur_line, char(9)); */
+      /* 'mapTF:498' [cur_seq, cur_alpha] = strtok(cur_line, char(9)); */
       c_strtok(cur_line, cur_seq, cur_alpha);
 
-      /* 'mapTF:479' alpha(cur_idx,1) = real(str2double(cur_alpha)); */
+      /* 'mapTF:499' alpha(cur_idx,1) = real(str2double(cur_alpha)); */
       dc = str2double(cur_alpha);
       alpha_data[m] = dc.re;
 
-      /* 'mapTF:480' sequences{cur_idx} = (strip(cur_seq)); */
+      /* 'mapTF:500' sequences{cur_idx} = (strip(cur_seq)); */
       strip(cur_seq, sequences_data[m].f1);
       m++;
     }
@@ -3904,16 +3922,16 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
   emxFree_char_T(&cur_alpha);
   emxFree_char_T(&cur_seq);
 
-  /* 'mapTF:482' fclose(fid); */
+  /* 'mapTF:502' fclose(fid); */
   cfclose(fileid);
 
-  /* 'mapTF:484' l = length(sequences{1}); */
+  /* 'mapTF:504' l = length(sequences{1}); */
   varargin_2 = sequences_data[0].f1->size[1];
   l = sequences_data[0].f1->size[1];
 
-  /* 'mapTF:485' if l ~= l_svm */
+  /* 'mapTF:505' if l ~= l_svm */
   if (sequences_data[0].f1->size[1] != l_svm) {
-    /* 'mapTF:486' fprintf("ERROR: L must be the same as the length of k-mer in the weight file\n"); */
+    /* 'mapTF:506' fprintf("ERROR: L must be the same as the length of k-mer in the weight file\n"); */
     printf("ERROR: L must be the same as the length of k-mer in the weight file\n");
     fflush(stdout);
     exit(1);
@@ -3921,7 +3939,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
   emxInit_real_T(&w, 1);
 
-  /* 'mapTF:489' w = zeros(4^l,1); */
+  /* 'mapTF:509' w = zeros(4^l,1); */
   md2 = (int)rt_powd_snf(4.0, sequences_data[0].f1->size[1]);
   i = w->size[0];
   w->size[0] = (int)rt_powd_snf(4.0, sequences_data[0].f1->size[1]);
@@ -3931,7 +3949,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     w_data[i] = 0.0;
   }
 
-  /* 'mapTF:490' pow = (4.^(0:(l-1)))'; */
+  /* 'mapTF:510' pow = (4.^(0:(l-1)))'; */
   emxInit_real_T(&rs, 2);
   if (sequences_data[0].f1->size[1] - 1 < 0) {
     rs->size[1] = 0;
@@ -3969,7 +3987,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
   emxInit_real_T(&pow2, 1);
 
-  /* 'mapTF:491' pow2 = flipud(pow); */
+  /* 'mapTF:511' pow2 = flipud(pow); */
   i = pow2->size[0];
   pow2->size[0] = b_pow->size[0];
   emxEnsureCapacity_real_T(pow2, i);
@@ -3988,20 +4006,20 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     pow2_data[pow2_tmp] = curr_pos;
   }
 
-  /* 'mapTF:492' fprintf('calculating indices\n'); */
+  /* 'mapTF:512' fprintf('calculating indices\n'); */
   printf("calculating indices\n");
   fflush(stdout);
 
-  /* 'mapTF:493' for i = 1:numel(alpha) */
+  /* 'mapTF:513' for i = 1:numel(alpha) */
   i = alpha->size[0];
   emxInit_real_T(&ss, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:494' ss = letterconvert(sequences{i}); */
+    /* 'mapTF:514' ss = letterconvert(sequences{i}); */
     letterconvert(sequences_data[b_i].f1, ss);
     ss_data = ss->data;
 
-    /* 'mapTF:495' rs = 3-fliplr(ss); */
-    /* 'mapTF:496' w(ss*pow+1) = alpha(i); */
+    /* 'mapTF:515' rs = 3-fliplr(ss); */
+    /* 'mapTF:516' w(ss*pow+1) = alpha(i); */
     if (ss->size[1] < 1) {
       curr_pos = 0.0;
     } else {
@@ -4011,7 +4029,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
     w_data[(int)(curr_pos + 1.0) - 1] = alpha_data[b_i];
 
-    /* 'mapTF:497' w(rs*pow+1) = alpha(i); */
+    /* 'mapTF:517' w(rs*pow+1) = alpha(i); */
     fliplr(ss);
     i1 = ss->size[0] * ss->size[1];
     ss->size[0] = 1;
@@ -4032,15 +4050,28 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     w_data[(int)(curr_pos + 1.0) - 1] = alpha_data[b_i];
   }
 
+  /* 'mapTF:519' if Negative */
+  if (Negative != 0.0) {
+    /* 'mapTF:520' w = -1 * w; */
+    md2 = w->size[0];
+    for (i = 0; i < md2; i++) {
+      w_data[i] = -w_data[i];
+    }
+
+    /* 'mapTF:521' m = -1 * mean(alpha); */
+    curr_pos = -(blockedSummation(alpha, alpha->size[0]) / (double)alpha->size[0]);
+  } else {
+    /* 'mapTF:522' else */
+    /* 'mapTF:523' m = mean(alpha); */
+    curr_pos = blockedSummation(alpha, alpha->size[0]) / (double)alpha->size[0];
+  }
+
   emxInit_real_T(&b_w, 1);
 
-  /* 'mapTF:499' m = mean(alpha); */
-  curr_pos = blockedSummation(alpha, alpha->size[0]) / (double)alpha->size[0];
-
-  /* 'mapTF:500' s = std(alpha); */
+  /* 'mapTF:525' s = std(alpha); */
   idx = b_std(alpha);
 
-  /* 'mapTF:501' W = (1/2)*(1+erf((w-m)/s/sqrt(2))); */
+  /* 'mapTF:526' W = (1/2)*(1+erf((w-m)/s/sqrt(2))); */
   i = b_w->size[0];
   b_w->size[0] = w->size[0];
   emxEnsureCapacity_real_T(b_w, i);
@@ -4057,7 +4088,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     alpha_data[i] = 0.5 * (alpha_data[i] + 1.0);
   }
 
-  /* 'mapTF:502' W(W>0.99) = 0.99; */
+  /* 'mapTF:527' W(W>0.99) = 0.99; */
   m = alpha->size[0];
   for (b_i = 0; b_i < m; b_i++) {
     if (alpha_data[b_i] > 0.99) {
@@ -4065,35 +4096,42 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     }
   }
 
-  /* W(W<0.01) = 0.01; */
+  /* 'mapTF:528' W(W<0.01) = 0.01; */
+  m = alpha->size[0];
+  for (b_i = 0; b_i < m; b_i++) {
+    if (alpha_data[b_i] < 0.01) {
+      alpha_data[b_i] = 0.01;
+    }
+  }
+
   /*  seq = importdata(sfn); */
-  /* 'mapTF:506' fid = fopen(sfn, 'r'); */
+  /* 'mapTF:531' fid = fopen(sfn, 'r'); */
   fileid = cfopen(sfn, "rb");
 
-  /* 'mapTF:507' if fid == -1 */
+  /* 'mapTF:532' if fid == -1 */
   if (fileid == -1) {
-    /* 'mapTF:508' fprintf("ERROR: Sequence file (.fa or .fasta) cannot be opened.\n") */
+    /* 'mapTF:533' fprintf("ERROR: Sequence file (.fa or .fasta) cannot be opened.\n") */
     printf("ERROR: Sequence file (.fa or .fasta) cannot be opened.\n");
     fflush(stdout);
     exit(1);
   }
 
-  /* 'mapTF:511' curr_pos = ftell(fid); */
+  /* 'mapTF:536' curr_pos = ftell(fid); */
   curr_pos = b_ftell(fileid);
 
-  /* 'mapTF:512' idx=0; */
+  /* 'mapTF:537' idx=0; */
   idx = 0.0;
 
-  /* 'mapTF:513' while ~feof(fid) */
+  /* 'mapTF:538' while ~feof(fid) */
   emxInit_char_T(&c_fileid, 2);
   do {
     exitg1 = 0;
     I2 = b_feof(fileid);
     if (!(I2 != 0.0)) {
-      /* 'mapTF:514' idx=idx+1; */
+      /* 'mapTF:539' idx=idx+1; */
       idx++;
 
-      /* 'mapTF:515' fgetl(fid); */
+      /* 'mapTF:540' fgetl(fid); */
       b_fgets(fileid, c_fileid);
     } else {
       exitg1 = 1;
@@ -4102,10 +4140,10 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
   emxFree_char_T(&c_fileid);
 
-  /* 'mapTF:517' fseek(fid, curr_pos, 'bof'); */
+  /* 'mapTF:542' fseek(fid, curr_pos, 'bof'); */
   b_fseek(fileid, curr_pos);
 
-  /* 'mapTF:518' seq = cell(idx, 1); */
+  /* 'mapTF:543' seq = cell(idx, 1); */
   m = (int)idx;
   i = seq->size[0];
   seq->size[0] = (int)idx;
@@ -4116,15 +4154,15 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     seq_data[i].f1->size[1] = 0;
   }
 
-  /* 'mapTF:519' seq = coder.nullcopy(seq); */
-  /* 'mapTF:520' for cur_idx=1:idx */
+  /* 'mapTF:544' seq = coder.nullcopy(seq); */
+  /* 'mapTF:545' for cur_idx=1:idx */
   m = 0;
   exitg2 = false;
   while ((!exitg2) && (m <= (int)idx - 1)) {
-    /* 'mapTF:521' cur_line = fgetl(fid); */
+    /* 'mapTF:546' cur_line = fgetl(fid); */
     fgetl(fileid, cur_line);
 
-    /* 'mapTF:522' if cur_line == -1 */
+    /* 'mapTF:547' if cur_line == -1 */
     for (i = 0; i < 2; i++) {
       x_size[i] = cur_line->size[i];
     }
@@ -4137,7 +4175,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     if (y) {
       exitg2 = true;
     } else {
-      /* 'mapTF:525' seq{cur_idx} = (strip(cur_line)); */
+      /* 'mapTF:550' seq{cur_idx} = (strip(cur_line)); */
       strip(cur_line, seq_data[m].f1);
       m++;
     }
@@ -4145,14 +4183,14 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
   emxFree_char_T(&cur_line);
 
-  /* 'mapTF:527' fclose(fid); */
+  /* 'mapTF:552' fclose(fid); */
   cfclose(fileid);
 
-  /* 'mapTF:529' n = length(seq)/2; */
+  /* 'mapTF:554' n = length(seq)/2; */
   n = (double)seq->size[0] / 2.0;
 
-  /* 'mapTF:530' seqout = cell(n,1); */
-  /* 'mapTF:531' seqindmat = cell(n,1); */
+  /* 'mapTF:555' seqout = cell(n,1); */
+  /* 'mapTF:556' seqindmat = cell(n,1); */
   unnamed_idx_0_tmp_tmp = (int)n;
   i = seqindmat->size[0];
   seqindmat->size[0] = (int)n;
@@ -4163,13 +4201,13 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     seqindmat_data[i].f1->size[1] = 2;
   }
 
-  /* 'mapTF:532' seqindmat = coder.nullcopy(seqindmat); */
-  /* 'mapTF:533' fprintf('converting kmers to probabilities\n'); */
+  /* 'mapTF:557' seqindmat = coder.nullcopy(seqindmat); */
+  /* 'mapTF:558' fprintf('converting kmers to probabilities\n'); */
   printf("converting kmers to probabilities\n");
   fflush(stdout);
 
-  /* 'mapTF:534' P = cell(n,1); */
-  /* 'mapTF:535' for i = 1:n */
+  /* 'mapTF:559' P = cell(n,1); */
+  /* 'mapTF:560' for i = 1:n */
   i = seqout->size[0];
   seqout->size[0] = (int)n;
   emxEnsureCapacity_cell_wrap_3(seqout, i);
@@ -4195,21 +4233,21 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
   emxInit_real_T(&p, 1);
   emxInit_real_T(&A, 2);
   for (b_i = 0; b_i < unnamed_idx_0_tmp_tmp; b_i++) {
-    /* 'mapTF:536' if mod(i,1000)==0 */
+    /* 'mapTF:561' if mod(i,1000)==0 */
     if (fmod((double)b_i + 1.0, 1000.0) == 0.0) {
-      /* 'mapTF:537' fprintf('%d sequences converted\n', int32(i)); */
+      /* 'mapTF:562' fprintf('%d sequences converted\n', int32(i)); */
       printf("%d sequences converted\n", b_i + 1);
       fflush(stdout);
     }
 
-    /* 'mapTF:539' L = length(seq{2*i})-l+1; */
+    /* 'mapTF:564' L = length(seq{2*i})-l+1; */
     for (i = 0; i < 2; i++) {
       x_size[i] = seq_data[((b_i + 1) << 1) - 1].f1->size[i];
     }
 
     idx = (double)(x_size[1] - varargin_2) + 1.0;
 
-    /* 'mapTF:540' seqindmat{i} = zeros(L,2); */
+    /* 'mapTF:565' seqindmat{i} = zeros(L,2); */
     m = (int)idx;
     i = seqindmat_data[b_i].f1->size[0] * seqindmat_data[b_i].f1->size[1];
     seqindmat_data[b_i].f1->size[0] = (int)idx;
@@ -4220,11 +4258,11 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
       seqindmat_data[b_i].f1->data[i] = 0.0;
     }
 
-    /* 'mapTF:541' ss = letterconvert(seq{2*i}); */
+    /* 'mapTF:566' ss = letterconvert(seq{2*i}); */
     letterconvert(seq_data[((b_i + 1) << 1) - 1].f1, ss);
     ss_data = ss->data;
 
-    /* 'mapTF:542' rs = 3-ss; */
+    /* 'mapTF:567' rs = 3-ss; */
     i = rs->size[0] * rs->size[1];
     rs->size[0] = 1;
     rs->size[1] = ss->size[1];
@@ -4232,7 +4270,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     rs_data = rs->data;
     md2 = ss->size[1];
 
-    /* 'mapTF:543' seqout{i} = ss+1; */
+    /* 'mapTF:568' seqout{i} = ss+1; */
     i = seqout_data[b_i].f1->size[0] * seqout_data[b_i].f1->size[1];
     seqout_data[b_i].f1->size[0] = 1;
     seqout_data[b_i].f1->size[1] = ss->size[1];
@@ -4243,7 +4281,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
       seqout_data[b_i].f1->data[i] = curr_pos + 1.0;
     }
 
-    /* 'mapTF:544' p = zeros(L,1); */
+    /* 'mapTF:569' p = zeros(L,1); */
     i = p->size[0];
     p->size[0] = (int)idx;
     emxEnsureCapacity_real_T(p, i);
@@ -4252,7 +4290,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
       p_data[i] = 0.0;
     }
 
-    /* 'mapTF:545' I = ss(1:l)*pow; */
+    /* 'mapTF:570' I = ss(1:l)*pow; */
     i = A->size[0] * A->size[1];
     A->size[0] = 1;
     A->size[1] = loop_ub;
@@ -4269,7 +4307,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
                        (blasint)1);
     }
 
-    /* 'mapTF:546' I2 = rs(1:l)*pow2; */
+    /* 'mapTF:571' I2 = rs(1:l)*pow2; */
     i = A->size[0] * A->size[1];
     A->size[0] = 1;
     A->size[1] = b_loop_ub;
@@ -4286,40 +4324,40 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
                       (blasint)1);
     }
 
-    /* 'mapTF:547' seqindmat{i}(1,1) = I+1; */
+    /* 'mapTF:572' seqindmat{i}(1,1) = I+1; */
     seqindmat_data[b_i].f1->data[0] = b_I + 1.0;
 
-    /* 'mapTF:548' seqindmat{i}(1,2) = I2+1; */
+    /* 'mapTF:573' seqindmat{i}(1,2) = I2+1; */
     seqindmat_data[b_i].f1->data[seqindmat_data[b_i].f1->size[0]] = I2 + 1.0;
 
-    /* 'mapTF:549' p(1) = W(I+1); */
+    /* 'mapTF:574' p(1) = W(I+1); */
     p_data[0] = alpha_data[(int)(b_I + 1.0) - 1];
 
-    /* 'mapTF:550' for j = 2:L */
+    /* 'mapTF:575' for j = 2:L */
     i = (int)(idx + -1.0);
     for (j = 0; j < i; j++) {
-      /* 'mapTF:551' I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1); */
+      /* 'mapTF:576' I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1); */
       curr_pos = rt_powd_snf(4.0, (double)varargin_2 - 1.0);
       m = (int)((unsigned int)j + varargin_2);
       b_I = (b_I - ss_data[j]) / 4.0 + curr_pos * ss_data[m];
 
       /* I2 = (I2-rs(j-1))/4+4^(l-1)*rs(j+l-1); */
-      /* 'mapTF:553' I2 = (I2-rs(j-1)*4^(l-1))*4+rs(j+l-1); */
+      /* 'mapTF:578' I2 = (I2-rs(j-1)*4^(l-1))*4+rs(j+l-1); */
       I2 = (I2 - rs_data[j] * curr_pos) * 4.0 + rs_data[m];
 
-      /* 'mapTF:554' seqindmat{i}(j,1) = I+1; */
+      /* 'mapTF:579' seqindmat{i}(j,1) = I+1; */
       seqindmat_data[b_i].f1->data[j + 1] = b_I + 1.0;
 
-      /* 'mapTF:555' seqindmat{i}(j,2) = I2+1; */
+      /* 'mapTF:580' seqindmat{i}(j,2) = I2+1; */
       seqindmat_data[b_i].f1->data[(j + seqindmat_data[b_i].f1->size[0]) + 1] =
         I2 + 1.0;
 
-      /* 'mapTF:556' p(j) = W(I+1); */
+      /* 'mapTF:581' p(j) = W(I+1); */
       p_data[j + 1] = alpha_data[(int)(b_I + 1.0) - 1];
     }
 
     /* seqindmat{i}(:,2) = flipud(seqindmat{i}(:,2)); */
-    /* 'mapTF:559' P{i} = p; */
+    /* 'mapTF:584' P{i} = p; */
     i = P_data[b_i].f1->size[0];
     P_data[b_i].f1->size[0] = p->size[0];
     emxEnsureCapacity_real_T(P_data[b_i].f1, i);
@@ -4332,14 +4370,14 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
   emxFree_real_T(&pow2);
   emxFree_real_T(&alpha);
 
-  /* 'mapTF:562' fprintf('Running dsvm\n'); */
+  /* 'mapTF:587' fprintf('Running dsvm\n'); */
   printf("Running dsvm\n");
   fflush(stdout);
 
-  /* 'mapTF:563' mat = [1 2 3;0 2 3;0 1 3;0 1 2]; */
-  /* 'mapTF:564' O = ones(1,l); */
-  /* 'mapTF:565' V = cell(n,1); */
-  /* 'mapTF:566' for i = 1:n */
+  /* 'mapTF:588' mat = [1 2 3;0 2 3;0 1 3;0 1 2]; */
+  /* 'mapTF:589' O = ones(1,l); */
+  /* 'mapTF:590' V = cell(n,1); */
+  /* 'mapTF:591' for i = 1:n */
   i = V->size[0];
   V->size[0] = (int)n;
   emxEnsureCapacity_cell_wrap_1(V, i);
@@ -4358,18 +4396,18 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
   pow2_data = RR->data;
   emxInit_real_T(&S, 2);
   for (b_i = 0; b_i < unnamed_idx_0_tmp_tmp; b_i++) {
-    /* 'mapTF:567' if mod(i,1000)==0 */
+    /* 'mapTF:592' if mod(i,1000)==0 */
     if (fmod((double)b_i + 1.0, 1000.0) == 0.0) {
-      /* 'mapTF:568' fprintf('%d sequences converted\n', int32(i)); */
+      /* 'mapTF:593' fprintf('%d sequences converted\n', int32(i)); */
       printf("%d sequences converted\n", b_i + 1);
       fflush(stdout);
     }
 
-    /* 'mapTF:570' L = length(seq{2*i}); */
+    /* 'mapTF:595' L = length(seq{2*i}); */
     m = ((b_i + 1) << 1) - 1;
     pow2_tmp = seq_data[m].f1->size[1];
 
-    /* 'mapTF:571' ss = seqout{i}-1; */
+    /* 'mapTF:596' ss = seqout{i}-1; */
     i = ss->size[0] * ss->size[1];
     ss->size[0] = 1;
     ss->size[1] = seqout_data[b_i].f1->size[1];
@@ -4380,7 +4418,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
       ss_data[i] = seqout_data[b_i].f1->data[i] - 1.0;
     }
 
-    /* 'mapTF:572' p = zeros(L+l-1,1); */
+    /* 'mapTF:597' p = zeros(L+l-1,1); */
     md2 = (int)((double)((unsigned int)seq_data[m].f1->size[1] + varargin_2) -
                 1.0);
     i = p->size[0];
@@ -4391,7 +4429,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
       p_data[i] = 0.0;
     }
 
-    /* 'mapTF:573' I = ss(1:l)*pow; */
+    /* 'mapTF:598' I = ss(1:l)*pow; */
     i = A->size[0] * A->size[1];
     A->size[0] = 1;
     A->size[1] = c_loop_ub;
@@ -4409,21 +4447,21 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
                        (blasint)1);
     }
 
-    /* 'mapTF:574' p(1) = w(I+1); */
+    /* 'mapTF:599' p(1) = w(I+1); */
     p_data[0] = w_data[(int)(b_I + 1.0) - 1];
 
-    /* 'mapTF:575' for j = 2:L-l+1 */
+    /* 'mapTF:600' for j = 2:L-l+1 */
     i = seq_data[m].f1->size[1] - l;
     for (j = 0; j < i; j++) {
-      /* 'mapTF:576' I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1); */
+      /* 'mapTF:601' I = (I-ss(j-1))/4+4^(l-1)*ss(j+l-1); */
       b_I = (b_I - ss_data[j]) / 4.0 + rt_powd_snf(4.0, (double)varargin_2 - 1.0)
         * ss_data[(int)((unsigned int)j + varargin_2)];
 
-      /* 'mapTF:577' p(j) = w(I+1); */
+      /* 'mapTF:602' p(j) = w(I+1); */
       p_data[j + 1] = w_data[(int)(b_I + 1.0) - 1];
     }
 
-    /* 'mapTF:579' v = zeros(L,3); */
+    /* 'mapTF:604' v = zeros(L,3); */
     i = seq_data[m].f1->size[1];
     i1 = v->size[0] * v->size[1];
     v->size[0] = i;
@@ -4435,7 +4473,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
       v_data[i] = 0.0;
     }
 
-    /* 'mapTF:580' for j = 1:L */
+    /* 'mapTF:605' for j = 1:L */
     i = seq_data[m].f1->size[1];
     if (0 <= i - 1) {
       varargin_1_tmp[0] = 1.0;
@@ -4450,7 +4488,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
     }
 
     for (j = 0; j < i; j++) {
-      /* 'mapTF:581' R = max([1 j-l+1]):min([j+l-1 L]); */
+      /* 'mapTF:606' R = max([1 j-l+1]):min([j+l-1 L]); */
       b_varargin_1_tmp[0] = 1.0;
       b_varargin_1_tmp[1] = (double)((j - l) + 1) + 1.0;
       curr_pos = b_maximum(b_varargin_1_tmp);
@@ -4489,7 +4527,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
         rs_data = rs->data;
       }
 
-      /* 'mapTF:582' RR = max([1 j-l+1]):min([j L+l-1]); */
+      /* 'mapTF:607' RR = max([1 j-l+1]):min([j L+l-1]); */
       varargin_1_tmp[1] = (double)((j - varargin_2) + 1) + 1.0;
       idx = b_maximum(varargin_1_tmp);
       b_j[0] = (double)j + 1.0;
@@ -4526,7 +4564,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
         pow2_data = RR->data;
       }
 
-      /* 'mapTF:583' S = ss(R); */
+      /* 'mapTF:608' S = ss(R); */
       i1 = S->size[0] * S->size[1];
       S->size[0] = 1;
       S->size[1] = rs->size[1];
@@ -4537,7 +4575,7 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
         S_data[i1] = ss_data[(int)rs_data[i1] - 1];
       }
 
-      /* 'mapTF:584' ref = sum(p(RR)); */
+      /* 'mapTF:609' ref = sum(p(RR)); */
       i1 = b_w->size[0];
       b_w->size[0] = RR->size[1];
       emxEnsureCapacity_real_T(b_w, i1);
@@ -4549,35 +4587,35 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
 
       curr_pos = blockedSummation(b_w, RR->size[1]);
 
-      /* 'mapTF:585' if max([1 j-l+1]) == 1 */
+      /* 'mapTF:610' if max([1 j-l+1]) == 1 */
       if (idx == 1.0) {
-        /* 'mapTF:586' cen = j; */
+        /* 'mapTF:611' cen = j; */
         m = j + 1;
 
-        /* 'mapTF:587' cen2 = j; */
+        /* 'mapTF:612' cen2 = j; */
         md2 = j + 1;
       } else if (I2 == pow2_tmp) {
-        /* 'mapTF:588' elseif min([j+l-1 L]) == L */
-        /* 'mapTF:589' cen = l; */
+        /* 'mapTF:613' elseif min([j+l-1 L]) == L */
+        /* 'mapTF:614' cen = l; */
         m = varargin_2;
 
-        /* 'mapTF:590' cen2 = L-j+1; */
+        /* 'mapTF:615' cen2 = L-j+1; */
         md2 = pow2_tmp - j;
       } else {
-        /* 'mapTF:591' else */
-        /* 'mapTF:592' cen = l; */
+        /* 'mapTF:616' else */
+        /* 'mapTF:617' cen = l; */
         m = varargin_2;
 
-        /* 'mapTF:593' cen2 = l; */
+        /* 'mapTF:618' cen2 = l; */
         md2 = varargin_2;
       }
 
-      /* 'mapTF:595' for ii = 1:3 */
+      /* 'mapTF:620' for ii = 1:3 */
       for (b_loop_ub = 0; b_loop_ub < 3; b_loop_ub++) {
-        /* 'mapTF:596' S(cen) = mat(ss(j)+1,ii); */
+        /* 'mapTF:621' S(cen) = mat(ss(j)+1,ii); */
         S_data[m - 1] = mat[((int)(ss_data[j] + 1.0) + (b_loop_ub << 2)) - 1];
 
-        /* 'mapTF:597' I = S(1:l)*pow; */
+        /* 'mapTF:622' I = S(1:l)*pow; */
         i1 = A->size[0] * A->size[1];
         A->size[0] = 1;
         A->size[1] = d_loop_ub;
@@ -4594,29 +4632,29 @@ static void seq2pv(const emxArray_char_T *sfn, const emxArray_char_T *wfn,
                            &pow_data[0], (blasint)1);
         }
 
-        /* 'mapTF:598' v(j,ii) = w(I+1); */
+        /* 'mapTF:623' v(j,ii) = w(I+1); */
         v_data[j + v->size[0] * b_loop_ub] = w_data[(int)(b_I + 1.0) - 1];
 
-        /* 'mapTF:599' if length(RR) > 1 */
+        /* 'mapTF:624' if length(RR) > 1 */
         if (RR->size[1] > 1) {
-          /* 'mapTF:600' for jj = 2:cen2 */
+          /* 'mapTF:625' for jj = 2:cen2 */
           for (loop_ub = 0; loop_ub <= md2 - 2; loop_ub++) {
-            /* 'mapTF:601' I = (I-S(jj-1))/4+4^(l-1)*S(jj+l-1); */
+            /* 'mapTF:626' I = (I-S(jj-1))/4+4^(l-1)*S(jj+l-1); */
             b_I = (b_I - S_data[loop_ub]) / 4.0 + rt_powd_snf(4.0, (double)
               varargin_2 - 1.0) * S_data[(int)((unsigned int)loop_ub +
               varargin_2)];
 
-            /* 'mapTF:602' v(j,ii)=v(j,ii)+w(I+1); */
+            /* 'mapTF:627' v(j,ii)=v(j,ii)+w(I+1); */
             v_data[j + v->size[0] * b_loop_ub] += w_data[(int)(b_I + 1.0) - 1];
           }
         }
 
-        /* 'mapTF:605' v(j,ii) = v(j,ii)-ref; */
+        /* 'mapTF:630' v(j,ii) = v(j,ii)-ref; */
         v_data[j + v->size[0] * b_loop_ub] -= curr_pos;
       }
     }
 
-    /* 'mapTF:608' V{i} = v; */
+    /* 'mapTF:633' V{i} = v; */
     i = V_data[b_i].f1->size[0] * V_data[b_i].f1->size[1];
     V_data[b_i].f1->size[0] = v->size[0];
     V_data[b_i].f1->size[1] = 3;
@@ -4668,28 +4706,28 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
   bool guard1 = false;
   p_data = p->data;
 
-  /* 'mapTF:963' l = length(p); */
-  /* 'mapTF:964' info = zeros(l, 1); */
+  /* 'mapTF:992' l = length(p); */
+  /* 'mapTF:993' info = zeros(l, 1); */
   nx = p->size[0];
   i = info->size[0];
   info->size[0] = nx;
   emxEnsureCapacity_real_T(info, i);
   info_data = info->data;
 
-  /* 'mapTF:965' len = zeros(l,1); */
+  /* 'mapTF:994' len = zeros(l,1); */
   i = len->size[0];
   len->size[0] = nx;
   emxEnsureCapacity_real_T(len, i);
   len_data = len->data;
 
-  /* 'mapTF:966' for i = 1:l */
+  /* 'mapTF:995' for i = 1:l */
   i = p->size[0];
   emxInit_real_T(&mat, 2);
   emxInit_real_T(&vec, 1);
   emxInit_real_T(&r, 2);
   emxInit_real_T(&b_mat, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:967' mat = p{i}+(p{i}==0); */
+    /* 'mapTF:996' mat = p{i}+(p{i}==0); */
     idx = mat->size[0] * mat->size[1];
     mat->size[0] = p_data[b_i].f1->size[0];
     mat->size[1] = p_data[b_i].f1->size[1];
@@ -4701,7 +4739,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
         data[idx] == 0.0);
     }
 
-    /* 'mapTF:968' vec = 2+sum(mat.*log(mat)/log(2),2); */
+    /* 'mapTF:997' vec = 2+sum(mat.*log(mat)/log(2),2); */
     idx = r->size[0] * r->size[1];
     r->size[0] = mat->size[0];
     r->size[1] = mat->size[1];
@@ -4740,7 +4778,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
       mat_data[idx] += 2.0;
     }
 
-    /* 'mapTF:969' while (vec(1) < cut || mean(vec(1:3)) < cut || mean(vec(2:4)) < cut) && length(vec) > 4 */
+    /* 'mapTF:998' while (vec(1) < cut || mean(vec(1:3)) < cut || mean(vec(2:4)) < cut) && length(vec) > 4 */
     do {
       exitg1 = 0;
       guard1 = false;
@@ -4770,7 +4808,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
 
       if (guard1) {
         if (vec->size[0] > 4) {
-          /* 'mapTF:970' p{i}(1,:) = []; */
+          /* 'mapTF:999' p{i}(1,:) = []; */
           nx = p_data[b_i].f1->size[0] - 2;
           nxin = p_data[b_i].f1->size[1];
           nrows = p_data[b_i].f1->size[0] - 1;
@@ -4800,7 +4838,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
           p_data[b_i].f1->size[1] = nxin + 1;
           emxEnsureCapacity_real_T(p_data[b_i].f1, idx);
 
-          /* 'mapTF:971' vec(1) = []; */
+          /* 'mapTF:1000' vec(1) = []; */
           nxin = vec->size[0];
           nx = vec->size[0];
           for (nrows = 0; nrows <= nx - 2; nrows++) {
@@ -4817,7 +4855,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
       }
     } while (exitg1 == 0);
 
-    /* 'mapTF:973' while (vec(end) < cut || mean(vec(end-2:end)) < cut || mean(vec(end-3:end-1)) < cut) && length(vec) > 4 */
+    /* 'mapTF:1002' while (vec(end) < cut || mean(vec(end-2:end)) < cut || mean(vec(end-3:end-1)) < cut) && length(vec) > 4 */
     do {
       exitg1 = 0;
       guard1 = false;
@@ -4847,7 +4885,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
 
       if (guard1) {
         if (vec->size[0] > 4) {
-          /* 'mapTF:974' vec(end) = []; */
+          /* 'mapTF:1003' vec(end) = []; */
           idx = vec->size[0];
           nxin = vec->size[0];
           nx = vec->size[0] - 1;
@@ -4860,7 +4898,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
           emxEnsureCapacity_real_T(vec, idx);
           mat_data = vec->data;
 
-          /* 'mapTF:975' p{i}(end,:) = []; */
+          /* 'mapTF:1004' p{i}(end,:) = []; */
           idx = p_data[b_i].f1->size[0];
           nx = p_data[b_i].f1->size[0] - 2;
           nxin = p_data[b_i].f1->size[1];
@@ -4896,10 +4934,10 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
       }
     } while (exitg1 == 0);
 
-    /* 'mapTF:977' info(i) = sum(vec); */
+    /* 'mapTF:1006' info(i) = sum(vec); */
     info_data[b_i] = blockedSummation(vec, vec->size[0]);
 
-    /* 'mapTF:978' [len(i), ~] = size(p{i}); */
+    /* 'mapTF:1007' [len(i), ~] = size(p{i}); */
     len_data[b_i] = p_data[b_i].f1->size[0];
   }
 
@@ -4908,7 +4946,7 @@ static void trim_pwm(emxArray_cell_wrap_6 *p, emxArray_real_T *info,
   emxFree_real_T(&vec);
   emxFree_real_T(&mat);
 
-  /* 'mapTF:980' pp = p; */
+  /* 'mapTF:1009' pp = p; */
 }
 
 /*
@@ -4918,8 +4956,11 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
            const emxArray_char_T *varargin_3, const emxArray_char_T *varargin_4,
            const emxArray_char_T *varargin_5, const emxArray_char_T *varargin_6,
            double varargin_7, double varargin_8, double varargin_9, double
-           varargin_10)
+           varargin_10, double varargin_11, double varargin_12, double
+           varargin_13)
 {
+  static const char b_cv[9] = { '_', 'n', 'e', 'g', 'a', 't', 'i', 'v', 'e' };
+
   cell_wrap_0 *P_data;
   cell_wrap_0 *VV_data;
   cell_wrap_1 *V_data;
@@ -4948,7 +4989,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxArray_cell_wrap_5 *pwm;
   emxArray_cell_wrap_6 *Smat;
   emxArray_cell_wrap_7 *NN;
-  emxArray_char_T *b_varargin_6;
+  emxArray_char_T *b_ofn;
+  emxArray_char_T *ofn;
   emxArray_int32_T *p1;
   emxArray_int32_T *r2;
   emxArray_real_T *LEN;
@@ -5002,7 +5044,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   int *p1_data;
   int *r3;
   const char *varargin_6_data;
-  char *b_varargin_6_data;
+  char *b_ofn_data;
+  char *ofn_data;
   bool empty_non_axis_sizes;
   bool *b_lab_data;
   if (!isInitialized_mapTF) {
@@ -5010,12 +5053,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   }
 
   varargin_6_data = varargin_6->data;
-  emxInit_cell_wrap_0(&P);
-  emxInit_cell_wrap_1(&V);
-  emxInit_cell_wrap_2(&seqindmat);
-  emxInit_cell_wrap_3(&ss);
-  emxInit_cell_wrap_4(&seq);
-  emxInit_char_T(&b_varargin_6, 2);
+  emxInit_char_T(&ofn, 2);
 
   /*  mapTF maps the TFBS motifs found from gkmPWM and gkmPWMlasso to regions at */
   /*      base-pair resolution */
@@ -5049,6 +5087,19 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   /*                      with the given combination of (l,k,KmerFrac), KmerFrac will */
   /*                      be automatically set to a lower value to create a more  */
   /*                      workable number of gapped k-mers */
+  /*      'LS'            Speeds up mapTF for large numbers of sequences by saving  */
+  /*                      the PWM probabilities for each k-mer.  Needs around 15GB */
+  /*                      of RAM.  Only set this if you have enough RAM.   */
+  /*                      (default: false) */
+  /*  */
+  /*      'PWMcorrcut'    The correlation cutoff to remove redundant motifs in the  */
+  /*                      gkmPWM and gkmPWMlasso list.  Motif selection is prioritized */
+  /*                      by the regression weight.  (default: 0.80) */
+  /*  */
+  /*      'dSVMcorrcut'   The correlation cutoff to remove motifs calls that do not fit */
+  /*                      the deltaSVM scores for all variants in the predicted TFBS. */
+  /*                      (default: 0.60) */
+  /*  */
   /*   */
   /*      Outputs 2 files named: */
   /*      outputprefix_TFBS_locations.out */
@@ -5063,58 +5114,98 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   /*          'GM12878_10_6_30_gkmPWMlasso.out','combined_db_v4.meme', 'GM12878',... */
   /*          'l', 11, 'k', 7,'KmerFrac', 1) */
   /*          Outputs GM12878_TFBS_locations.out and GM12878_motif.out */
-  /* 'mapTF:48' if nargin < 6 */
-  /* 'mapTF:52' fn = varargin{1}; */
-  /* 'mapTF:53' wfn = varargin{2}; */
-  /* 'mapTF:54' mfn1 = varargin{3}; */
-  /* 'mapTF:55' mfn2 = varargin{4}; */
-  /* 'mapTF:56' memefn = varargin{5}; */
-  /* 'mapTF:57' ofn = varargin{6}; */
-  /* 'mapTF:58' l_svm = varargin{7}; */
-  /* 'mapTF:59' k_svm = varargin{8}; */
-  /* 'mapTF:60' nfrac = varargin{9}; */
-  /* 'mapTF:61' LS = varargin{10}; */
-  /* 'mapTF:63' fprintf('Processing Motifs\n'); */
+  /* 'mapTF:61' if nargin < 6 */
+  /* 'mapTF:65' fn = varargin{1}; */
+  /* 'mapTF:66' wfn = varargin{2}; */
+  /* 'mapTF:67' mfn1 = varargin{3}; */
+  /* 'mapTF:68' mfn2 = varargin{4}; */
+  /* 'mapTF:69' memefn = varargin{5}; */
+  /* 'mapTF:70' ofn = varargin{6}; */
+  i = ofn->size[0] * ofn->size[1];
+  ofn->size[0] = 1;
+  ofn->size[1] = varargin_6->size[1];
+  emxEnsureCapacity_char_T(ofn, i);
+  ofn_data = ofn->data;
+  loop_ub = varargin_6->size[1];
+  for (i = 0; i < loop_ub; i++) {
+    ofn_data[i] = varargin_6_data[i];
+  }
+
+  /* 'mapTF:71' l_svm = varargin{7}; */
+  /* 'mapTF:72' k_svm = varargin{8}; */
+  /* 'mapTF:73' nfrac = varargin{9}; */
+  /* 'mapTF:74' LS = varargin{10}; */
+  /* 'mapTF:75' PWMcorrcut = varargin{11}; */
+  /* 'mapTF:76' dsvmcut = varargin{12}; */
+  /* 'mapTF:77' Negative = varargin{13}; */
+  /* 'mapTF:79' if Negative */
+  if (varargin_13 != 0.0) {
+    /* 'mapTF:80' ofn = [ofn '_negative']; */
+    i = ofn->size[0] * ofn->size[1];
+    ofn->size[0] = 1;
+    ofn->size[1] = varargin_6->size[1] + 9;
+    emxEnsureCapacity_char_T(ofn, i);
+    ofn_data = ofn->data;
+    loop_ub = varargin_6->size[1];
+    for (i = 0; i < loop_ub; i++) {
+      ofn_data[i] = varargin_6_data[i];
+    }
+
+    for (i = 0; i < 9; i++) {
+      ofn_data[i + varargin_6->size[1]] = b_cv[i];
+    }
+  }
+
+  emxInit_cell_wrap_0(&P);
+  emxInit_cell_wrap_1(&V);
+  emxInit_cell_wrap_2(&seqindmat);
+  emxInit_cell_wrap_3(&ss);
+  emxInit_cell_wrap_4(&seq);
+  emxInit_char_T(&b_ofn, 2);
+
+  /* 'mapTF:83' fprintf('Processing Motifs\n'); */
   printf("Processing Motifs\n");
   fflush(stdout);
 
-  /* 'mapTF:64' process_motifs(mfn1, mfn2, memefn, ofn) */
-  process_motifs(varargin_3, varargin_4, varargin_5, varargin_6);
+  /* 'mapTF:84' process_motifs(mfn1, mfn2, memefn, ofn, PWMcorrcut, Negative); */
+  process_motifs(varargin_3, varargin_4, varargin_5, ofn, varargin_11,
+                 varargin_13);
 
-  /* 'mapTF:65' mfn = [ofn '_motifs.out']; */
-  /* 'mapTF:66' [P,V, seqindmat, ss, seq] = seq2pv(fn, wfn,l_svm); */
-  seq2pv(varargin_1, varargin_2, varargin_7, P, V, seqindmat, ss, seq);
+  /* 'mapTF:85' mfn = [ofn '_motifs.out']; */
+  /* 'mapTF:86' [P,V, seqindmat, ss, seq] = seq2pv(fn, wfn,l_svm, Negative); */
+  seq2pv(varargin_1, varargin_2, varargin_7, varargin_13, P, V, seqindmat, ss,
+         seq);
   ss_data = ss->data;
   seqindmat_data = seqindmat->data;
   V_data = V->data;
   P_data = P->data;
 
-  /* 'mapTF:67' GC = countGC(ss); */
+  /* 'mapTF:87' GC = countGC(ss); */
   GC = countGC(ss);
 
-  /* 'mapTF:68' GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2]; */
+  /* 'mapTF:88' GCmat = [0.5-GC/2 GC/2 GC/2 0.5-GC/2]; */
   GCmat_tmp = 0.5 - GC / 2.0;
   GCmat[0] = GCmat_tmp;
   GCmat[1] = GC / 2.0;
   GCmat[2] = GC / 2.0;
   GCmat[3] = GCmat_tmp;
 
-  /* 'mapTF:69' b = 1; */
+  /* 'mapTF:89' b = 1; */
   b = 1.0;
 
-  /* 'mapTF:70' [p,names,len] = getMOTIF(mfn); */
-  i = b_varargin_6->size[0] * b_varargin_6->size[1];
-  b_varargin_6->size[0] = 1;
-  b_varargin_6->size[1] = varargin_6->size[1] + 11;
-  emxEnsureCapacity_char_T(b_varargin_6, i);
-  b_varargin_6_data = b_varargin_6->data;
-  loop_ub = varargin_6->size[1];
+  /* 'mapTF:90' [p,names,len] = getMOTIF(mfn); */
+  i = b_ofn->size[0] * b_ofn->size[1];
+  b_ofn->size[0] = 1;
+  b_ofn->size[1] = ofn->size[1] + 11;
+  emxEnsureCapacity_char_T(b_ofn, i);
+  b_ofn_data = b_ofn->data;
+  loop_ub = ofn->size[1];
   for (i = 0; i < loop_ub; i++) {
-    b_varargin_6_data[i] = varargin_6_data[i];
+    b_ofn_data[i] = ofn_data[i];
   }
 
   for (i = 0; i < 11; i++) {
-    b_varargin_6_data[i + varargin_6->size[1]] = cv[i];
+    b_ofn_data[i + ofn->size[1]] = cv[i];
   }
 
   emxInit_cell_wrap_5(&PWM);
@@ -5123,32 +5214,32 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxInit_cell_wrap_5(&p);
   emxInit_cell_wrap_4(&names);
   emxInit_real_T(&len, 1);
-  getMOTIF(b_varargin_6, p, names, len);
+  getMOTIF(b_ofn, p, names, len);
   c_data = len->data;
   pwm_data = p->data;
 
-  /* 'mapTF:71' a = numel(len); */
-  /* 'mapTF:72' PWM = cell(a,1); */
+  /* 'mapTF:91' a = numel(len); */
+  /* 'mapTF:92' PWM = cell(a,1); */
   nx = len->size[0];
   i = PWM->size[0];
   PWM->size[0] = len->size[0];
   emxEnsureCapacity_cell_wrap_5(PWM, i);
   PWM_data = PWM->data;
 
-  /* 'mapTF:73' PWM = coder.nullcopy(PWM); */
-  /* 'mapTF:74' PWM2 = cell(a,1); */
+  /* 'mapTF:93' PWM = coder.nullcopy(PWM); */
+  /* 'mapTF:94' PWM2 = cell(a,1); */
   i = PWM2->size[0];
   PWM2->size[0] = len->size[0];
   emxEnsureCapacity_cell_wrap_5(PWM2, i);
   PWM2_data = PWM2->data;
 
-  /* 'mapTF:75' PWM2 = coder.nullcopy(PWM2); */
-  /* 'mapTF:76' lPWM2 = cell(a,1); */
+  /* 'mapTF:95' PWM2 = coder.nullcopy(PWM2); */
+  /* 'mapTF:96' lPWM2 = cell(a,1); */
   i = lPWM2->size[0];
   lPWM2->size[0] = len->size[0];
   emxEnsureCapacity_cell_wrap_5(lPWM2, i);
   lPWM2_data = lPWM2->data;
-  emxFree_char_T(&b_varargin_6);
+  emxFree_char_T(&b_ofn);
   for (i = 0; i < nx; i++) {
     PWM_data[i].f1->size[0] = 0;
     PWM_data[i].f1->size[1] = 4;
@@ -5160,8 +5251,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_real_T(&LEN, 1);
 
-  /* 'mapTF:77' lPWM2 = coder.nullcopy(lPWM2); */
-  /* 'mapTF:79' LEN = zeros(a,1); */
+  /* 'mapTF:97' lPWM2 = coder.nullcopy(lPWM2); */
+  /* 'mapTF:99' LEN = zeros(a,1); */
   i = LEN->size[0];
   LEN->size[0] = len->size[0];
   emxEnsureCapacity_real_T(LEN, i);
@@ -5174,9 +5265,9 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxInit_real_T(&LEN_2, 1);
   emxInit_real_T(&shift, 1);
 
-  /* 'mapTF:80' LEN_2 = zeros(a,1); */
-  /* 'mapTF:81' shift = zeros(a,1); */
-  /* 'mapTF:83' for i = 1:a */
+  /* 'mapTF:100' LEN_2 = zeros(a,1); */
+  /* 'mapTF:101' shift = zeros(a,1); */
+  /* 'mapTF:103' for i = 1:a */
   i = len->size[0];
   i1 = shift->size[0];
   shift->size[0] = len->size[0];
@@ -5197,12 +5288,12 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxInit_real_T(&r, 2);
   emxInit_real_T(&r1, 2);
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:84' shift(i) = max([l_svm-len(i) 4]); */
+    /* 'mapTF:104' shift(i) = max([l_svm-len(i) 4]); */
     b_varargin_7[0] = varargin_7 - c_data[b_i];
     GC = b_maximum(b_varargin_7);
     shift_data[b_i] = GC;
 
-    /* 'mapTF:85' PWM{i} = [repmat(GCmat,shift(i), 1); p{i} ;repmat(GCmat,shift(i), 1)]; */
+    /* 'mapTF:105' PWM{i} = [repmat(GCmat,shift(i), 1); p{i} ;repmat(GCmat,shift(i), 1)]; */
     repmat(GCmat, GC, r);
     ff_data = r->data;
     repmat(GCmat, GC, r1);
@@ -5214,7 +5305,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     PWM_data[b_i].f1->size[1] = 4;
     emxEnsureCapacity_real_T(PWM_data[b_i].f1, i1);
 
-    /* 'mapTF:86' PWM2{i} = [ones(l_svm-1,4)/4; p{i} ;ones(l_svm-1,4)/4]; */
+    /* 'mapTF:106' PWM2{i} = [ones(l_svm-1,4)/4; p{i} ;ones(l_svm-1,4)/4]; */
     i1 = PWM2_data[b_i].f1->size[0] * PWM2_data[b_i].f1->size[1];
     PWM2_data[b_i].f1->size[0] = (varargin_7_idx_0 + pwm_data[b_i].f1->size[0])
       + sizes_idx_0;
@@ -5259,7 +5350,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       }
     }
 
-    /* 'mapTF:87' lPWM2{i} = log((PWM2{i}+10^-10)/(1+4*10^-10)); */
+    /* 'mapTF:107' lPWM2{i} = log((PWM2{i}+10^-10)/(1+4*10^-10)); */
     i1 = lPWM2_data[b_i].f1->size[0] * lPWM2_data[b_i].f1->size[1];
     lPWM2_data[b_i].f1->size[0] = PWM2_data[b_i].f1->size[0];
     lPWM2_data[b_i].f1->size[1] = 4;
@@ -5275,17 +5366,17 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       lPWM2_data[b_i].f1->data[loop_ub] = log(lPWM2_data[b_i].f1->data[loop_ub]);
     }
 
-    /* 'mapTF:88' LEN_2(i) = len(i); */
+    /* 'mapTF:108' LEN_2(i) = len(i); */
     LEN_2_data[b_i] = c_data[b_i];
 
-    /* 'mapTF:89' LEN(i) = len(i)+2*shift(i)-l_svm+1; */
+    /* 'mapTF:109' LEN(i) = len(i)+2*shift(i)-l_svm+1; */
     GC = ((c_data[b_i] + 2.0 * shift_data[b_i]) - varargin_7) + 1.0;
     LEN_data[b_i] = GC;
 
-    /* 'mapTF:90' for j = 1:LEN(i) */
+    /* 'mapTF:110' for j = 1:LEN(i) */
     i1 = (int)GC;
     for (j = 0; j < i1; j++) {
-      /* 'mapTF:91' b = b+1; */
+      /* 'mapTF:111' b = b+1; */
       b++;
     }
   }
@@ -5296,15 +5387,15 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxInit_cell_wrap_5(&pwm);
   emxInit_cell_wrap_5(&lpwm);
 
-  /* 'mapTF:95' pwm = cell(b,1); */
+  /* 'mapTF:115' pwm = cell(b,1); */
   nx = (int)b;
   i = pwm->size[0];
   pwm->size[0] = (int)b;
   emxEnsureCapacity_cell_wrap_5(pwm, i);
   pwm_data = pwm->data;
 
-  /* 'mapTF:96' pwm = coder.nullcopy(pwm); */
-  /* 'mapTF:97' lpwm = cell(b,1); */
+  /* 'mapTF:116' pwm = coder.nullcopy(pwm); */
+  /* 'mapTF:117' lpwm = cell(b,1); */
   i = lpwm->size[0];
   lpwm->size[0] = (int)b;
   emxEnsureCapacity_cell_wrap_5(lpwm, i);
@@ -5318,8 +5409,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_real_T(&lab, 1);
 
-  /* 'mapTF:98' lpwm = coder.nullcopy(lpwm); */
-  /* 'mapTF:99' lab = zeros(b,1); */
+  /* 'mapTF:118' lpwm = coder.nullcopy(lpwm); */
+  /* 'mapTF:119' lab = zeros(b,1); */
   i = lab->size[0];
   lab->size[0] = (int)b;
   emxEnsureCapacity_real_T(lab, i);
@@ -5328,16 +5419,16 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     lab_data[i] = 0.0;
   }
 
-  /* 'mapTF:101' b = 1; */
+  /* 'mapTF:121' b = 1; */
   b = 1.0;
 
-  /* 'mapTF:102' for i = 1:a */
+  /* 'mapTF:122' for i = 1:a */
   i = len->size[0];
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:103' for j = 1:LEN(i) */
+    /* 'mapTF:123' for j = 1:LEN(i) */
     i1 = (int)LEN_data[b_i];
     for (j = 0; j < i1; j++) {
-      /* 'mapTF:104' pwm{b} = PWM{i}(j:j+l_svm-1,:); */
+      /* 'mapTF:124' pwm{b} = PWM{i}(j:j+l_svm-1,:); */
       GC = (((double)j + 1.0) + varargin_7) - 1.0;
       if ((double)j + 1.0 > GC) {
         i2 = 0;
@@ -5361,7 +5452,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
         }
       }
 
-      /* 'mapTF:105' lpwm{b} = log((pwm{b}+10^-10)/(1+4*10^-10)); */
+      /* 'mapTF:125' lpwm{b} = log((pwm{b}+10^-10)/(1+4*10^-10)); */
       i2 = PWM2_data[i3].f1->size[0] * PWM2_data[i3].f1->size[1];
       PWM2_data[(int)(b + (double)j) - 1].f1->size[0] = pwm_data[i3].f1->size[0];
       PWM2_data[(int)(b + (double)j) - 1].f1->size[1] = 4;
@@ -5378,10 +5469,10 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
           .f1->data[loop_ub]);
       }
 
-      /* 'mapTF:106' lab(b) = i; */
+      /* 'mapTF:126' lab(b) = i; */
       lab_data[i3] = (double)b_i + 1.0;
 
-      /* 'mapTF:107' b = b+1; */
+      /* 'mapTF:127' b = b+1; */
     }
 
     b += (double)(i1 - 1) + 1.0;
@@ -5390,7 +5481,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxFree_cell_wrap_5(&pwm);
   emxFree_cell_wrap_5(&PWM);
 
-  /* 'mapTF:112' lab = lab(1:(b-1)); */
+  /* 'mapTF:132' lab = lab(1:(b-1)); */
   i = lab->size[0];
   if (1.0 > b - 1.0) {
     lab->size[0] = 0;
@@ -5401,8 +5492,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxEnsureCapacity_real_T(lab, i);
   lab_data = lab->data;
 
-  /* 'mapTF:113' lab2 = lab; */
-  /* 'mapTF:114' f = (1:(b-1))'; */
+  /* 'mapTF:133' lab2 = lab; */
+  /* 'mapTF:134' f = (1:(b-1))'; */
   emxInit_real_T(&y, 2);
   c_data = y->data;
   if (b - 1.0 < 1.0) {
@@ -5430,7 +5521,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     f_data[i] = c_data[i];
   }
 
-  /* 'mapTF:115' for i = 2:2:a */
+  /* 'mapTF:135' for i = 2:2:a */
   i = (int)((double)len->size[0] / 2.0);
   emxInit_real_T(&ff, 1);
   emxInit_real_T(&minnorm, 1);
@@ -5439,7 +5530,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   for (b_i = 0; b_i < i; b_i++) {
     c_i = (b_i << 1) + 2U;
 
-    /* 'mapTF:116' ff = find(lab2==i); */
+    /* 'mapTF:136' ff = find(lab2==i); */
     loop_ub = lab->size[0];
     i1 = b_lab->size[0];
     b_lab->size[0] = lab->size[0];
@@ -5460,7 +5551,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       ff_data[i1] = r3[i1];
     }
 
-    /* 'mapTF:117' f(ff) = flipud(f(ff)); */
+    /* 'mapTF:137' f(ff) = flipud(f(ff)); */
     i1 = minnorm->size[0];
     minnorm->size[0] = ff->size[0];
     emxEnsureCapacity_real_T(minnorm, i1);
@@ -5485,7 +5576,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     }
   }
 
-  /* 'mapTF:119' p1 = find(mod(lab,2)==1); */
+  /* 'mapTF:139' p1 = find(mod(lab,2)==1); */
   i = minnorm->size[0];
   minnorm->size[0] = lab->size[0];
   emxEnsureCapacity_real_T(minnorm, i);
@@ -5530,8 +5621,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     p1_data[i] = r3[i];
   }
 
-  /* 'mapTF:120' ff = find(mod(lab,2)==0); */
-  /* 'mapTF:121' p2 = f(ff); */
+  /* 'mapTF:140' ff = find(mod(lab,2)==0); */
+  /* 'mapTF:141' p2 = f(ff); */
   i = minnorm->size[0];
   minnorm->size[0] = lab->size[0];
   emxEnsureCapacity_real_T(minnorm, i);
@@ -5580,14 +5671,14 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxInit_real_T(&seqmat, 2);
   emxInit_real_T(&kmat, 2);
 
-  /* 'mapTF:122' pl = length(p1); */
+  /* 'mapTF:142' pl = length(p1); */
   pl = p1->size[0] - 1;
 
-  /* 'mapTF:125' [c,~,~,~,~,rcnum] = genIndex(l_svm,k_svm,nfrac); */
+  /* 'mapTF:145' [c,~,~,~,~,rcnum] = genIndex(l_svm,k_svm,nfrac); */
   genIndex(varargin_7, varargin_8, varargin_9, seqmat, kmat, ff, lab, c, &GC);
   seqmat_data = seqmat->data;
 
-  /* 'mapTF:126' c2 = c(1:numel(c)/k_svm-rcnum,:); */
+  /* 'mapTF:146' c2 = c(1:numel(c)/k_svm-rcnum,:); */
   GC = (double)(seqmat->size[0] * seqmat->size[1]) / varargin_8 - GC;
   if (1.0 > GC) {
     loop_ub = 0;
@@ -5595,7 +5686,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     loop_ub = (int)GC;
   }
 
-  /* 'mapTF:127' c = [c;l_svm+1-fliplr(c2)]; */
+  /* 'mapTF:147' c = [c;l_svm+1-fliplr(c2)]; */
   b_loop_ub = seqmat->size[1];
   i = kmat->size[0] * kmat->size[1];
   kmat->size[0] = loop_ub;
@@ -5657,10 +5748,10 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     }
   }
 
-  /* 'mapTF:128' C = numel(c)/k_svm; */
+  /* 'mapTF:148' C = numel(c)/k_svm; */
   GC = (double)(c->size[0] * c->size[1]) / varargin_8;
 
-  /* 'mapTF:129' seqmat = zeros(C,l_svm); */
+  /* 'mapTF:149' seqmat = zeros(C,l_svm); */
   i = (int)GC;
   i1 = seqmat->size[0] * seqmat->size[1];
   seqmat->size[0] = (int)GC;
@@ -5673,9 +5764,9 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     seqmat_data[i1] = 0.0;
   }
 
-  /* 'mapTF:130' for i = 1:C */
+  /* 'mapTF:150' for i = 1:C */
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'mapTF:131' seqmat(i,c(i,:)) = 1; */
+    /* 'mapTF:151' seqmat(i,c(i,:)) = 1; */
     loop_ub = c->size[1];
     i1 = r2->size[0];
     r2->size[0] = c->size[1];
@@ -5693,7 +5784,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_cell_wrap_6(&Smat, 1);
 
-  /* 'mapTF:133' Smat = cell(l_svm,1); */
+  /* 'mapTF:153' Smat = cell(l_svm,1); */
   i = Smat->size[0];
   Smat->size[0] = (int)varargin_7;
   emxEnsureCapacity_cell_wrap_6(Smat, i);
@@ -5703,10 +5794,10 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     Smat_data[i].f1->size[1] = 0;
   }
 
-  /* 'mapTF:134' Smat = coder.nullcopy(Smat); */
-  /* 'mapTF:135' for i = 1:l_svm */
+  /* 'mapTF:154' Smat = coder.nullcopy(Smat); */
+  /* 'mapTF:155' for i = 1:l_svm */
   for (b_i = 0; b_i < varargin_7_idx_0; b_i++) {
-    /* 'mapTF:136' f = find(prod(c-i,2)==0); */
+    /* 'mapTF:156' f = find(prod(c-i,2)==0); */
     i = kmat->size[0] * kmat->size[1];
     kmat->size[0] = c->size[0];
     kmat->size[1] = c->size[1];
@@ -5739,7 +5830,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       f_data[i] = r3[i];
     }
 
-    /* 'mapTF:137' Smat{i} = zeros(length(f), l_svm); */
+    /* 'mapTF:157' Smat{i} = zeros(length(f), l_svm); */
     i = Smat_data[b_i].f1->size[0] * Smat_data[b_i].f1->size[1];
     Smat_data[b_i].f1->size[0] = f->size[0];
     Smat_data[b_i].f1->size[1] = (int)varargin_7;
@@ -5749,10 +5840,10 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       Smat_data[b_i].f1->data[i] = 0.0;
     }
 
-    /* 'mapTF:138' for j = 1:length(f) */
+    /* 'mapTF:158' for j = 1:length(f) */
     i = f->size[0];
     for (j = 0; j < i; j++) {
-      /* 'mapTF:139' Smat{i}(j,c(f(j),:)) = 1; */
+      /* 'mapTF:159' Smat{i}(j,c(f(j),:)) = 1; */
       loop_ub = c->size[1];
       i1 = r2->size[0];
       r2->size[0] = c->size[1];
@@ -5773,12 +5864,12 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxFree_boolean_T(&b_lab);
   emxFree_int32_T(&r2);
 
-  /* 'mapTF:142' L = length(ss); */
-  /* 'mapTF:143' B = b-1; */
-  /* 'mapTF:144' maxnorm = zeros(B,1); */
-  /* 'mapTF:145' minnorm = zeros(B,1); */
-  /* 'mapTF:146' vec = zeros(l_svm,1); */
-  /* 'mapTF:147' IND = zeros(4^l_svm,1); */
+  /* 'mapTF:162' L = length(ss); */
+  /* 'mapTF:163' B = b-1; */
+  /* 'mapTF:164' maxnorm = zeros(B,1); */
+  /* 'mapTF:165' minnorm = zeros(B,1); */
+  /* 'mapTF:166' vec = zeros(l_svm,1); */
+  /* 'mapTF:167' IND = zeros(4^l_svm,1); */
   GC = rt_powd_snf(4.0, varargin_7);
   nx = (int)rt_powd_snf(4.0, varargin_7);
   i = lab->size[0];
@@ -5789,7 +5880,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     lab_data[i] = 0.0;
   }
 
-  /* 'mapTF:148' kmat = zeros(B,4^l_svm); */
+  /* 'mapTF:168' kmat = zeros(B,4^l_svm); */
   i = kmat->size[0] * kmat->size[1];
   kmat->size[0] = (int)((unsigned int)b - 1U);
   kmat->size[1] = (int)GC;
@@ -5800,9 +5891,9 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     kmat_data[i] = 0.0;
   }
 
-  /* 'mapTF:149' if LS */
+  /* 'mapTF:169' if LS */
   if (varargin_10 != 0.0) {
-    /* 'mapTF:150' kmat = zeros(B/2, 4^l_svm); */
+    /* 'mapTF:170' kmat = zeros(B/2, 4^l_svm); */
     i = (int)((b - 1.0) / 2.0);
     i1 = kmat->size[0] * kmat->size[1];
     kmat->size[0] = i;
@@ -5815,7 +5906,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     }
   }
 
-  /* 'mapTF:153' for j = 1:B */
+  /* 'mapTF:173' for j = 1:B */
   i = (int)(unsigned int)b;
   i1 = f->size[0];
   f->size[0] = (int)((unsigned int)b - 1U);
@@ -5828,9 +5919,9 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxInit_real_T(&x, 2);
   emxInit_real_T(&b_lpwm, 2);
   for (j = 0; j <= i - 2; j++) {
-    /* 'mapTF:154' vec = max(lpwm{j}'); */
-    /* 'mapTF:155' vec2 = min(lpwm{j}'); */
-    /* 'mapTF:156' maxnorm(j) = sum(exp(seqmat*vec')); */
+    /* 'mapTF:174' vec = max(lpwm{j}'); */
+    /* 'mapTF:175' vec2 = min(lpwm{j}'); */
+    /* 'mapTF:176' maxnorm(j) = sum(exp(seqmat*vec')); */
     i1 = b_lpwm->size[0] * b_lpwm->size[1];
     b_lpwm->size[0] = 4;
     loop_ub = PWM2_data[j].f1->size[0];
@@ -5866,7 +5957,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     c_data = y->data;
     f_data[j] = c_data[0];
 
-    /* 'mapTF:157' minnorm(j) = sum(exp(seqmat*vec2')); */
+    /* 'mapTF:177' minnorm(j) = sum(exp(seqmat*vec2')); */
     i1 = b_lpwm->size[0] * b_lpwm->size[1];
     b_lpwm->size[0] = 4;
     loop_ub = PWM2_data[j].f1->size[0];
@@ -5915,7 +6006,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxFree_real_T(&y);
   emxFree_real_T(&c);
 
-  /* 'mapTF:159' dnorm = maxnorm-minnorm; */
+  /* 'mapTF:179' dnorm = maxnorm-minnorm; */
   if (f->size[0] == minnorm->size[0]) {
     loop_ub = f->size[0];
     for (i1 = 0; i1 < loop_ub; i1++) {
@@ -5928,7 +6019,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_real_T(&vec, 1);
 
-  /* 'mapTF:160' vec = zeros(l_svm,1); */
+  /* 'mapTF:180' vec = zeros(l_svm,1); */
   i1 = vec->size[0];
   vec->size[0] = (int)varargin_7;
   emxEnsureCapacity_real_T(vec, i1);
@@ -5939,9 +6030,9 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_cell_wrap_5(&LL);
 
-  /* 'mapTF:161' all_pwm = zeros(4, l_svm, B); */
-  /* 'mapTF:162' for cur_idx=1:B */
-  /* 'mapTF:166' LL = cell(length(V),1); */
+  /* 'mapTF:181' all_pwm = zeros(4, l_svm, B); */
+  /* 'mapTF:182' for cur_idx=1:B */
+  /* 'mapTF:186' LL = cell(length(V),1); */
   nx = V->size[0];
   i1 = LL->size[0];
   LL->size[0] = V->size[0];
@@ -5954,8 +6045,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_cell_wrap_0(&VV);
 
-  /* 'mapTF:167' LL = coder.nullcopy(LL); */
-  /* 'mapTF:168' VV = cell(length(V),1); */
+  /* 'mapTF:187' LL = coder.nullcopy(LL); */
+  /* 'mapTF:188' VV = cell(length(V),1); */
   nx = V->size[0];
   i1 = VV->size[0];
   VV->size[0] = V->size[0];
@@ -5967,8 +6058,8 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
 
   emxInit_cell_wrap_7(&NN);
 
-  /* 'mapTF:169' VV = coder.nullcopy(VV); */
-  /* 'mapTF:170' NN = cell(length(V),1); */
+  /* 'mapTF:189' VV = coder.nullcopy(VV); */
+  /* 'mapTF:190' NN = cell(length(V),1); */
   nx = V->size[0];
   i1 = NN->size[0];
   NN->size[0] = V->size[0];
@@ -5978,19 +6069,19 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     NN_data[i1].f1->size[0] = 0;
   }
 
-  /* 'mapTF:171' NN = coder.nullcopy(NN); */
-  /* 'mapTF:172' fprintf('Mapping motifs\n'); */
+  /* 'mapTF:191' NN = coder.nullcopy(NN); */
+  /* 'mapTF:192' fprintf('Mapping motifs\n'); */
   printf("Mapping motifs\n");
   fflush(stdout);
 
-  /* 'mapTF:173' tic */
+  /* 'mapTF:193' tic */
   tic();
 
-  /* 'mapTF:174' for I = 1:length(ss) */
+  /* 'mapTF:194' for I = 1:length(ss) */
   i1 = ss->size[0];
   emxInit_real_T(&pwm_prob, 2);
   for (sizes_idx_0 = 0; sizes_idx_0 < i1; sizes_idx_0++) {
-    /* 'mapTF:175' seq2 = ss{I}; */
+    /* 'mapTF:195' seq2 = ss{I}; */
     /*      ss_onehot = zeros(4, length(seq2)); */
     /*      for idx=1:length(seq2) */
     /*          ss_onehot(seq2(idx), idx) = 1; */
@@ -6019,7 +6110,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
     /*              pwm_prob(:,i) = kmat(:,ind); */
     /*          end */
     /*      end */
-    /* 'mapTF:205' pwm_prob = zeros(B,numel(seqindmat{I})/2); */
+    /* 'mapTF:225' pwm_prob = zeros(B,numel(seqindmat{I})/2); */
     i2 = pwm_prob->size[0] * pwm_prob->size[1];
     pwm_prob->size[0] = (int)(b - 1.0);
     pwm_prob->size[1] = (int)((double)(seqindmat_data[sizes_idx_0].f1->size[0] <<
@@ -6032,36 +6123,36 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       LEN_2_data[i2] = 0.0;
     }
 
-    /* 'mapTF:206' for i = 1:numel(seqindmat{I})/2 */
+    /* 'mapTF:226' for i = 1:numel(seqindmat{I})/2 */
     i2 = (int)((double)(seqindmat_data[sizes_idx_0].f1->size[0] << 1) / 2.0);
     for (b_i = 0; b_i < i2; b_i++) {
-      /* 'mapTF:207' ind = seqindmat{I}(i,:); */
-      /* 'mapTF:208' if LS */
+      /* 'mapTF:227' ind = seqindmat{I}(i,:); */
+      /* 'mapTF:228' if LS */
       if (varargin_10 != 0.0) {
-        /* 'mapTF:209' if IND(ind(1)) == 0 */
+        /* 'mapTF:229' if IND(ind(1)) == 0 */
         md2 = (int)seqindmat_data[sizes_idx_0].f1->data[b_i];
         if (lab_data[md2 - 1] == 0.0) {
-          /* 'mapTF:210' IND(ind(1)) = 1; */
+          /* 'mapTF:230' IND(ind(1)) = 1; */
           lab_data[md2 - 1] = 1.0;
 
-          /* 'mapTF:211' SEQ = seq2(i:i+l_svm-1); */
+          /* 'mapTF:231' SEQ = seq2(i:i+l_svm-1); */
           if ((double)b_i + 1.0 > (((double)b_i + 1.0) + varargin_7) - 1.0) {
             i3 = 0;
           } else {
             i3 = b_i;
           }
 
-          /* 'mapTF:212' for j = 1:pl */
+          /* 'mapTF:232' for j = 1:pl */
           for (j = 0; j <= pl; j++) {
-            /* 'mapTF:213' for jj = 1:l_svm */
+            /* 'mapTF:233' for jj = 1:l_svm */
             for (b_loop_ub = 0; b_loop_ub < varargin_7_idx_0; b_loop_ub++) {
-              /* 'mapTF:214' vec(jj) = lpwm{p1(j)}(jj,SEQ(jj)); */
+              /* 'mapTF:234' vec(jj) = lpwm{p1(j)}(jj,SEQ(jj)); */
               shift_data[b_loop_ub] = PWM2_data[p1_data[j] - 1].f1->
                 data[b_loop_ub + PWM2_data[p1_data[j] - 1].f1->size[0] * ((int)
                 ss_data[sizes_idx_0].f1->data[i3 + b_loop_ub] - 1)];
             }
 
-            /* 'mapTF:216' kmat(j,ind(1)) = sum(exp(seqmat*vec)); */
+            /* 'mapTF:236' kmat(j,ind(1)) = sum(exp(seqmat*vec)); */
             loop_ub = seqmat->size[0];
             if ((seqmat->size[0] == 0) || (seqmat->size[1] == 0) || (vec->size[0]
                  == 0)) {
@@ -6093,7 +6184,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
               ff->size[0]);
           }
 
-          /* 'mapTF:218' kmat(:,ind(1)) = log((kmat(:,ind(1))-minnorm(p1))./dnorm(p1)); */
+          /* 'mapTF:238' kmat(:,ind(1)) = log((kmat(:,ind(1))-minnorm(p1))./dnorm(p1)); */
           loop_ub = kmat->size[0];
           if (kmat->size[0] == 1) {
             nx = p1->size[0];
@@ -6127,38 +6218,38 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
           }
         }
 
-        /* 'mapTF:220' pwm_prob(p1,i) = kmat(:,ind(1)); */
+        /* 'mapTF:240' pwm_prob(p1,i) = kmat(:,ind(1)); */
         loop_ub = kmat->size[0];
         for (i3 = 0; i3 < loop_ub; i3++) {
           LEN_2_data[(p1_data[i3] + pwm_prob->size[0] * b_i) - 1] = kmat_data[i3
             + kmat->size[0] * (md2 - 1)];
         }
 
-        /* 'mapTF:221' if IND(ind(2)) == 0 */
+        /* 'mapTF:241' if IND(ind(2)) == 0 */
         md2 = (int)seqindmat_data[sizes_idx_0].f1->data[b_i +
           seqindmat_data[sizes_idx_0].f1->size[0]];
         if (lab_data[md2 - 1] == 0.0) {
-          /* 'mapTF:222' IND(ind(2)) = 1; */
+          /* 'mapTF:242' IND(ind(2)) = 1; */
           lab_data[md2 - 1] = 1.0;
 
-          /* 'mapTF:223' SEQ = seq2(i:i+l_svm-1); */
+          /* 'mapTF:243' SEQ = seq2(i:i+l_svm-1); */
           if ((double)b_i + 1.0 > (((double)b_i + 1.0) + varargin_7) - 1.0) {
             i3 = 0;
           } else {
             i3 = b_i;
           }
 
-          /* 'mapTF:224' for j = 1:pl */
+          /* 'mapTF:244' for j = 1:pl */
           for (j = 0; j <= pl; j++) {
-            /* 'mapTF:225' for jj = 1:l_svm */
+            /* 'mapTF:245' for jj = 1:l_svm */
             for (b_loop_ub = 0; b_loop_ub < varargin_7_idx_0; b_loop_ub++) {
-              /* 'mapTF:226' vec(jj) = lpwm{p2(j)}(jj,SEQ(jj)); */
+              /* 'mapTF:246' vec(jj) = lpwm{p2(j)}(jj,SEQ(jj)); */
               shift_data[b_loop_ub] = PWM2_data[(int)p2_data[j] - 1].f1->
                 data[b_loop_ub + PWM2_data[(int)p2_data[j] - 1].f1->size[0] *
                 ((int)ss_data[sizes_idx_0].f1->data[i3 + b_loop_ub] - 1)];
             }
 
-            /* 'mapTF:228' kmat(j,ind(2)) = sum(exp(seqmat*vec)); */
+            /* 'mapTF:248' kmat(j,ind(2)) = sum(exp(seqmat*vec)); */
             loop_ub = seqmat->size[0];
             if ((seqmat->size[0] == 0) || (seqmat->size[1] == 0) || (vec->size[0]
                  == 0)) {
@@ -6190,7 +6281,7 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
               ff->size[0]);
           }
 
-          /* 'mapTF:230' kmat(:,ind(2)) = log((kmat(:,ind(2))-minnorm(p2))./dnorm(p2)); */
+          /* 'mapTF:250' kmat(:,ind(2)) = log((kmat(:,ind(2))-minnorm(p2))./dnorm(p2)); */
           loop_ub = kmat->size[0];
           if (kmat->size[0] == 1) {
             nx = p2->size[0];
@@ -6225,32 +6316,32 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
           }
         }
 
-        /* 'mapTF:232' pwm_prob(p2,i) = kmat(:,ind(2)); */
+        /* 'mapTF:252' pwm_prob(p2,i) = kmat(:,ind(2)); */
         loop_ub = kmat->size[0];
         for (i3 = 0; i3 < loop_ub; i3++) {
           LEN_2_data[((int)p2_data[i3] + pwm_prob->size[0] * b_i) - 1] =
             kmat_data[i3 + kmat->size[0] * (md2 - 1)];
         }
       } else {
-        /* 'mapTF:233' else */
-        /* 'mapTF:234' SEQ = seq2(i:i+l_svm-1); */
+        /* 'mapTF:253' else */
+        /* 'mapTF:254' SEQ = seq2(i:i+l_svm-1); */
         if ((double)b_i + 1.0 > (((double)b_i + 1.0) + varargin_7) - 1.0) {
           i3 = 0;
         } else {
           i3 = b_i;
         }
 
-        /* 'mapTF:235' for j = 1:B */
+        /* 'mapTF:255' for j = 1:B */
         for (j = 0; j <= i - 2; j++) {
-          /* 'mapTF:236' for jj = 1:l_svm */
+          /* 'mapTF:256' for jj = 1:l_svm */
           for (b_loop_ub = 0; b_loop_ub < varargin_7_idx_0; b_loop_ub++) {
-            /* 'mapTF:237' vec(jj) = lpwm{j}(jj,SEQ(jj)); */
+            /* 'mapTF:257' vec(jj) = lpwm{j}(jj,SEQ(jj)); */
             shift_data[b_loop_ub] = PWM2_data[j].f1->data[b_loop_ub +
               PWM2_data[j].f1->size[0] * ((int)ss_data[sizes_idx_0].f1->data[i3
               + b_loop_ub] - 1)];
           }
 
-          /* 'mapTF:239' pwm_prob(j,i) = log((sum(exp(seqmat*vec))-minnorm(j))/dnorm(j)); */
+          /* 'mapTF:259' pwm_prob(j,i) = log((sum(exp(seqmat*vec))-minnorm(j))/dnorm(j)); */
           loop_ub = seqmat->size[0];
           if ((seqmat->size[0] == 0) || (seqmat->size[1] == 0) || (vec->size[0] ==
                0)) {
@@ -6284,26 +6375,26 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
       }
     }
 
-    /* 'mapTF:243' [LL{I}, NN{I}] = MAPTF(fn, ss{I}, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, P{I}, names, a, b); */
+    /* 'mapTF:263' [LL{I}, NN{I}] = MAPTF(fn, ss{I}, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, P{I}, names, a, b); */
     MAPTF(ss_data[sizes_idx_0].f1, pwm_prob, varargin_7, LEN, LEN_2, shift,
           P_data[sizes_idx_0].f1, names, len->size[0], pwm_data[sizes_idx_0].f1,
           NN_data[sizes_idx_0].f1);
 
-    /* 'mapTF:244' if numel(LL{I}) > 0 */
+    /* 'mapTF:264' if numel(LL{I}) > 0 */
     if ((pwm_data[sizes_idx_0].f1->size[0] << 2) > 0) {
-      /* 'mapTF:245' VV{I} = scoreseqkmer(PWM2, lPWM2, LL{I}, ss{I}, Smat, l_svm, k_svm, ofn, V{I}); */
+      /* 'mapTF:265' VV{I} = scoreseqkmer(PWM2, lPWM2, LL{I}, ss{I}, Smat, l_svm, k_svm, ofn, V{I}); */
       scoreseqkmer(PWM2, lPWM2, pwm_data[sizes_idx_0].f1, ss_data[sizes_idx_0].
                    f1, Smat, varargin_7, V_data[sizes_idx_0].f1,
                    VV_data[sizes_idx_0].f1);
     }
 
-    /* 'mapTF:247' if mod(I,100)==0 */
+    /* 'mapTF:267' if mod(I,100)==0 */
     if (b_mod((double)sizes_idx_0 + 1.0, 100.0) == 0.0) {
-      /* 'mapTF:248' fprintf('%d out of %d sequences done...\n', int32(I), int32(length(ss))); */
+      /* 'mapTF:268' fprintf('%d out of %d sequences done...\n', int32(I), int32(length(ss))); */
       printf("%d out of %d sequences done...\n", sizes_idx_0 + 1, ss->size[0]);
       fflush(stdout);
 
-      /* 'mapTF:249' toc */
+      /* 'mapTF:269' toc */
       toc();
     }
   }
@@ -6331,18 +6422,19 @@ void mapTF(const emxArray_char_T *varargin_1, const emxArray_char_T *varargin_2,
   emxFree_cell_wrap_5(&lPWM2);
   emxFree_cell_wrap_5(&PWM2);
 
-  /* 'mapTF:252' fprintf('%d out of %d sequences done...\n', int32(length(ss)), int32(length(ss))); */
+  /* 'mapTF:272' fprintf('%d out of %d sequences done...\n', int32(length(ss)), int32(length(ss))); */
   printf("%d out of %d sequences done...\n", ss->size[0], ss->size[0]);
   fflush(stdout);
 
   /*  clear kmat */
-  /* 'mapTF:254' PWM_corr(ofn, VV, NN, LL, seq); */
-  PWM_corr(varargin_6, VV, NN, LL, seq);
+  /* 'mapTF:274' PWM_corr(ofn, VV, NN, LL, seq, dsvmcut); */
+  PWM_corr(ofn, VV, NN, LL, seq, varargin_12);
   emxFree_cell_wrap_4(&seq);
   emxFree_cell_wrap_3(&ss);
   emxFree_cell_wrap_7(&NN);
   emxFree_cell_wrap_0(&VV);
   emxFree_cell_wrap_5(&LL);
+  emxFree_char_T(&ofn);
 }
 
 /* End of code generation (mapTF.c) */

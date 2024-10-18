@@ -19,7 +19,21 @@
 /*
  *
  */
-void b_maximum(const emxArray_real_T *x, double *ex, int *idx)
+double b_maximum(const double x[2])
+{
+  double ex;
+  if (x[0] < x[1]) {
+    ex = x[1];
+  } else {
+    ex = x[0];
+  }
+  return ex;
+}
+
+/*
+ *
+ */
+void c_maximum(const emxArray_real_T *x, double *ex, int *idx)
 {
   const double *x_data;
   double d;
@@ -54,7 +68,7 @@ void b_maximum(const emxArray_real_T *x, double *ex, int *idx)
 /*
  *
  */
-void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex)
+void d_maximum(const emxArray_real_T *x, emxArray_real_T *ex)
 {
   const double *x_data;
   double d;
@@ -87,7 +101,7 @@ void c_maximum(const emxArray_real_T *x, emxArray_real_T *ex)
 /*
  *
  */
-void d_maximum(const emxArray_real_T *x, double *ex, int *idx)
+void e_maximum(const emxArray_real_T *x, double *ex, int *idx)
 {
   const double *x_data;
   double d;

@@ -28,9 +28,9 @@ extern void gkmPWMlasso(const emxArray_char_T *varargin_1,
                         double varargin_4, double varargin_5, double varargin_6,
                         double varargin_7, double varargin_8, double varargin_9,
                         double varargin_10, double varargin_11,
-                        double varargin_12);
+                        double varargin_12, double varargin_13);
 
-void minus(emxArray_real_T *loc, const emxArray_real_T *cfile2);
+void minus(emxArray_real_T *normvec, const emxArray_real_T *cfile2);
 
 #ifdef __cplusplus
 }

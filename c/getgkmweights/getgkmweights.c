@@ -90,9 +90,9 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   emxArray_boolean_T *b_dc2;
   emxArray_cell_wrap_10 *p;
   emxArray_char_T *S;
+  emxArray_char_T *b_charStr;
   emxArray_char_T *b_varargin_1;
   emxArray_char_T *charStr;
-  emxArray_char_T *filename;
   emxArray_char_T *kmer;
   emxArray_char_T *s;
   emxArray_int32_T *r;
@@ -177,19 +177,52 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   /*      file.  The first column containing the labels of each sequence and the
    */
   /*      scores in the second. */
-  /* 'getgkmweights:15' fn = varargin{1}; */
-  /* 'getgkmweights:16' l_svm = varargin{2}; */
-  /* 'getgkmweights:17' k_svm = varargin{3}; */
-  /* 'getgkmweights:18' RC = varargin{4}; */
-  /* 'getgkmweights:19' nfrac = varargin{5}; */
-  /* 'getgkmweights:20' nfracLim = varargin{6}; */
-  /* 'getgkmweights:21' lk = 1; */
+  /*  */
+  /*      Positional Parameters (Required): */
+  /*  */
+  /*      fileprefix      The prefix of the gkmSVM/lsgkm model
+   * (FILEHEADER_svseq.fa) */
+  /*                      or (FILEHEADER.model.txt) */
+  /*      'l'             The full length of the gapped k-mer. */
+  /*      'k'             The number of ungapped positions of the gapped k-mer.
+   */
+  /*  */
+  /*      Name Value Pair Parameters (Optional): */
+  /*  */
+  /*      'RC'            If true, treat reverse complementary gapped k-mers as
+   */
+  /*                      the same feature.  Otherwise treat them as separate
+   * features */
+  /*                      (default:true) */
+  /*      'KmerFrac'      Set the fraction of the total number of gapped k-mers
+   * to */
+  /*                      use with gkmPWM.  This reduces the memory and runtime
+   */
+  /*                      needed.  If the total number of gapped k-mers is too
+   * high */
+  /*                      with the given combination of (l,k,KmerFrac), KmerFrac
+   * will */
+  /*                      be automatically set to a lower value to create a more
+   */
+  /*                      workable number of gapped k-mers */
+  /*      'KmerFracLimit' Automatically lower KmerFrac if the number of gapped
+   * kmers */
+  /* .                    is too large.  Note that this will require more memory
+   * and */
+  /*                      increase runtime if set to false. (default: true) */
+  /* 'getgkmweights:37' fn = varargin{1}; */
+  /* 'getgkmweights:38' l_svm = varargin{2}; */
+  /* 'getgkmweights:39' k_svm = varargin{3}; */
+  /* 'getgkmweights:40' RC = varargin{4}; */
+  /* 'getgkmweights:41' nfrac = varargin{5}; */
+  /* 'getgkmweights:42' nfracLim = varargin{6}; */
+  /* 'getgkmweights:43' lk = 1; */
   lk_size[0] = 1;
   lk_size[1] = 1;
   lk_data[0] = 1.0;
-  /* 'getgkmweights:23' if nfrac ~= 1 */
+  /* 'getgkmweights:45' if nfrac ~= 1 */
   if (varargin_5 != 1.0) {
-    /* 'getgkmweights:24' lk = [l_svm k_svm]; */
+    /* 'getgkmweights:46' lk = [l_svm k_svm]; */
     lk_size[0] = 1;
     lk_size[1] = 2;
     lk_data[0] = varargin_2;
@@ -200,74 +233,69 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   emxInit_real_T(&negvec, 1);
   emxInit_real_T(&c2, 2);
   emxInit_real_T(&seqvec2, 2);
-  /* 'getgkmweights:27' [comb,comb2,diffc,indc,xc,rcnum] =
+  /* 'getgkmweights:49' [comb,comb2,diffc,indc,xc,rcnum] =
    * genIndex(l_svm,k_svm,nfrac); */
   genIndex(varargin_2, varargin_3, varargin_5, comb, c2, negvec, cfile, seqvec2,
            &rcnum);
   comb_data = comb->data;
-  /* 'getgkmweights:28' if nfracLim && length(comb)*4^k_svm > 5*10^5 */
+  /* 'getgkmweights:50' if nfracLim && length(comb)*4^k_svm > 5*10^5 */
   if (varargin_6 != 0.0) {
     if ((comb->size[0] == 0) || (comb->size[1] == 0)) {
-      nd2 = 0;
+      j2 = 0;
     } else {
-      m = comb->size[0];
-      nd2 = comb->size[1];
-      if (m >= nd2) {
-        nd2 = m;
+      nd2 = comb->size[0];
+      j2 = comb->size[1];
+      if (nd2 >= j2) {
+        j2 = nd2;
       }
     }
     nfrac = pow(4.0, varargin_3);
-    if ((double)nd2 * nfrac > 500000.0) {
-      /* 'getgkmweights:29' nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
+    if ((double)j2 * nfrac > 500000.0) {
+      /* 'getgkmweights:51' nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
        */
       nfrac = rt_roundd(5.0E+7 / nfrac /
                         (double)(comb->size[0] * comb->size[1]) * varargin_3) /
               100.0;
-    
-      // /* 'getgkmweights:30' fprintf('Combination of (l,k) yields too many gapped
-      //  * kmers.  Using %f of the total gapped kmers\n', nfrac); */
-      // printf("Combination of (l,k) yields too many gapped kmers.  Using %f of "
-      //        "the total gapped kmers\n",
-      //        nfrac);
-      // fflush(stdout);
-    
-      /* 'getgkmweights:31' lk = ([l_svm k_svm]); */
+      /* 'getgkmweights:52' fprintf('Combination of (l,k) yields too many gapped
+       * kmers.  Using %f of the total gapped kmers\n', nfrac); */
+      printf("Combination of (l,k) yields too many gapped kmers.  Using %f of "
+             "the total gapped kmers\n",
+             nfrac);
+      fflush(stdout);
+      /* 'getgkmweights:53' lk = ([l_svm k_svm]); */
       lk_size[0] = 1;
       lk_size[1] = 2;
       lk_data[0] = varargin_2;
       lk_data[1] = varargin_3;
-      /* 'getgkmweights:32' [comb,comb2,diffc,indc,xc,rcnum] =
+      /* 'getgkmweights:54' [comb,comb2,diffc,indc,xc,rcnum] =
        * genIndex(l_svm,k_svm,nfrac); */
       genIndex(varargin_2, varargin_3, nfrac, comb, c2, negvec, cfile, seqvec2,
                &rcnum);
       comb_data = comb->data;
-        
-      printf("WARNING: Using %d gapped kmers\n", (int)((double)(comb->size[0] * comb->size[1]) / varargin_3 * pow(4.0, varargin_3)));
-      fflush(stdout); 
     }
   }
-  /* 'getgkmweights:34' fprintf('Counting gapped kmers\n'); */
+  /* 'getgkmweights:56' fprintf('Counting gapped kmers\n'); */
   printf("Counting gapped kmers\n");
   fflush(stdout);
-  /* 'getgkmweights:35' [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fn,
+  /* 'getgkmweights:57' [cfile, GCpos1, GCneg1,mat,mat2] = getgkmcounts(fn,
    * l_svm, k_svm, lk, RC, comb,rcnum); */
   getgkmcounts(varargin_1, varargin_2, varargin_3, lk_data, lk_size, varargin_4,
                comb, rcnum, cfile, &validatedHoleFilling_idx_0, &GCneg1, mat,
                mat2);
   cfile_data = cfile->data;
-  /* 'getgkmweights:36' negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
+  /* 'getgkmweights:58' negvec = BGkmer(mat, GCneg1,comb,rcnum,l_svm,k_svm,RC);
    */
   /* 'BGkmer:2' len = numel(c)/k; */
   nfrac = (double)(comb->size[0] * comb->size[1]) / varargin_3;
   /* 'BGkmer:3' alen = len-rcnum; */
   /* 'BGkmer:4' negweights = zeros(len*4^k,1); */
   c_tmp = pow(4.0, varargin_3);
-  m = (int)(nfrac * c_tmp);
+  nd2 = (int)(nfrac * c_tmp);
   i = negvec->size[0];
-  negvec->size[0] = m;
+  negvec->size[0] = nd2;
   emxEnsureCapacity_real_T(negvec, i);
   negvec_data = negvec->data;
-  for (i = 0; i < m; i++) {
+  for (i = 0; i < nd2; i++) {
     negvec_data[i] = 0.0;
   }
   emxInit_real_T(&dc2, 2);
@@ -344,17 +372,17 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   seqvec->size[1] = (int)varargin_3;
   emxEnsureCapacity_real_T(seqvec, i1);
   seqvec_data = seqvec->data;
-  m = (int)c_tmp * (int)varargin_3;
-  for (i1 = 0; i1 < m; i1++) {
+  nd2 = (int)c_tmp * (int)varargin_3;
+  for (i1 = 0; i1 < nd2; i1++) {
     seqvec_data[i1] = 0.0;
   }
   /* 'BGkmer:17' for i = 1:k */
   for (b_i = 0; b_i < i3; b_i++) {
     /* 'BGkmer:18' for j = 1:4^k */
-    for (nd2 = 0; nd2 < i2; nd2++) {
+    for (m = 0; m < i2; m++) {
       /* 'BGkmer:19' seqvec(j,i) = mod(floor((j-1)/4^(i-1)), 4)+1; */
-      seqvec_data[nd2 + seqvec->size[0] * b_i] =
-          b_mod(floor((((double)nd2 + 1.0) - 1.0) /
+      seqvec_data[m + seqvec->size[0] * b_i] =
+          b_mod(floor((((double)m + 1.0) - 1.0) /
                       pow(4.0, ((double)b_i + 1.0) - 1.0)),
                 4.0) +
           1.0;
@@ -368,8 +396,8 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     seqvec2->size[1] = seqvec->size[1];
     emxEnsureCapacity_real_T(seqvec2, i1);
     seqvec2_data = seqvec2->data;
-    m = seqvec->size[0] * seqvec->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = seqvec->size[0] * seqvec->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       seqvec2_data[i1] = seqvec_data[i1];
     }
     m = seqvec->size[0];
@@ -383,8 +411,8 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
         seqvec2_data[b_i + seqvec2->size[0] * j2] = xtmp;
       }
     }
-    m = seqvec2->size[0] * seqvec2->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = seqvec2->size[0] * seqvec2->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       seqvec2_data[i1] = 5.0 - seqvec2_data[i1];
     }
     /* 'BGkmer:24' c2 = l+1-fliplr(c); */
@@ -393,8 +421,8 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     c2->size[1] = comb->size[1];
     emxEnsureCapacity_real_T(c2, i1);
     c2_data = c2->data;
-    m = comb->size[0] * comb->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = comb->size[0] * comb->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       c2_data[i1] = comb_data[i1];
     }
     m = comb->size[0];
@@ -407,8 +435,8 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
         c2_data[b_i + c2->size[0] * j2] = xtmp;
       }
     }
-    m = c2->size[0] * c2->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = c2->size[0] * c2->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       c2_data[i1] = (varargin_2 + 1.0) - c2_data[i1];
     }
   }
@@ -421,13 +449,13 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   emxInit_real_T(&b_comb, 2);
   for (b_i = 0; b_i < i1; b_i++) {
     /* 'BGkmer:28' dc = diff(c(i,:)); */
-    m = comb->size[1];
+    nd2 = comb->size[1];
     i4 = b_comb->size[0] * b_comb->size[1];
     b_comb->size[0] = 1;
     b_comb->size[1] = comb->size[1];
     emxEnsureCapacity_real_T(b_comb, i4);
     b_comb_data = b_comb->data;
-    for (i4 = 0; i4 < m; i4++) {
+    for (i4 = 0; i4 < nd2; i4++) {
       b_comb_data[i4] = comb_data[b_i + comb->size[0] * i4];
     }
     diff(b_comb, dc);
@@ -446,13 +474,13 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     /* 'BGkmer:30' if RC */
     if (varargin_4 != 0.0) {
       /* 'BGkmer:31' dc2 = diff(c2(i,:)); */
-      m = c2->size[1];
+      nd2 = c2->size[1];
       i4 = b_comb->size[0] * b_comb->size[1];
       b_comb->size[0] = 1;
       b_comb->size[1] = c2->size[1];
       emxEnsureCapacity_real_T(b_comb, i4);
       b_comb_data = b_comb->data;
-      for (i4 = 0; i4 < m; i4++) {
+      for (i4 = 0; i4 < nd2; i4++) {
         b_comb_data[i4] = c2_data[b_i + c2->size[0] * i4];
       }
       diff(b_comb, dc2);
@@ -530,18 +558,18 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     for (b_j1 = 0; b_j1 < nd2; b_j1++) {
       b_comb_data[b_j1] = negvec_data[(i1 + b_j1) - 1] / 1.4142135623730951;
     }
-    m = b_comb->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = b_comb->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       negvec_data[(i4 + i1) + 1] = b_comb_data[i1];
     }
   }
   emxFree_real_T(&b_comb);
-  /* 'getgkmweights:37' cfile = cfile-negvec/sum(negvec)*sum(cfile); */
+  /* 'getgkmweights:59' cfile = cfile-negvec/sum(negvec)*sum(cfile); */
   nfrac = blockedSummation(negvec, negvec->size[0]);
   GCmat_idx_0_tmp = blockedSummation(cfile, cfile->size[0]);
   if (cfile->size[0] == negvec->size[0]) {
-    m = cfile->size[0];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = cfile->size[0];
+    for (i1 = 0; i1 < nd2; i1++) {
       cfile_data[i1] -= negvec_data[i1] / nfrac * GCmat_idx_0_tmp;
     }
   } else {
@@ -549,21 +577,21 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     cfile_data = cfile->data;
   }
   emxFree_real_T(&negvec);
-  /* 'getgkmweights:38' cfile = cfile/std(cfile); */
+  /* 'getgkmweights:60' cfile = cfile/std(cfile); */
   nfrac = b_std(cfile);
-  m = cfile->size[0];
-  for (i1 = 0; i1 < m; i1++) {
+  nd2 = cfile->size[0];
+  for (i1 = 0; i1 < nd2; i1++) {
     cfile_data[i1] /= nfrac;
   }
   emxInit_char_T(&s, 2);
   s_data = s->data;
   emxInit_char_T(&S, 2);
-  /* 'getgkmweights:39' s = ''; */
+  /* 'getgkmweights:61' s = ''; */
   s->size[0] = 1;
   s->size[1] = 0;
-  /* 'getgkmweights:40' for i = 1:k_svm */
+  /* 'getgkmweights:62' for i = 1:k_svm */
   for (b_i = 0; b_i < i3; b_i++) {
-    /* 'getgkmweights:41' s = [s 'A']; */
+    /* 'getgkmweights:63' s = [s 'A']; */
     i1 = s->size[1];
     i4 = s->size[0] * s->size[1];
     s->size[1]++;
@@ -572,7 +600,7 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     s_data[i1] = 'A';
   }
   emxInit_char_T(&kmer, 2);
-  /* 'getgkmweights:43' kmer = repmat(s,4^k_svm,1); */
+  /* 'getgkmweights:65' kmer = repmat(s,4^k_svm,1); */
   i1 = kmer->size[0] * kmer->size[1];
   kmer->size[0] = (int)c_tmp;
   kmer->size[1] = s->size[1];
@@ -585,55 +613,47 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       kmer_data[j2 + b_j1] = 'A';
     }
   }
-  /* 'getgkmweights:44' vec = fliplr(0:4^k_svm-1); */
+  /* 'getgkmweights:66' vec = 0:4^k_svm-1; */
   if (c_tmp - 1.0 < 0.0) {
     dc->size[0] = 1;
     dc->size[1] = 0;
   } else {
     i1 = dc->size[0] * dc->size[1];
     dc->size[0] = 1;
-    m = (int)floor(c_tmp - 1.0);
-    dc->size[1] = m + 1;
+    nd2 = (int)floor(c_tmp - 1.0);
+    dc->size[1] = nd2 + 1;
     emxEnsureCapacity_real_T(dc, i1);
     dc_data = dc->data;
-    for (i1 = 0; i1 <= m; i1++) {
+    for (i1 = 0; i1 <= nd2; i1++) {
       dc_data[i1] = i1;
     }
   }
-  m = dc->size[1] - 1;
-  nd2 = dc->size[1] >> 1;
-  for (b_j1 = 0; b_j1 < nd2; b_j1++) {
-    j2 = m - b_j1;
-    xtmp = dc_data[b_j1];
-    dc_data[b_j1] = dc_data[j2];
-    dc_data[j2] = xtmp;
-  }
-  /* 'getgkmweights:45' for i = 1:k_svm */
+  /* 'getgkmweights:67' for i = 1:k_svm */
   emxInit_int32_T(&r, 1);
   emxInit_int32_T(&r1, 2);
   emxInit_boolean_T(&b_dc2, 2);
   for (b_i = 0; b_i < i3; b_i++) {
-    /* 'getgkmweights:46' vec2 = mod(floor(vec/4^(k_svm-i)),4); */
-    nfrac = pow(4.0, varargin_3 - ((double)b_i + 1.0));
+    /* 'getgkmweights:68' vec2 = mod(floor(vec/4^(i-1)),4); */
+    nfrac = pow(4.0, ((double)b_i + 1.0) - 1.0);
     i1 = dc2->size[0] * dc2->size[1];
     dc2->size[0] = 1;
     dc2->size[1] = dc->size[1];
     emxEnsureCapacity_real_T(dc2, i1);
     dc2_data = dc2->data;
-    m = dc->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = dc->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       dc2_data[i1] = dc_data[i1] / nfrac;
     }
-    nd2 = dc2->size[1];
-    for (m = 0; m < nd2; m++) {
+    j2 = dc2->size[1];
+    for (m = 0; m < j2; m++) {
       dc2_data[m] = floor(dc2_data[m]);
     }
     i1 = dc2->size[0] * dc2->size[1];
     dc2->size[0] = 1;
     emxEnsureCapacity_real_T(dc2, i1);
     dc2_data = dc2->data;
-    m = dc2->size[1] - 1;
-    for (i1 = 0; i1 <= m; i1++) {
+    nd2 = dc2->size[1] - 1;
+    for (i1 = 0; i1 <= nd2; i1++) {
       nfrac = dc2_data[i1];
       if (nfrac == 0.0) {
         nfrac = 0.0;
@@ -645,15 +665,15 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       }
       dc2_data[i1] = nfrac;
     }
-    /* 'getgkmweights:47' f = find(vec2==1); */
-    /* 'getgkmweights:48' kmer(f,i) = 'C'; */
+    /* 'getgkmweights:69' f = find(vec2==1); */
+    /* 'getgkmweights:70' kmer(f,i) = 'C'; */
     i1 = b_dc2->size[0] * b_dc2->size[1];
     b_dc2->size[0] = 1;
     b_dc2->size[1] = dc2->size[1];
     emxEnsureCapacity_boolean_T(b_dc2, i1);
     b_dc2_data = b_dc2->data;
-    m = dc2->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = dc2->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       b_dc2_data[i1] = (dc2_data[i1] == 1.0);
     }
     eml_find(b_dc2, r1);
@@ -662,23 +682,23 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     r->size[0] = r1->size[1];
     emxEnsureCapacity_int32_T(r, i1);
     r3 = r->data;
-    m = r1->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = r1->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       r3[i1] = r2[i1];
     }
-    m = r->size[0];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = r->size[0];
+    for (i1 = 0; i1 < nd2; i1++) {
       kmer_data[(r3[i1] + kmer->size[0] * b_i) - 1] = 'C';
     }
-    /* 'getgkmweights:49' f = find(vec2==2); */
-    /* 'getgkmweights:50' kmer(f,i) = 'G'; */
+    /* 'getgkmweights:71' f = find(vec2==2); */
+    /* 'getgkmweights:72' kmer(f,i) = 'G'; */
     i1 = b_dc2->size[0] * b_dc2->size[1];
     b_dc2->size[0] = 1;
     b_dc2->size[1] = dc2->size[1];
     emxEnsureCapacity_boolean_T(b_dc2, i1);
     b_dc2_data = b_dc2->data;
-    m = dc2->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = dc2->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       b_dc2_data[i1] = (dc2_data[i1] == 2.0);
     }
     eml_find(b_dc2, r1);
@@ -687,23 +707,23 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     r->size[0] = r1->size[1];
     emxEnsureCapacity_int32_T(r, i1);
     r3 = r->data;
-    m = r1->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = r1->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       r3[i1] = r2[i1];
     }
-    m = r->size[0];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = r->size[0];
+    for (i1 = 0; i1 < nd2; i1++) {
       kmer_data[(r3[i1] + kmer->size[0] * b_i) - 1] = 'G';
     }
-    /* 'getgkmweights:51' f = find(vec2==3); */
-    /* 'getgkmweights:52' kmer(f,i) = 'T'; */
+    /* 'getgkmweights:73' f = find(vec2==3); */
+    /* 'getgkmweights:74' kmer(f,i) = 'T'; */
     i1 = b_dc2->size[0] * b_dc2->size[1];
     b_dc2->size[0] = 1;
     b_dc2->size[1] = dc2->size[1];
     emxEnsureCapacity_boolean_T(b_dc2, i1);
     b_dc2_data = b_dc2->data;
-    m = dc2->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = dc2->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       b_dc2_data[i1] = (dc2_data[i1] == 3.0);
     }
     eml_find(b_dc2, r1);
@@ -712,12 +732,12 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     r->size[0] = r1->size[1];
     emxEnsureCapacity_int32_T(r, i1);
     r3 = r->data;
-    m = r1->size[1];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = r1->size[1];
+    for (i1 = 0; i1 < nd2; i1++) {
       r3[i1] = r2[i1];
     }
-    m = r->size[0];
-    for (i1 = 0; i1 < m; i1++) {
+    nd2 = r->size[0];
+    for (i1 = 0; i1 < nd2; i1++) {
       kmer_data[(r3[i1] + kmer->size[0] * b_i) - 1] = 'T';
     }
   }
@@ -726,12 +746,12 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   emxFree_real_T(&dc);
   emxFree_real_T(&dc2);
   emxFree_int32_T(&r);
-  /* 'getgkmweights:54' s = ''; */
+  /* 'getgkmweights:76' s = ''; */
   s->size[0] = 1;
   s->size[1] = 0;
-  /* 'getgkmweights:55' for i = 1:l_svm */
+  /* 'getgkmweights:77' for i = 1:l_svm */
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'getgkmweights:56' s = [s '-']; */
+    /* 'getgkmweights:78' s = [s '-']; */
     i1 = s->size[1];
     i2 = s->size[0] * s->size[1];
     s->size[1]++;
@@ -740,19 +760,19 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     s_data[i1] = '-';
   }
   emxInit_char_T(&b_varargin_1, 2);
-  /* 'getgkmweights:58' a = 1; */
+  /* 'getgkmweights:80' a = 1; */
   a = 1U;
-  /* 'getgkmweights:59' fid = fopen(sprintf('%s_%d_%d_gkmweights.out', fn,
+  /* 'getgkmweights:81' fid = fopen(sprintf('%s_%d_%d_gkmweights.out', fn,
    * int32(l_svm), int32(k_svm)), 'w'); */
-  nd2 = (int)rt_roundd(varargin_2);
-  j2 = (int)rt_roundd(varargin_3);
+  j2 = (int)rt_roundd(varargin_2);
+  m = (int)rt_roundd(varargin_3);
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
   emxEnsureCapacity_char_T(b_varargin_1, i);
   b_varargin_1_data = b_varargin_1->data;
-  m = varargin_1->size[1];
-  for (i = 0; i < m; i++) {
+  nd2 = varargin_1->size[1];
+  for (i = 0; i < nd2; i++) {
     b_varargin_1_data[i] = varargin_1_data[i];
   }
   b_varargin_1_data[varargin_1->size[1]] = '\x00';
@@ -761,29 +781,29 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   S->size[1] = varargin_1->size[1] + 1;
   emxEnsureCapacity_char_T(S, i);
   S_data = S->data;
-  m = varargin_1->size[1];
-  for (i = 0; i < m; i++) {
+  nd2 = varargin_1->size[1];
+  for (i = 0; i < nd2; i++) {
     S_data[i] = varargin_1_data[i];
   }
   emxInit_char_T(&charStr, 2);
   S_data[varargin_1->size[1]] = '\x00';
-  m = snprintf(NULL, 0, "%s_%d_%d_gkmweights.out", &S_data[0], nd2, j2);
+  nd2 = snprintf(NULL, 0, "%s_%d_%d_gkmweights.out", &S_data[0], j2, m);
   i = charStr->size[0] * charStr->size[1];
   charStr->size[0] = 1;
-  charStr->size[1] = m + 1;
+  charStr->size[1] = nd2 + 1;
   emxEnsureCapacity_char_T(charStr, i);
   S_data = charStr->data;
-  snprintf(&S_data[0], (size_t)(m + 1), "%s_%d_%d_gkmweights.out",
-           &b_varargin_1_data[0], nd2, j2);
+  snprintf(&S_data[0], (size_t)(nd2 + 1), "%s_%d_%d_gkmweights.out",
+           &b_varargin_1_data[0], j2, m);
   i = charStr->size[0] * charStr->size[1];
-  if (1 > m) {
+  if (1 > nd2) {
     charStr->size[1] = 0;
   } else {
-    charStr->size[1] = m;
+    charStr->size[1] = nd2;
   }
   emxEnsureCapacity_char_T(charStr, i);
   fileid = cfopen(charStr, "wb");
-  /* 'getgkmweights:60' for i = 1:numel(comb)/k_svm */
+  /* 'getgkmweights:82' for i = 1:numel(comb)/k_svm */
   i = (int)((double)(comb->size[0] * comb->size[1]) / varargin_3);
   emxFree_char_T(&charStr);
   if (0 <= i - 1) {
@@ -795,9 +815,9 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
     }
   }
   for (b_i = 0; b_i < i; b_i++) {
-    /* 'getgkmweights:61' for j = 1:4^k_svm */
-    for (nd2 = 0; nd2 < i5; nd2++) {
-      /* 'getgkmweights:62' S = s; */
+    /* 'getgkmweights:83' for j = 1:4^k_svm */
+    for (m = 0; m < i5; m++) {
+      /* 'getgkmweights:84' S = s; */
       i1 = S->size[0] * S->size[1];
       S->size[0] = 1;
       S->size[1] = s->size[1];
@@ -806,31 +826,31 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       for (i1 = 0; i1 < loop_ub; i1++) {
         S_data[i1] = s_data[i1];
       }
-      /* 'getgkmweights:63' S(comb(i,:)) = kmer(j,:); */
+      /* 'getgkmweights:85' S(comb(i,:)) = kmer(j,:); */
       for (i1 = 0; i1 < b_loop_ub; i1++) {
         S_data[(int)comb_data[b_i + comb->size[0] * i1] - 1] =
-            kmer_data[nd2 + kmer->size[0] * i1];
+            kmer_data[m + kmer->size[0] * i1];
       }
-      /* 'getgkmweights:64' fprintf(fid, '%s\t%0.5f\n', S, cfile(a)); */
+      /* 'getgkmweights:86' fprintf(fid, '%s\t%0.5f\n', S, cfile(a)); */
       i1 = b_varargin_1->size[0] * b_varargin_1->size[1];
       b_varargin_1->size[0] = 1;
       b_varargin_1->size[1] = S->size[1] + 1;
       emxEnsureCapacity_char_T(b_varargin_1, i1);
       b_varargin_1_data = b_varargin_1->data;
-      m = S->size[1];
-      for (i1 = 0; i1 < m; i1++) {
+      nd2 = S->size[1];
+      for (i1 = 0; i1 < nd2; i1++) {
         b_varargin_1_data[i1] = S_data[i1];
       }
       b_varargin_1_data[S->size[1]] = '\x00';
       getfilestar(fileid, &filestar, &autoflush);
       if (!(filestar == b_NULL)) {
         fprintf(filestar, "%s\t%0.5f\n", &b_varargin_1_data[0],
-                cfile_data[(int)(a + nd2) - 1]);
+                cfile_data[(int)(a + m) - 1]);
         if (autoflush) {
           fflush(filestar);
         }
       }
-      /* 'getgkmweights:65' a = a+1; */
+      /* 'getgkmweights:87' a = a+1; */
     }
     a += i5;
   }
@@ -838,17 +858,17 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   emxFree_char_T(&s);
   emxFree_real_T(&cfile);
   emxFree_real_T(&comb);
-  /* 'getgkmweights:68' fclose(fid); */
+  /* 'getgkmweights:90' fclose(fid); */
   cfclose(fileid);
   /*  dlmwrite([fn '_negmat.out'], [mat; GCpos1 GCneg1 0 0], 'precision',10); */
-  /* 'getgkmweights:70' fid = fopen(sprintf('%s_negmat.out', fn), 'w'); */
+  /* 'getgkmweights:92' fid = fopen(sprintf('%s_negmat.out', fn), 'w'); */
   i = b_varargin_1->size[0] * b_varargin_1->size[1];
   b_varargin_1->size[0] = 1;
   b_varargin_1->size[1] = varargin_1->size[1] + 1;
   emxEnsureCapacity_char_T(b_varargin_1, i);
   b_varargin_1_data = b_varargin_1->data;
-  m = varargin_1->size[1];
-  for (i = 0; i < m; i++) {
+  nd2 = varargin_1->size[1];
+  for (i = 0; i < nd2; i++) {
     b_varargin_1_data[i] = varargin_1_data[i];
   }
   b_varargin_1_data[varargin_1->size[1]] = '\x00';
@@ -857,35 +877,36 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
   S->size[1] = varargin_1->size[1] + 1;
   emxEnsureCapacity_char_T(S, i);
   S_data = S->data;
-  m = varargin_1->size[1];
-  for (i = 0; i < m; i++) {
+  nd2 = varargin_1->size[1];
+  for (i = 0; i < nd2; i++) {
     S_data[i] = varargin_1_data[i];
   }
-  emxInit_char_T(&filename, 2);
+  emxInit_char_T(&b_charStr, 2);
   S_data[varargin_1->size[1]] = '\x00';
-  m = snprintf(NULL, 0, "%s_negmat.out", &S_data[0]);
-  i = filename->size[0] * filename->size[1];
-  filename->size[0] = 1;
-  filename->size[1] = m + 1;
-  emxEnsureCapacity_char_T(filename, i);
-  S_data = filename->data;
-  snprintf(&S_data[0], (size_t)(m + 1), "%s_negmat.out", &b_varargin_1_data[0]);
-  i = filename->size[0] * filename->size[1];
-  if (1 > m) {
-    filename->size[1] = 0;
+  nd2 = snprintf(NULL, 0, "%s_negmat.out", &S_data[0]);
+  i = b_charStr->size[0] * b_charStr->size[1];
+  b_charStr->size[0] = 1;
+  b_charStr->size[1] = nd2 + 1;
+  emxEnsureCapacity_char_T(b_charStr, i);
+  S_data = b_charStr->data;
+  snprintf(&S_data[0], (size_t)(nd2 + 1), "%s_negmat.out",
+           &b_varargin_1_data[0]);
+  i = b_charStr->size[0] * b_charStr->size[1];
+  if (1 > nd2) {
+    b_charStr->size[1] = 0;
   } else {
-    filename->size[1] = m;
+    b_charStr->size[1] = nd2;
   }
-  emxEnsureCapacity_char_T(filename, i);
-  fileid = cfopen(filename, "wb");
-  /* 'getgkmweights:71' matsize = size(mat); */
-  /* 'getgkmweights:72' for i=1:matsize(1) */
+  emxEnsureCapacity_char_T(b_charStr, i);
+  fileid = cfopen(b_charStr, "wb");
+  /* 'getgkmweights:93' matsize = size(mat); */
+  /* 'getgkmweights:94' for i=1:matsize(1) */
   b_NULL = NULL;
-  /* 'getgkmweights:73' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
+  /* 'getgkmweights:95' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
    * mat(i,2), mat(i,3), mat(i,4)); */
   getfilestar(fileid, &filestar, &autoflush);
+  emxFree_char_T(&b_charStr);
   emxFree_char_T(&b_varargin_1);
-  emxFree_char_T(&filename);
   emxFree_char_T(&S);
   if (!(filestar == b_NULL)) {
     fprintf(filestar, "%.10f,%.10f,%.10f,%.10f\n", mat[0], mat[4], mat[8],
@@ -894,7 +915,7 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       fflush(filestar);
     }
   }
-  /* 'getgkmweights:73' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
+  /* 'getgkmweights:95' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
    * mat(i,2), mat(i,3), mat(i,4)); */
   getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
@@ -904,7 +925,7 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       fflush(filestar);
     }
   }
-  /* 'getgkmweights:73' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
+  /* 'getgkmweights:95' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
    * mat(i,2), mat(i,3), mat(i,4)); */
   getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
@@ -914,7 +935,7 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       fflush(filestar);
     }
   }
-  /* 'getgkmweights:73' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
+  /* 'getgkmweights:95' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', mat(i,1),
    * mat(i,2), mat(i,3), mat(i,4)); */
   getfilestar(fileid, &filestar, &autoflush);
   if (!(filestar == b_NULL)) {
@@ -924,7 +945,7 @@ void getgkmweights(const emxArray_char_T *varargin_1, double varargin_2,
       fflush(filestar);
     }
   }
-  /* 'getgkmweights:75' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', GCpos1,
+  /* 'getgkmweights:97' fprintf(fid, '%.10f,%.10f,%.10f,%.10f\n', GCpos1,
    * GCneg1, 0.0, 0.0); */
   b_NULL = NULL;
   getfilestar(fileid, &filestar, &autoflush);
