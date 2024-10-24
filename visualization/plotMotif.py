@@ -169,10 +169,15 @@ def generate_pdf(out: pd.DataFrame,
         vizPWM(pwm, 9.1, numMotif-idx-1.25)
         
     plt.axis('off')
+    pdf_fname = f'{prefix}.pdf' if len(prefix) > 4 and prefix[-4:] != '.pdf' else prefix
+    png_fname = pdf_fname.replace('.pdf', '.png')
+    svg_fname = pdf_fname.replace('.pdf', '.svg')
     try:
-        plt.savefig(f"{prefix}.pdf" if len(prefix) > 4 and prefix[-4:] != '.pdf' else prefix, dpi=600)
+        plt.savefig(pdf_fname, dpi=600)
+        plt.savefig(png_fname, dpi=600)
+        plt.savefig(svg_fname, dpi=600)
     except:
-        print("ERROR: Fail to write a pdf to the current directory.")
+        print("ERROR: Fail to save the motif plots as (.pdf, .png, .svg) to the current directory.")
 
 
 def main():
