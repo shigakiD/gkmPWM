@@ -4,11 +4,6 @@ A package to extract compact and interpretable features from sequence based mode
 
 ## Installation
 
-Run the following on the command line:
-
-```bash
-git clone https://github.com/dshigaki/gkmPWM.git
-```
 This repository is organized into 4 directories.  Two of them, matlab and c contain the code to run:
 
 <b>gkmPWMlasso</b>: an algorithm to extract known PWMs from a sequence based model.  
