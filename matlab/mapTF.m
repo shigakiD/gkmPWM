@@ -38,11 +38,9 @@ function mapTF(varargin)
 %                     the PWM probabilities for each k-mer.  Needs around 15GB
 %                     of RAM.  Only set this if you have enough RAM.  
 %                     (default: false)
-%
 %     'PWMcorrcut'    The correlation cutoff to remove redundant motifs in the 
 %                     gkmPWM and gkmPWMlasso list.  Motif selection is prioritized
 %                     by the regression weight.  (default: 0.80)
-%
 %     'dSVMcorrcut'   The correlation cutoff to remove motifs calls that do not fit
 %                     the deltaSVM scores for all variants in the predicted TFBS.
 %                     (default: 0.60)
@@ -280,6 +278,7 @@ end
 fprintf('%d out of %d sequences done...\n', length(ss), length(ss));
 clear kmat
 PWM_corr(ofn, VV, NN, LL, seq, dsvmcut);
+
 function [Lmat, NAME] = MAPTF(fn, ss, pwm_prob, l_svm, k_svm, LEN, LEN_2, shift, gkmprob, names, a, b)
 L = length(ss)-l_svm+1;
 n = sum(LEN)+1;
