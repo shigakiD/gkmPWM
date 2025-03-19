@@ -186,9 +186,8 @@ if nfracLim && numel(comb)/k_svm*4^k_svm > 5*10^5
     nfrac = round(5*10^7/4^k_svm/numel(comb)*k_svm)/100;
     lk = [l_svm k_svm];
     [comb,rc,diffc,indc,xc,rcnum] = genIndex(l_svm,k_svm,nfrac);
-    disp(['Using ' num2str(numel(comb)/k_svm*4^k_svm) ' gapped kmers'])
 end
-
+disp(['Using ' num2str(numel(comb)/k_svm*4^k_svm) ' gapped kmers'])
 disp(['Running gkmPWM on ' fileprefix ' for ' num2str(mnum) ' motifs and ' num2str(num) ' iterations'])
 disp('Counting gapped k-mers')
 
