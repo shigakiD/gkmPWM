@@ -71,6 +71,9 @@ for i = 1:length(d)-1;
     end
 end
 rcnum = a-1;
+if mod(l,2) == 1 && mod(k,2) == 1
+    rcnum = 0;
+end
 f = find(d==1);
 c=[c(f,:);c(e,:)];
 C = c;
