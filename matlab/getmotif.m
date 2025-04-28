@@ -21,11 +21,12 @@ else
         a = strsplit(strip(line), ' ');
         names{j} = a{end};
         line = fgetl(fid);
-        line = fgetl(fid);
-        mat{j} = [];
-        while ~isempty(line)
-            mat{j} = [mat{j}; str2num(line)];
+        a = strsplit(strip(line), ' ');
+        N = str2double(a{6});
+        mat{j} = zeros(N,4);
+        for ii = 1:N
             line = fgetl(fid);
+            mat{j}(ii,:) = [str2num(line)];
         end
     end
 end
