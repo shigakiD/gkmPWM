@@ -24,7 +24,7 @@ and then run
 ```bash
 make -f macos.mk
 ```
-There will be three executables: gkmPWMlasso, gkmPWM, and mapTF that appear in the directory. If you are using a Windows environment, please either use the Matlab code or run the C code within Windows Subsystem for Linux.
+This takes seconds to install.  There will be three executables: gkmPWMlasso, gkmPWM, and mapTF that appear in the directory. If you are using a Windows environment, please either use the Matlab code or run the C code within Windows Subsystem for Linux.
 
 Prior to running any of the funtions the matlab directory, run <i>addpath('dir/gkmPWM/matlab')</i> in matlab.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
 
