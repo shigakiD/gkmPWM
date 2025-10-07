@@ -28,11 +28,11 @@ There will be three executables: gkmPWMlasso, gkmPWM, and mapTF that appear in t
 
 Prior to running any of the funtions the matlab directory, run <i>addpath('dir/gkmPWM/matlab')</i> in matlab.  dir is the location of the gkmPWM directory.  These require MATLAB's statistics and machine learning toolbox.
 
-There isn't really any advantage over running the MATLAB script over the C script and vice versa.  They run with comparable computation time and memory.  
+There isn't really any advantage over running the MATLAB script over the C script and vice versa.  They run with comparable computation time and memory.  gkmPWMlasso for a typical gkmSVM model (GM12878.model.txt in the example files) takes about 8-15 minutes depending on the quality of your CPU.  It takes about 15 GB of RAM.  If your computer doesn't have the RAM to run it, use the reduced list https://beerlab.org/gkmpwm/reduced_list_DHS_noproms_hg38.meme, instead of combined_db_v4.meme as the meme file input.  gkmPWM (de novo motifs) takes around 30 minutes to an hour for the same dataset.  It requires very little RAM (~1-2 GB).  
   
 In the visualization directory, there are two python scripts that create visuals for the outputs of the MATLAB and C functions.  Python3 is required to run these.  
 
-Lastly, there is a directory containing example files that are used in the tutorial below.
+Lastly, there is a directory containing example files that are used in the tutorial below.  By running the code below, you should be able to reproduce the files in this directory.  Additional gkm-SVM models are available on the ENCODE portal.  You should be able to reproduce the motif list in https://www.beerlab.org/gkmpwm/ by running gkmPWM and gkmPWMlasso on those models with the same parameters as below.
 
 The following sections will outline and provide examples of running gkmPWMlasso, gkmPWM, and mapTF.  Only required parameters and a handful of optional parameters will be discussed for the tutorial.  For information on the optional parameters, see the help sections in the code.  There will be lines of code that can be copied to generate the same outputs as in the example_files directory.  All file inputs in the examples are also in that directory.
 
@@ -158,7 +158,7 @@ To run mapTF:
 <b>MATLAB</b>
 ```bash
 mapTF(seqfile, wfilename, denovofile, lassofile, memefile,outprefix)
-gkmPWM('GM12878.fa', 'GM12878_weights.out','GM12878_11_7_0_15_denovo.meme', 'GM12878_11_7_30_gkmPWMlasso.out', 'combined_db_v4.meme','GM12878')
+mapTF('GM12878.fa', 'GM12878_weights.out','GM12878_11_7_0_15_denovo.meme', 'GM12878_11_7_30_gkmPWMlasso.out', 'combined_db_v4.meme','GM12878')
 ```
 <b>C</b>
 ```bash
